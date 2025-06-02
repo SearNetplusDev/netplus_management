@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\v1\management\Auth;
 
 use App\Http\Controllers\Controller;
-use http\Env\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\v1\Management\Auth\AuthRequest;
@@ -29,5 +28,13 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Invalid credentials or inactive user',
         ], SymfonyResponse::HTTP_UNAUTHORIZED);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json([
+            'message' => 'Logged out successfully'
+        ], SymfonyResponse::HTTP_OK);
     }
 }
