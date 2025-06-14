@@ -8,9 +8,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
+use App\Traits\DataViewer;
 
 class User extends Authenticatable
 {
+    use DataViewer, HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+
     protected $connection = 'pgsql';
     protected $table = 'users';
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -27,6 +30,9 @@ class User extends Authenticatable
         'password',
         'status_id',
     ];
+
+    protected array $allowedFilters = ['id', 'name', 'email', 'status_id'];
+    protected array $orderable = ['id', 'name', 'email', 'status_id'];
 
     /**
      * The attributes that should be hidden for serialization.
