@@ -22,4 +22,9 @@ class UsersController extends Controller
 
         return response()->json(['collection' => $query]);
     }
+
+    public function edit(Request $request): JsonResponse
+    {
+        return response()->json(['user' => User::query()->find($request->id)]);
+    }
 }
