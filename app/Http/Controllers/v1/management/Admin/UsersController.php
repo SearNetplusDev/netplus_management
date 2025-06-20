@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\v1\Management\Admin\UsersRequest;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {

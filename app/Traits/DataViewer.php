@@ -32,7 +32,6 @@ trait DataViewer
             'f.*.query_1' => 'required',
             'f.*.query_2' => 'required_if:f.*.operator,between,not_between'
         ])->validate();
-
         return (new CustomQueryBuilder)->apply($query, $data);
     }
 

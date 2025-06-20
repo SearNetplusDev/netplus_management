@@ -44,7 +44,7 @@ class CustomQueryBuilder
     {
         $method = Str::camel($filter['operator']);
         if (method_exists($this, $method)) {
-            $relation ? $this->method($filter, $query, $relation) : $this->$method($filter, $query);
+            $relation ? $this->$method($filter, $query, $relation) : $this->$method($filter, $query);
         }
     }
 
@@ -80,17 +80,17 @@ class CustomQueryBuilder
 
     public function contains(array $f, Builder $q): Builder
     {
-        return $q->where($f['column'], 'like', '%' . $f['query_1'] . '%', $f['match']);
+        return $q->where($f['column'], 'ILIKE', '%' . $f['query_1'] . '%', $f['match']);
     }
 
     public function startsWith(array $f, Builder $q): Builder
     {
-        return $q->where($f['column'], 'like', '%' . $f['query_1'], $f['match']);
+        return $q->where($f['column'], 'ILIKE', '%' . $f['query_1'], $f['match']);
     }
 
     public function endsWith(array $f, Builder $q): Builder
     {
-        return $q->where($f['column'], 'like', $f['query_2'] . '%', $f['match']);
+        return $q->where($f['column'], 'ILIKE', $f['query_2'] . '%', $f['match']);
     }
 
     public function inThePast(array $f, Builder $q): Builder
