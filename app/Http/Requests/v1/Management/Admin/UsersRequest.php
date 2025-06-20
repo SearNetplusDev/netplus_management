@@ -23,7 +23,6 @@ class UsersRequest extends FormRequest
     {
         $rules = [
             'name' => 'required|string|min:10',
-//            'email' => 'required|email|unique:users,email,' . $this->route('id'),
             'email' => 'required|email|unique:users,email',
             'password' => 'nullable|min:8',
             'status' => 'required|boolean',
