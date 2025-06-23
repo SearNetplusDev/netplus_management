@@ -21,6 +21,7 @@ return [
 
 //    'allowed_origins' => ['*'],
     'allowed_origins' => ['http://192.168.1.78:9000'],
+//    'allowed_origins' => [env('SANCTUM_ORIGINS')],
 
     'allowed_origins_patterns' => [],
 //    'allowed_origins_patterns' => ['*'],
