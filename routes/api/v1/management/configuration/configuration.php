@@ -21,6 +21,7 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
 
         //      Countries
         Route::group(['prefix' => 'countries'], function () {
+            Route::post('data', [CountriesController::class, 'data']);
         });
     });
 });
