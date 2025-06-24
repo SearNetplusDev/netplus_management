@@ -29,6 +29,7 @@ class MenuModel extends Model
     {
         return $this->hasMany(MenuModel::class, 'parent_id')
             ->where('status_id', 1)
-            ->orderBy('order');
+            ->orderBy('order')
+            ->with('children');
     }
 }

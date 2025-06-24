@@ -24,7 +24,7 @@ class MenuController extends Controller
 
     public function edit(Request $request): JsonResponse
     {
-        return response()->json(['response' => MenuModel::find($request->id)->load('parent')]);
+        return response()->json(['response' => MenuModel::find($request->id)->load('parent.parent')]);
     }
 
     public function store(MenuRequest $request): JsonResponse
@@ -56,15 +56,32 @@ class MenuController extends Controller
 
     public function getParents(): JsonResponse
     {
-        $query = MenuModel::query()
-            ->with('parent.parent')
-            ->select('id', 'name')
-            ->where('url', '#')
+        $menuTree = MenuModel::query()
+            ->with(['children', 'parent'])
             ->whereNull('parent_id')
-            ->orderBy('name', 'asc')
+            ->orderBy('name')
             ->get();
-        $query->push(['id' => 0, 'name' => 'Sin padre']);
-        $data = collect($query)->sortBy('id');
-        return response()->json(['response' => $data->values()]);
+        $parents = $this->extractMenusWithChildren($menuTree);
+        $parents[] = ['id' => 0, 'name' => 'Sin Padre'];
+        $data = collect($parents)->sortBy('id')->values();
+
+        return response()->json(['response' => $data]);
+    }
+
+    protected function extractMenusWithChildren($menu): array
+    {
+        $result = [];
+
+        foreach ($menu as $menuItem) {
+            if ($menuItem->children->isNotEmpty()) {
+                $name = ($menuItem->parent->name) ?? null ? $menuItem->parent->name . ' - ' . $menuItem->name : $menuItem->name;
+                $result[] = [
+                    'id' => $menuItem->id,
+                    'name' => $name
+                ];
+                $result = [...$result, ...$this->extractMenusWithChildren($menuItem->children)];
+            }
+        }
+        return $result;
     }
 }
