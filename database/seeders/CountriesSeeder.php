@@ -14,16 +14,17 @@ class CountriesSeeder extends Seeder
      */
     public function run(): void
     {
-        $json = File::get(database_path("seeders/data/countries.json"));
-        $countries = json_decode($json, true);
+        $countries = json_decode(File::get(database_path('seeders/data/countries.json')), true);
 
         foreach ($countries as $country) {
+            $prefix = preg_replace('/\D+/', '', $country['phoneCode']);
+
             CountryModel::create([
                 'es_name' => $country['nameES'],
                 'en_name' => $country['nameEN'],
                 'iso_2' => $country['iso2'],
                 'iso_3' => $country['iso3'],
-                'phone_prefix' => $country['phoneCode'],
+                'phone_prefix' => (int)$prefix,
                 'status_id' => 1,
             ]);
         }

@@ -17,7 +17,7 @@ return new class extends Migration {
                 $table->string('en_name');
                 $table->string('iso_2');
                 $table->string('iso_3');
-                $table->string('phone_prefix');
+                $table->integer('phone_prefix');
                 $table->boolean('status_id')->default(1);
                 $table->timestamps();
                 $table->softDeletes();
