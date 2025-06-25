@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\management\configuration\geography;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\v1\Management\Configuration\CountriesRequest;
 use App\Models\Configuration\CountryModel;
 
 class CountriesController extends Controller
@@ -20,4 +21,39 @@ class CountriesController extends Controller
 
         return response()->json(['collection' => $query]);
     }
+
+    public function create(CountriesRequest $request): JsonResponse
+    {
+        $country = CountryModel::create([
+            'es_name' => $request->esName,
+            'en_name' => $request->enName,
+            'iso_2' => $request->iso2,
+            'iso_3' => $request->iso3,
+            'phone_prefix' => $request->prefix,
+            'status_id' => $request->status
+        ]);
+
+        return response()->json(['saved' => (bool)$country, 'country' => $country]);
+    }
+
+    public function edit(Request $request): JsonResponse
+    {
+        return response()->json(['country' => CountryModel::query()->find($request->id ?? 0)]);
+    }
+
+    public function update(CountriesRequest $request, $id): JsonResponse
+    {
+        $country = CountryModel::query()->findOrFail($id);
+        $country->update([
+            'es_name' => $request->esName,
+            'en_name' => $request->enName,
+            'iso_2' => $request->iso2,
+            'iso_3' => $request->iso3,
+            'phone_prefix' => $request->prefix,
+            'status_id' => $request->status
+        ]);
+
+        return response()->json(['saved' => (bool)$country, 'country' => $country]);
+    }
+
 }
