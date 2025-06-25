@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\configuration\ConfigurationController;
 use App\Http\Controllers\v1\management\configuration\menu\MenuController;
 use App\Http\Controllers\v1\management\configuration\geography\CountriesController;
+use App\Http\Controllers\v1\management\configuration\geography\StatesController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -25,6 +26,14 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
             Route::post('data', [CountriesController::class, 'data']);
             Route::post('edit', [CountriesController::class, 'edit']);
             Route::put('{id}', [CountriesController::class, 'update']);
+        });
+
+        //      States
+        Route::group(['prefix' => 'states'], function () {
+            Route::post('/', [StatesController::class, 'create']);
+            Route::post('data', [StatesController::class, 'data']);
+            Route::post('edit', [StatesController::class, 'edit']);
+            Route::put('{id}', [StatesController::class, 'update']);
         });
     });
 });

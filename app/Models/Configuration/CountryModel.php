@@ -10,6 +10,7 @@ class CountryModel extends Model
 {
     use SoftDeletes, DataViewer;
 
+    protected $connection = 'pgsql';
     protected $table = 'config_countries';
     protected $primaryKey = 'id';
     protected $fillable = ['es_name', 'en_name', 'iso_2', 'iso_3', 'phone_prefix', 'status_id'];
