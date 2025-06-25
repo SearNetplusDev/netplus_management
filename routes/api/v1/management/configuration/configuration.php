@@ -5,6 +5,7 @@ use App\Http\Controllers\v1\management\configuration\ConfigurationController;
 use App\Http\Controllers\v1\management\configuration\menu\MenuController;
 use App\Http\Controllers\v1\management\configuration\geography\CountriesController;
 use App\Http\Controllers\v1\management\configuration\geography\StatesController;
+use App\Http\Controllers\v1\management\configuration\geography\MunicipalitiesController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -34,6 +35,14 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
             Route::post('data', [StatesController::class, 'data']);
             Route::post('edit', [StatesController::class, 'edit']);
             Route::put('{id}', [StatesController::class, 'update']);
+        });
+
+        //      Municipalities
+        Route::group(['prefix' => 'municipalities'], function () {
+            Route::post('/', [MunicipalitiesController::class, 'store']);
+            Route::post('data', [MunicipalitiesController::class, 'data']);
+            Route::post('edit', [MunicipalitiesController::class, 'edit']);
+            Route::put('{id}', [MunicipalitiesController::class, 'update']);
         });
     });
 });
