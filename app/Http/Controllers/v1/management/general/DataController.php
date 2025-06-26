@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\management\general;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\Configuration\StateModel;
 
 class DataController extends Controller
 {
@@ -22,5 +23,15 @@ class DataController extends Controller
         ];
 
         return response()->json(['response' => $status]);
+    }
+
+    public function statesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => StateModel::query()
+                ->select('id', 'name')
+                ->orderBy('name', 'ASC')
+                ->get()
+        ]);
     }
 }

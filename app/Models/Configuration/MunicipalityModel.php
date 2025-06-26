@@ -15,10 +15,10 @@ class MunicipalityModel extends Model
     protected $table = 'config_municipalities';
     protected $fillable = ['name', 'code', 'state_id', 'status_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
-    protected array $allowedFields = ['id', 'name', 'code', 'state_id', 'status_id'];
+    protected array $allowedFilters = ['id', 'name', 'code', 'state_id', 'status_id'];
     protected array $orderable = ['id', 'name', 'code', 'state_id', 'status_id'];
 
-    public function State(): BelongsTo
+    public function state(): BelongsTo
     {
         return $this->belongsTo(StateModel::class, 'state_id', 'id');
     }

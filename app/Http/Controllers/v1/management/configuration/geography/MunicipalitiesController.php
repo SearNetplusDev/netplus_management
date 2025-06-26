@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\management\configuration\geography;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\v1\Management\Configuration\MunicipalitiesRequest;
 use Illuminate\Http\JsonResponse;
 use App\Models\Configuration\MunicipalityModel;
 
@@ -14,15 +15,45 @@ class MunicipalitiesController extends Controller
      */
     public function data(Request $request): JsonResponse
     {
-        //
+        $query = MunicipalityModel::query()->with('state');
+
+        if ($request->has('e')) {
+            foreach ($request->e as $filter) {
+                if (!isset($filter['column'], $filter['data'])) {
+                    continue;
+                }
+                $data = json_decode($filter['data'], true);
+
+                if (!is_array($data)) {
+                    continue;
+                }
+
+                match ($filter['column']) {
+                    'status' => $query->whereIn('status_id', $data),
+                    'state' => $query->whereIn('state_id', $data),
+                    default => null,
+                };
+            }
+        }
+
+        $query = $query->orderByDesc('status_id')
+            ->advancedFilter();
+
+        return response()->json(['collection' => $query]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(MunicipalitiesRequest $request): JsonResponse
     {
-        //
+        $municipality = MunicipalityModel::create([
+            'name' => $request->name,
+            'code' => $request->code,
+            'state_id' => $request->state,
+            'status_id' => $request->status
+        ]);
+        return response()->json(['saved' => (bool)$municipality, 'municipality' => $municipality]);
     }
 
 
@@ -31,14 +62,21 @@ class MunicipalitiesController extends Controller
      */
     public function edit(Request $request): JsonResponse
     {
-        //
+        return response()->json(['municipality' => MunicipalityModel::query()->findOrFail($request->id)]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(MunicipalitiesRequest $request, string $id)
     {
-        //
+        $municipality = MunicipalityModel::query()->findOrFail($id);
+        $municipality->update([
+            'name' => $request->name,
+            'code' => $request->code,
+            'state_id' => $request->state,
+            'status_id' => $request->status
+        ]);
+        return response()->json(['saved' => (bool)$municipality, 'municipality' => $municipality]);
     }
 }
