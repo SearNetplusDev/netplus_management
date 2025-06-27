@@ -32,7 +32,7 @@ class DistrictsController extends Controller
                 };
             }
         }
-        $query = $query->orderBy('status_id')->advancedFilter();
+        $query = $query->orderByDesc('status_id')->advancedFilter();
 
         return response()->json(['collection' => $query]);
     }
