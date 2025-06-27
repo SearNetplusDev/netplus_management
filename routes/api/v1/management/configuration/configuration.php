@@ -44,5 +44,9 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
             Route::post('edit', [MunicipalitiesController::class, 'edit']);
             Route::put('{id}', [MunicipalitiesController::class, 'update']);
         });
+
+        //      Districts
+        Route::group(['prefix' => 'districts'], function () {
+        });
     });
 });
