@@ -6,6 +6,7 @@ use App\Http\Controllers\v1\management\configuration\menu\MenuController;
 use App\Http\Controllers\v1\management\configuration\geography\CountriesController;
 use App\Http\Controllers\v1\management\configuration\geography\StatesController;
 use App\Http\Controllers\v1\management\configuration\geography\MunicipalitiesController;
+use App\Http\Controllers\v1\management\configuration\geography\DistrictsController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -47,6 +48,10 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
 
         //      Districts
         Route::group(['prefix' => 'districts'], function () {
+            Route::post('/', [DistrictsController::class, 'store']);
+            Route::post('data', [DistrictsController::class, 'data']);
+            Route::post('edit', [DistrictsController::class, 'edit']);
+            Route::put('{id}', [DistrictsController::class, 'update']);
         });
     });
 });

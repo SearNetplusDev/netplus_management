@@ -16,7 +16,7 @@ class DistrictModel extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['name', 'municipality_id', 'state_id', 'status_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
-    protected array $allowedFields = ['id', 'name', 'municipality_id', 'state_id', 'status_id'];
+    protected array $allowedFilters = ['id', 'name', 'municipality_id', 'state_id', 'status_id'];
     protected array $orderable = ['id', 'name', 'municipality_id', 'state_id', 'status_id'];
 
     public function municipality(): belongsTo
