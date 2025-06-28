@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\management\general;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuration\CountryModel;
 use App\Models\Configuration\DistrictModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,5 +57,23 @@ class DataController extends Controller
                 ->orderBy('name', 'ASC')
                 ->get()
         ]);
+    }
+
+    public function districtsList(): JsonResponse
+    {
+        return response()->json(['response' => DistrictModel::query()->select('id', 'name')->get()]);
+    }
+
+    public function countriesList(): JsonResponse
+    {
+        $query = CountryModel::query()->select('id', 'es_name')->get();
+        $result = $query->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->es_name,
+            ];
+        });
+
+        return response()->json(['response' => $result]);
     }
 }
