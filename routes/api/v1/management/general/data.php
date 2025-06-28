@@ -10,4 +10,5 @@ Route::prefix('v1/general')->middleware('auth:sanctum')->group(function () {
     Route::get('state/{id}/municipalities', [DataController::class, 'municipalitiesByState']);
     Route::get('districts', [DataController::class, 'districtsList']);
     Route::get('countries', [DataController::class, 'countriesList']);
+    Route::get('municipality/{id}/districts', [DataController::class, 'districtsByMunicipality']);
 });

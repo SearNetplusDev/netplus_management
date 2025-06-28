@@ -76,4 +76,14 @@ class DataController extends Controller
 
         return response()->json(['response' => $result]);
     }
+
+    public function districtsByMunicipality(int $municipalityID): JsonResponse
+    {
+        $query = DistrictModel::query()
+            ->select('id', 'name')
+            ->where('municipality_id', $municipalityID)
+            ->get();
+
+        return response()->json(['response' => $query]);
+    }
 }
