@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Configuration\Geography\MunicipalityModel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use App\Models\Configuration\MunicipalityModel;
 
 class MunicipalitiesSeeder extends Seeder
 {

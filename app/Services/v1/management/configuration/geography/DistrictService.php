@@ -3,7 +3,7 @@
 namespace App\Services\v1\management\configuration\geography;
 
 use App\DTOs\v1\management\configuration\geography\DistrictsDTO;
-use App\Models\Configuration\DistrictModel;
+use App\Models\Configuration\Geography\DistrictModel;
 
 class DistrictService
 {

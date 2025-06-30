@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\v1\management\configuration\geography;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\Management\Configuration\DistrictsRequest;
 use App\Http\Resources\v1\management\configuration\geography\DistrictResource;
+use App\Models\Configuration\Geography\DistrictModel;
 use App\Services\v1\management\configuration\geography\DistrictService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Http\Requests\v1\Management\Configuration\DistrictsRequest;
-use App\Models\Configuration\DistrictModel;
 
 class DistrictsController extends Controller
 {

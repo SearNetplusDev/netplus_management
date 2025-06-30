@@ -8,6 +8,8 @@ use App\Http\Controllers\v1\management\configuration\geography\StatesController;
 use App\Http\Controllers\v1\management\configuration\geography\MunicipalitiesController;
 use App\Http\Controllers\v1\management\configuration\geography\DistrictsController;
 use App\Http\Controllers\v1\management\configuration\branches\BranchesController;
+use App\Http\Controllers\v1\management\configuration\clients\DocumentTypesController;
+use App\Http\Controllers\v1\management\configuration\clients\SexTypesController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -61,6 +63,22 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
             Route::post('data', [DistrictsController::class, 'data']);
             Route::post('edit', [DistrictsController::class, 'edit']);
             Route::put('{id}', [DistrictsController::class, 'update']);
+        });
+    });
+
+    //      Clients
+    Route::group(['prefix' => 'clients'], function () {
+
+        //      Document Types
+        Route::group(['prefix' => 'documents'], function () {
+            Route::post('/', [DocumentTypesController::class, 'store']);
+            Route::post('data', [DocumentTypesController::class, 'dataViewer']);
+            Route::post('edit', [DocumentTypesController::class, 'edit']);
+            Route::put('{id}', [DocumentTypesController::class, 'update']);
+        });
+
+        //      Sex Types
+        Route::group(['prefix' => 'sex'], function () {
         });
     });
 });

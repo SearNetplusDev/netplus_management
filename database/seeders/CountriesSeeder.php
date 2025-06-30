@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Configuration\Geography\CountryModel;
 use Illuminate\Database\Seeder;
-use App\Models\Configuration\CountryModel;
 use Illuminate\Support\Facades\File;
 
 class CountriesSeeder extends Seeder

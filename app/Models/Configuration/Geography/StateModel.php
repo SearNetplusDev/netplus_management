@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Configuration;
+namespace App\Models\Configuration\Geography;
 
+use App\Traits\DataViewer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\DataViewer;
 
 class StateModel extends Model
 {

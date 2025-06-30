@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Configuration\Geography\DistrictModel;
+use App\Models\Configuration\Geography\MunicipalityModel;
+use App\Models\Configuration\Geography\StateModel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use App\Models\Configuration\StateModel;
-use App\Models\Configuration\MunicipalityModel;
-use App\Models\Configuration\DistrictModel;
 
 class NationalSeeder extends Seeder
 {

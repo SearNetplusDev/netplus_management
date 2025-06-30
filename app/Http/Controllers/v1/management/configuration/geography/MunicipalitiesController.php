@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\v1\management\configuration\geography;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\v1\Management\Configuration\MunicipalitiesRequest;
+use App\Models\Configuration\Geography\MunicipalityModel;
 use Illuminate\Http\JsonResponse;
-use App\Models\Configuration\MunicipalityModel;
+use Illuminate\Http\Request;
 
 class MunicipalitiesController extends Controller
 {

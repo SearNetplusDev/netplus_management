@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Models\Configuration;
+namespace App\Models\Configuration\Geography;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\DataViewer;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

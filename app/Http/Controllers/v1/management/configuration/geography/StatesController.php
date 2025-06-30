@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\v1\management\configuration\geography;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\v1\Management\Configuration\StatesRequest;
+use App\Models\Configuration\Geography\StateModel;
 use Illuminate\Http\JsonResponse;
-use App\Models\Configuration\StateModel;
+use Illuminate\Http\Request;
 
 class StatesController extends Controller
 {

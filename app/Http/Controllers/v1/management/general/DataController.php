@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\v1\management\general;
 
 use App\Http\Controllers\Controller;
-use App\Models\Configuration\CountryModel;
-use App\Models\Configuration\DistrictModel;
+use App\Models\Configuration\Geography\CountryModel;
+use App\Models\Configuration\Geography\DistrictModel;
+use App\Models\Configuration\Geography\MunicipalityModel;
+use App\Models\Configuration\Geography\StateModel;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use App\Models\Configuration\StateModel;
-use App\Models\Configuration\MunicipalityModel;
 
 class DataController extends Controller
 {

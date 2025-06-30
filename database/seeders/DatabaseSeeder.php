@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Configuration\CountryModel;
-use App\Models\User;
+use App\Models\Configuration\Geography\CountryModel;
+use Illuminate\Database\Seeder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {

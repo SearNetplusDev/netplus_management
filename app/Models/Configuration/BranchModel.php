@@ -2,11 +2,15 @@
 
 namespace App\Models\Configuration;
 
+use App\Models\Configuration\Geography\CountryModel;
+use App\Models\Configuration\Geography\DistrictModel;
+use App\Models\Configuration\Geography\MunicipalityModel;
+use App\Models\Configuration\Geography\StateModel;
+use App\Traits\DataViewer;
+use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\DataViewer;
-use App\Traits\HasStatusTrait;
 
 
 class BranchModel extends Model
