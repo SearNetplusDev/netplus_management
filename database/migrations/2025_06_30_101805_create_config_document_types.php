@@ -10,14 +10,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('config_document_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('code');
-            $table->boolean('status_id');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('config_document_types')) {
+            Schema::create('config_document_types', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('code');
+                $table->boolean('status_id');
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
     }
 
     /**

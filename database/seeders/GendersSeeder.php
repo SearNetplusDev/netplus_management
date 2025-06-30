@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Configuration\Clients\SexTypeModel;
+use App\Models\Configuration\Clients\GenderModel;
 
-class SexTypeSeeder extends Seeder
+class GendersSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,7 +15,7 @@ class SexTypeSeeder extends Seeder
     {
         $array = ['Masculino', 'Femenino'];
         foreach ($array as $value) {
-            SexTypeModel::create([
+            GenderModel::create([
                 'name' => $value,
                 'status_id' => 1,
             ]);

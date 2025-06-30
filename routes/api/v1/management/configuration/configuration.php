@@ -9,7 +9,7 @@ use App\Http\Controllers\v1\management\configuration\geography\MunicipalitiesCon
 use App\Http\Controllers\v1\management\configuration\geography\DistrictsController;
 use App\Http\Controllers\v1\management\configuration\branches\BranchesController;
 use App\Http\Controllers\v1\management\configuration\clients\DocumentTypesController;
-use App\Http\Controllers\v1\management\configuration\clients\SexTypesController;
+use App\Http\Controllers\v1\management\configuration\clients\GenderController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -78,7 +78,11 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
         });
 
         //      Sex Types
-        Route::group(['prefix' => 'sex'], function () {
+        Route::group(['prefix' => 'genders'], function () {
+            Route::post('/', [GenderController::class, 'store']);
+            Route::post('data', [GenderController::class, 'dataViewer']);
+            Route::post('edit', [GenderController::class, 'edit']);
+            Route::put('{id}', [GenderController::class, 'update']);
         });
     });
 });

@@ -10,13 +10,15 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('config_sex_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->boolean('status_id');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('config_genders')) {
+            Schema::create('config_genders', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->boolean('status_id');
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
     }
 
     /**
