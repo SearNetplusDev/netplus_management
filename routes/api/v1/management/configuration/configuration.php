@@ -11,6 +11,7 @@ use App\Http\Controllers\v1\management\configuration\branches\BranchesController
 use App\Http\Controllers\v1\management\configuration\clients\DocumentTypesController;
 use App\Http\Controllers\v1\management\configuration\clients\GenderController;
 use App\Http\Controllers\v1\management\configuration\clients\ClientTypeController;
+use App\Http\Controllers\v1\management\configuration\clients\MaritalStatusController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -88,7 +89,10 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
 
         //     Marital Status
         Route::group(['prefix' => 'marital'], function () {
-
+            Route::post('/', [MaritalStatusController::class, 'store']);
+            Route::post('data', [MaritalStatusController::class, 'data']);
+            Route::post('edit', [MaritalStatusController::class, 'edit']);
+            Route::put('{id}', [MaritalStatusController::class, 'update']);
         });
 
         //      Types
