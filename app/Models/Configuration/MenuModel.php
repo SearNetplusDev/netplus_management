@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
+use App\Traits\HasStatusTrait;
 
 class MenuModel extends Model
 {
-    use SoftDeletes, DataViewer;
+    use SoftDeletes, DataViewer, HasStatusTrait;
 
     protected $connection = 'pgsql';
     protected $table = 'config_menu';
@@ -18,6 +19,7 @@ class MenuModel extends Model
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = ['id', 'name', 'url', 'status_id'];
     protected array $orderable = ['id', 'name', 'status_id'];
+    protected $appends = ['status'];
 
     public function parent(): BelongsTo
     {

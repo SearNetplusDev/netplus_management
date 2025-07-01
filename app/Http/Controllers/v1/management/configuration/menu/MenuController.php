@@ -7,19 +7,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Configuration\MenuModel;
 use App\Http\Requests\v1\Management\Configuration\MenuRequest;
+use App\Services\v1\management\DataviewerService;
 
 class MenuController extends Controller
 {
-    public function data(Request $request): JsonResponse
+    public function data(Request $request, DataviewerService $dataViewerService): JsonResponse
     {
         $query = MenuModel::query();
-        $statusFilter = collect($request->e ?? [])->firstWhere('column', 'status');
-        if ($statusFilter) {
-            $query->whereIn('status_id', json_decode($statusFilter['data']));
-        }
-        $query = $query->orderBy('status_id', 'desc')->advancedFilter();
 
-        return response()->json(['collection' => $query]);
+        return $dataViewerService->handle($request, $query, [
+            'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+        ]);
     }
 
     public function edit(Request $request): JsonResponse
