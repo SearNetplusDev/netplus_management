@@ -9,33 +9,21 @@ use App\Models\Configuration\Geography\DistrictModel;
 use App\Services\v1\management\configuration\geography\DistrictService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Services\v1\management\DataViewerService;
 
 class DistrictsController extends Controller
 {
-    public function data(Request $request): JsonResponse
+    public function data(Request $request, DataviewerService $dataViewerService): JsonResponse
     {
         $query = DistrictModel::query()->with(['municipality', 'state']);
 
-        if ($request->has('e')) {
-            foreach ($request->e as $filter) {
-                if (!isset($filter['column'], $filter['data'])) continue;
-
-                $data = json_decode($filter['data'], true);
-
-                if (!is_array($data)) continue;
-
-                match ($filter['column']) {
-                    'status' => $query->whereIn('status_id', $data),
-                    'state' => $query->whereIn('state_id', $data),
-                    'municipality' => $query->whereIn('municipality_id', $data),
-                    default => null,
-                };
-            }
-        }
-        $query = $query->orderByDesc('status_id')->advancedFilter();
-
-        return response()->json(['collection' => $query]);
+        return $dataViewerService->handle($request, $query, [
+            'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+            'state' => fn($q, $data) => $q->whereIn('state_id', $data),
+            'municipality' => fn($q, $data) => $q->whereIn('municipality_id', $data),
+        ]);
     }
+
 
     public function store(DistrictsRequest $request, DistrictService $districtService): JsonResponse
     {
