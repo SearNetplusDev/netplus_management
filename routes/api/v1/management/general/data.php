@@ -11,4 +11,9 @@ Route::prefix('v1/general')->middleware('auth:sanctum')->group(function () {
     Route::get('districts', [DataController::class, 'districtsList']);
     Route::get('countries', [DataController::class, 'countriesList']);
     Route::get('municipality/{id}/districts', [DataController::class, 'districtsByMunicipality']);
+    Route::get('genders', [DataController::class, 'gendersList']);
+    Route::get('marital', [DataController::class, 'maritalStatusList']);
+    Route::get('branches', [DataController::class, 'branchesList']);
+    Route::get('client/types', [DataController::class, 'clientTypesList']);
+    Route::get('billing/documents', [DataController::class, 'billingDocumentsList']);
 });

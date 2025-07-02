@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\v1\management\general;
 
 use App\Http\Controllers\Controller;
+use App\Models\Billing\Options\DocumentTypeModel as BillingDocumentType;
+use App\Models\Configuration\BranchModel;
+use App\Models\Configuration\Clients\ClientTypeModel;
+use App\Models\Configuration\Clients\GenderModel;
+use App\Models\Configuration\Clients\MaritalStatusModel;
 use App\Models\Configuration\Geography\CountryModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
@@ -84,5 +89,55 @@ class DataController extends Controller
             ->get();
 
         return response()->json(['response' => $query]);
+    }
+
+    public function gendersList(): JsonResponse
+    {
+        return response()->json([
+            'response' => GenderModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function maritalStatusList(): JsonResponse
+    {
+        return response()->json([
+            'response' => MaritalStatusModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function branchesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => BranchModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function clientTypesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => ClientTypeModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function billingDocumentsList(): JsonResponse
+    {
+        return response()->json([
+            'response' => BillingDocumentType::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
     }
 }
