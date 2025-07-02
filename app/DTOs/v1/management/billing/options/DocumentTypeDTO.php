@@ -7,8 +7,8 @@ use Spatie\DataTransferObject\DataTransferObject;
 class DocumentTypeDTO extends DataTransferObject
 {
     public function __construct(
-        public readonly ?string $name = null,
-        public readonly ?string $code = null,
+        public readonly ?string $name,
+        public readonly ?string $code,
         public readonly ?bool   $status_id,
     )
     {

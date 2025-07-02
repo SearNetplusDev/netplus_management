@@ -16,11 +16,11 @@ return new class extends Migration {
                 $table->string('name');
                 $table->string('surname');
                 $table->integer('gender_id');
-                $table->date('birthdate');
+                $table->date('birthdate')->nullable();
                 $table->integer('marital_status_id');
                 $table->integer('branch_id');
                 $table->integer('client_type_id');
-                $table->string('profession');
+                $table->string('profession')->nullable();
                 $table->integer('country_id');
                 $table->integer('document_type_id');
                 $table->boolean('legal_entity');
