@@ -27,7 +27,7 @@ class ClientModel extends Model
         'gender_id',
         'birthdate',
         'marital_status_id',
-        'brach_id',
+        'branch_id',
         'client_type_id',
         'profession',
         'country_id',
@@ -42,7 +42,7 @@ class ClientModel extends Model
         'name',
         'surname',
         'gender_id',
-        'brach_id',
+        'branch_id',
         'client_type_id',
         'status_id',
     ];
@@ -51,7 +51,7 @@ class ClientModel extends Model
         'name',
         'surname',
         'gender_id',
-        'brach_id',
+        'branch_id',
         'client_type_id',
         'status_id',
     ];
@@ -67,9 +67,9 @@ class ClientModel extends Model
         return $this->hasOne(MaritalStatusModel::class, 'id', 'marital_status_id');
     }
 
-    public function brach(): HasOne
+    public function branch(): HasOne
     {
-        return $this->hasOne(BranchModel::class, 'id', 'brach_id');
+        return $this->hasOne(BranchModel::class, 'id', 'branch_id');
     }
 
     public function client_type(): HasOne
