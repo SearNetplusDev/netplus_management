@@ -9,6 +9,7 @@ use App\Models\Configuration\Clients\GenderModel;
 use App\Models\Configuration\Clients\MaritalStatusModel;
 use App\Models\Configuration\Geography\CountryModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
@@ -85,5 +86,22 @@ class ClientModel extends Model
     public function billing_document(): HasOne
     {
         return $this->hasOne(DocumentTypeModel::class, 'id', 'document_type_id');
+    }
+
+    public function personal_documents(): HasMany
+    {
+        return $this->hasMany(DocumentModel::class, 'client_id', 'id');
+    }
+
+    public function dui(): HasOne
+    {
+        return $this->hasOne(DocumentModel::class, 'id', 'client_id')
+            ->where('document_type_id', '3');
+    }
+
+    public function nit(): HasOne
+    {
+        return $this->hasOne(DocumentModel::class, 'id', 'client_id')
+            ->where('document_type_id', '4');
     }
 }
