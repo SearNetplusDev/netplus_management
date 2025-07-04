@@ -2,6 +2,7 @@
 
 namespace App\Models\Clients;
 
+use App\Models\Configuration\Clients\DocumentTypeModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,5 +25,10 @@ class DocumentModel extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(ClientModel::class, 'client_id', 'id');
+    }
+
+    public function document_type(): BelongsTo
+    {
+        return $this->belongsTo(DocumentTypeModel::class, 'document_type_id', 'id');
     }
 }

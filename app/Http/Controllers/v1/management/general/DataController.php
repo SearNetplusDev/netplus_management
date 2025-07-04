@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\management\general;
 
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Options\DocumentTypeModel as BillingDocumentType;
+use App\Models\Configuration\Clients\DocumentTypeModel as ClientDocumentType;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Configuration\Clients\GenderModel;
@@ -137,6 +138,16 @@ class DataController extends Controller
             'response' => BillingDocumentType::query()
                 ->where('status_id', 1)
                 ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function personalDocumentsList(): JsonResponse
+    {
+        return response()->json([
+            'response' => ClientDocumentType::query()
+                ->where('status_id', 1)
+                ->select('id', 'name', 'status_id')
                 ->get()
         ]);
     }
