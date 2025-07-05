@@ -14,7 +14,7 @@ class DocumentsController extends Controller
 {
     public function data(Request $request): JsonResponse
     {
-        return response()->json(['response' => DocumentModel::query()->where('client_id', $request->clientID)->get()]);
+        return response()->json(['response' => DocumentModel::query()->with('document_type')->where('client_id', $request->clientID)->get()]);
     }
 
     public function store(DocumentRequest $request, DocumentService $documentService): JsonResponse
@@ -36,7 +36,7 @@ class DocumentsController extends Controller
                     ['id', $request->documentID],
                     ['client_id', $request->clientID],
                 ])
-                ->get()
+                ->firstOrFail()
         ]);
     }
 

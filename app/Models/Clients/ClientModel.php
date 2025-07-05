@@ -95,13 +95,13 @@ class ClientModel extends Model
 
     public function dui(): HasOne
     {
-        return $this->hasOne(DocumentModel::class, 'id', 'client_id')
-            ->where('document_type_id', '3');
+        return $this->hasOne(DocumentModel::class, 'client_id', 'id')
+            ->where('document_type_id', 3);
     }
 
     public function nit(): HasOne
     {
-        return $this->hasOne(DocumentModel::class, 'id', 'client_id')
-            ->where('document_type_id', '4');
+        return $this->hasOne(DocumentModel::class, 'client_id', 'id')
+            ->where('document_type_id', 4);
     }
 }
