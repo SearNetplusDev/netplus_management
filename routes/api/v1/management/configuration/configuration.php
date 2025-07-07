@@ -12,6 +12,7 @@ use App\Http\Controllers\v1\management\configuration\clients\DocumentTypesContro
 use App\Http\Controllers\v1\management\configuration\clients\GenderController;
 use App\Http\Controllers\v1\management\configuration\clients\ClientTypeController;
 use App\Http\Controllers\v1\management\configuration\clients\MaritalStatusController;
+use App\Http\Controllers\v1\management\configuration\clients\PhoneTypeController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -101,6 +102,14 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
             Route::post('data', [ClientTypeController::class, 'dataviewer']);
             Route::post('edit', [ClientTypeController::class, 'edit']);
             Route::put('{id}', [ClientTypeController::class, 'update']);
+        });
+
+        //      Phone Types
+        Route::group(['prefix' => 'phones'], function () {
+            Route::post('/', [PhoneTypeController::class, 'store']);
+            Route::post('data', [PhoneTypeController::class, 'data']);
+            Route::post('edit', [PhoneTypeController::class, 'edit']);
+            Route::put('{id}', [PhoneTypeController::class, 'update']);
         });
     });
 });

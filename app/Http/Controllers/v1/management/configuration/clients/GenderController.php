@@ -9,27 +9,17 @@ use App\Services\v1\management\configuration\clients\GenderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Configuration\Clients\GenderModel;
+use App\Services\v1\management\DataViewerService;
 
 class GenderController extends Controller
 {
-    public function dataViewer(Request $request): JsonResponse
+    public function dataViewer(Request $request, DataViewerService $dataViewerService): JsonResponse
     {
         $query = GenderModel::query();
-        if ($request->has('e')) {
-            foreach ($request->e as $filter) {
-                if (!isset($filter['column'], $filter['data'])) continue;
-                $data = json_decode($filter['data'], true);
-                if (!is_array($data)) continue;
-                match ($filter['column']) {
-                    default => null,
-                    'status' => $query->whereIn('status_id', $data),
-                };
-            }
-        }
 
-        $query = $query->orderByDesc('status_id')->advancedFilter();
-
-        return response()->json(['collection' => $query]);
+        return $dataViewerService->handle($request, $query, [
+            'status' => fn($q, $data) => $query->wherein('status_id', $data),
+        ]);
     }
 
     public function store(GenderRequest $request, GenderService $genderService): JsonResponse
