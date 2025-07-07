@@ -26,7 +26,12 @@ class DocumentRequest extends FormRequest
     {
         return [
             'client' => 'required|integer',
-            'type' => 'required|integer',
+            'type' => ['required', 'integer', Rule::unique('clients_documents', 'document_type_id')
+                ->where(function ($query) {
+                    $query->where('client_id', $this->input('client'));
+                })
+                ->ignore($this->route('id'))
+            ],
             'number' => ['required', 'string', Rule::unique('clients_documents', 'number')->ignore($this->route('id'))],
             'expiration' => ['required', 'date', 'after_or_equal:' . today()->format('Y-m-d')],
             'status' => 'required|boolean',
@@ -40,7 +45,8 @@ class DocumentRequest extends FormRequest
             'client.integer' => 'Formato inválido.',
             'type.required' => 'Tipo de documento no definido.',
             'type.integer' => 'Formato inválido para tipo de documento.',
-            'number.required' => 'Numero de documento es un campo obligatorio.',
+            'type.unique' => 'Este cliente ya tiene este tipo de documento registrado.',
+            'number.required' => 'Número de documento es un campo obligatorio.',
             'number.string' => 'Formato incorrecto para número de documento.',
             'number.unique' => 'Este documento ya ha sido registrado.',
             'expiration.required' => 'Fecha de vencimiento es un campo obligatorio.',
