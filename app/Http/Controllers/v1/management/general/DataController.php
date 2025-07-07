@@ -9,6 +9,7 @@ use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Configuration\Clients\GenderModel;
 use App\Models\Configuration\Clients\MaritalStatusModel;
+use App\Models\Configuration\Clients\PhoneTypeModel;
 use App\Models\Configuration\Geography\CountryModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
@@ -148,6 +149,16 @@ class DataController extends Controller
             'response' => ClientDocumentType::query()
                 ->where('status_id', 1)
                 ->select('id', 'name', 'status_id')
+                ->get()
+        ]);
+    }
+
+    public function phoneCategoriesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => PhoneTypeModel::query()
+                ->where('status_id', 1)
+                ->select(['id', 'name'])
                 ->get()
         ]);
     }

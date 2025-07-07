@@ -15,7 +15,7 @@ class ClientsController extends Controller
 {
     public function data(Request $request, DataViewerService $dataViewerService): JsonResponse
     {
-        $query = ClientModel::query()->with(['branch', 'client_type', 'dui']);
+        $query = ClientModel::query()->with(['branch', 'client_type', 'dui', 'mobile']);
 
         return $dataViewerService->handle($request, $query, [
             'status' => fn($q, $data) => $query->whereIn('status_id', $data),
