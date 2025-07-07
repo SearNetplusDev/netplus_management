@@ -104,4 +104,18 @@ class ClientModel extends Model
         return $this->hasOne(DocumentModel::class, 'client_id', 'id')
             ->where('document_type_id', 4);
     }
+
+    public function mobile(): HasOne
+    {
+        return $this->hasOne(PhoneModel::class, 'client_id', 'id')
+            ->where('phone_type_id', 2)
+            ->latest();
+    }
+
+    public function landline(): HasOne
+    {
+        return $this->hasOne(PhoneModel::class, 'client_id', 'id')
+            ->where('phone_type_id', 1)
+            ->latest();
+    }
 }

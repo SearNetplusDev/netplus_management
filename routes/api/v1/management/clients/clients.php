@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\clients\ClientsController;
 use App\Http\Controllers\v1\management\clients\DocumentsController;
+use App\Http\Controllers\v1\management\clients\PhonesController;
 
 Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
 
@@ -17,5 +18,13 @@ Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
         Route::post('data', [DocumentsController::class, 'data']);
         Route::post('edit', [DocumentsController::class, 'edit']);
         Route::put('{id}', [DocumentsController::class, 'update']);
+    });
+
+    //      PHONES
+    Route::group(['prefix' => 'phones'], function () {
+        Route::post('/', [PhonesController::class, 'store']);
+        Route::post('data', [PhonesController::class, 'data']);
+        Route::post('edit', [PhonesController::class, 'edit']);
+        Route::put('{id}', [PhonesController::class, 'update']);
     });
 });
