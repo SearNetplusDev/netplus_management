@@ -118,4 +118,11 @@ class ClientModel extends Model
             ->where('phone_type_id', 1)
             ->latest();
     }
+
+    public function email(): HasOne
+    {
+        return $this->hasOne(EmailModel::class, 'client_id', 'id')
+            ->where('status_id', 1)
+            ->latest();
+    }
 }
