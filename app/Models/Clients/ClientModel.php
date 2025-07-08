@@ -125,4 +125,11 @@ class ClientModel extends Model
             ->where('status_id', 1)
             ->latest();
     }
+
+    public function address(): HasOne
+    {
+        return $this->hasOne(AddressModel::class, 'client_id', 'id')
+            ->where('status_id', 1)
+            ->latest();
+    }
 }

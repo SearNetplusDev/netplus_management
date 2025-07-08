@@ -5,6 +5,7 @@ use App\Http\Controllers\v1\management\clients\ClientsController;
 use App\Http\Controllers\v1\management\clients\DocumentsController;
 use App\Http\Controllers\v1\management\clients\PhonesController;
 use App\Http\Controllers\v1\management\clients\EmailsController;
+use App\Http\Controllers\v1\management\clients\AddressesController;
 
 Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
 
@@ -35,5 +36,13 @@ Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
         Route::post('data', [EmailsController::class, 'data']);
         Route::post('edit', [EmailsController::class, 'edit']);
         Route::put('{id}', [EmailsController::class, 'update']);
+    });
+
+    //      ADDRESSES
+    Route::group(['prefix' => 'addresses'], function () {
+        Route::post('/', [AddressesController::class, 'store']);
+        Route::post('data', [AddressesController::class, 'data']);
+        Route::post('edit', [AddressesController::class, 'edit']);
+        Route::put('{id}', [AddressesController::class, 'update']);
     });
 });
