@@ -14,6 +14,14 @@ class ReferencesResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'client_id' => $this->client_id,
+            'name' => $this->name,
+            'dui' => $this->dui,
+            'mobile' => $this->mobile,
+            'kinship_id' => $this->kinship_id,
+            'status_id' => $this->status_id,
+        ];
     }
 }

@@ -11,6 +11,7 @@ class ReferenceDTO extends DataTransferObject
         public readonly string $name,
         public readonly string $dui,
         public readonly string $mobile,
+        public readonly int    $kinship_id,
         public readonly int    $status_id,
     )
     {
@@ -24,6 +25,7 @@ class ReferenceDTO extends DataTransferObject
             name: $data['name'] ?? '',
             dui: $data['dui'] ?? '',
             mobile: $data['mobile'] ?? '',
+            kinship_id: $data['kinship_id'] ?? 0,
             status_id: $data['status_id'] ?? 0,
         );
     }
@@ -35,6 +37,7 @@ class ReferenceDTO extends DataTransferObject
             'name' => $this->name,
             'dui' => $this->dui,
             'mobile' => $this->mobile,
+            'kinship_id' => $this->kinship_id,
             'status_id' => $this->status_id,
         ];
     }

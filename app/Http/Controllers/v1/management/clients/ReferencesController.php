@@ -14,21 +14,36 @@ class ReferencesController extends Controller
 {
     public function data(Request $request): JsonResponse
     {
-
+        return response()->json([
+            'response' => ReferenceModel::query()
+                ->with('kinship')
+                ->where('client_id', $request->input('clientID'))
+                ->get()
+        ]);
     }
 
     public function store(ReferencesRequest $request, ReferenceService $service): JsonResponse
     {
+        $reference = $service->createReference($request->toDTO());
 
+        return response()->json([
+            'saved' => (boolean)$reference,
+            'reference' => new ReferencesResource($reference)
+        ]);
     }
 
     public function edit(Request $request): JsonResponse
     {
-
+        return response()->json(['reference' => ReferenceModel::query()->find($request->input('id'))]);
     }
 
     public function update(ReferencesRequest $request, ReferenceModel $id, ReferenceService $service): JsonResponse
     {
+        $reference = $service->updateReference($id, $request->toDTO());
 
+        return response()->json([
+            'saved' => (boolean)$reference,
+            'reference' => new ReferencesResource($reference)
+        ]);
     }
 }

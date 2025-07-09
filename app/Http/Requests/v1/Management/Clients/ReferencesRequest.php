@@ -27,6 +27,7 @@ class ReferencesRequest extends FormRequest
             'name' => 'required|string|between:10,100',
             'dui' => 'required|string|size:10',
             'mobile' => 'required|string',
+            'kinship' => 'required|integer',
             'status' => 'required|boolean',
         ];
     }
@@ -52,6 +53,7 @@ class ReferencesRequest extends FormRequest
             name: $this->input('name'),
             dui: $this->input('dui'),
             mobile: $this->input('mobile'),
+            kinship_id: $this->input('kinship'),
             status_id: $this->input('status'),
         );
     }
