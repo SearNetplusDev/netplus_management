@@ -16,6 +16,7 @@ class AddressesController extends Controller
     {
         return response()->json([
             'response' => AddressModel::query()
+                ->with(['state', 'municipality', 'district'])
                 ->where('client_id', $request->input('clientID'))
                 ->get()
         ]);
