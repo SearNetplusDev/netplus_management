@@ -8,6 +8,7 @@ use App\Models\Configuration\Clients\DocumentTypeModel as ClientDocumentType;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Configuration\Clients\GenderModel;
+use App\Models\Configuration\Clients\KinshipModel;
 use App\Models\Configuration\Clients\MaritalStatusModel;
 use App\Models\Configuration\Clients\PhoneTypeModel;
 use App\Models\Configuration\Geography\CountryModel;
@@ -159,6 +160,17 @@ class DataController extends Controller
             'response' => PhoneTypeModel::query()
                 ->where('status_id', 1)
                 ->select(['id', 'name'])
+                ->get()
+        ]);
+    }
+
+    public function referencesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => KinshipModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->orderBy('name', 'ASC')
                 ->get()
         ]);
     }
