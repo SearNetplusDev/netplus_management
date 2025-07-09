@@ -13,6 +13,7 @@ use App\Http\Controllers\v1\management\configuration\clients\GenderController;
 use App\Http\Controllers\v1\management\configuration\clients\ClientTypeController;
 use App\Http\Controllers\v1\management\configuration\clients\MaritalStatusController;
 use App\Http\Controllers\v1\management\configuration\clients\PhoneTypeController;
+use App\Http\Controllers\v1\management\configuration\clients\KinshipController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -110,6 +111,14 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
             Route::post('data', [PhoneTypeController::class, 'data']);
             Route::post('edit', [PhoneTypeController::class, 'edit']);
             Route::put('{id}', [PhoneTypeController::class, 'update']);
+        });
+
+        //      Kinship
+        Route::group(['prefix' => 'kinship'], function () {
+            Route::post('/', [KinshipController::class, 'store']);
+            Route::post('data', [KinshipController::class, 'data']);
+            Route::post('edit', [KinshipController::class, 'edit']);
+            Route::put('{id}', [KinshipController::class, 'update']);
         });
     });
 });

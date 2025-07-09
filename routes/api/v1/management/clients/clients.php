@@ -6,6 +6,7 @@ use App\Http\Controllers\v1\management\clients\DocumentsController;
 use App\Http\Controllers\v1\management\clients\PhonesController;
 use App\Http\Controllers\v1\management\clients\EmailsController;
 use App\Http\Controllers\v1\management\clients\AddressesController;
+use App\Http\Controllers\v1\management\clients\ReferencesController;
 
 Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
 
@@ -44,5 +45,13 @@ Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
         Route::post('data', [AddressesController::class, 'data']);
         Route::post('edit', [AddressesController::class, 'edit']);
         Route::put('{id}', [AddressesController::class, 'update']);
+    });
+
+    //      REFERENCES
+    Route::group(['prefix' => 'references'], function () {
+        Route::post('/', [ReferencesController::class, 'store']);
+        Route::post('data', [ReferencesController::class, 'data']);
+        Route::post('edit', [ReferencesController::class, 'edit']);
+        Route::put('{id}', [ReferencesController::class, 'update']);
     });
 });
