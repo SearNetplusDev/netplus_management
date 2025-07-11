@@ -17,7 +17,7 @@ class FinancialInformationController extends Controller
         return response()->json([
             'response' => FinancialInformationModel::query()
                 ->where('client_id', $request->get('clientID'))
-                ->get()
+                ->first()
         ]);
     }
 
