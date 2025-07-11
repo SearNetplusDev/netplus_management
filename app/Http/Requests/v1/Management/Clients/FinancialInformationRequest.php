@@ -25,13 +25,25 @@ class FinancialInformationRequest extends FormRequest
     {
         return [
             'client' => 'required|numeric',
-            'nrc' => ['required', 'numeric', Rule::unique('clients_financial_information', 'nrc')->ignore($this->route('id'))],
+            'nrc' => [
+                'required',
+                'regex:/^\d{6}-\d$/',
+                Rule::unique('clients_financial_information', 'nrc')->ignore($this->route('id'))
+            ],
             'activity' => 'required|numeric',
             'retained' => 'required|boolean',
             'representative' => 'required|string',
-            'dui' => ['required', 'string', Rule::unique('clients_financial_information', 'dui')->ignore($this->route('id'))],
-            'nit' => ['required', 'string', Rule::unique('clients_financial_information', 'nit')->ignore($this->route('id'))],
-            'phone' => 'required|string',
+            'dui' => [
+                'required',
+                'regex:/^\d{8}-\d$/',
+                Rule::unique('clients_financial_information', 'dui')->ignore($this->route('id'))
+            ],
+            'nit' => [
+                'required',
+                'string',
+                Rule::unique('clients_financial_information', 'nit')->ignore($this->route('id'))
+            ],
+            'phone' => 'required|regex:/^[267]\d{3}-\d{4}$/',
             'alias' => 'nullable|string',
             'state' => 'required|numeric',
             'municipality' => 'required|numeric',
@@ -45,18 +57,18 @@ class FinancialInformationRequest extends FormRequest
     {
         return [
             'nrc.required' => 'NRC es un campo obligatorio.',
-            'nrc.numeric' => 'Formato inválido.',
+            'nrc.regex' => 'Formato inválido.',
             'nrc.unique' => 'Este NRC ya ha sido registrado.',
             'representative.required' => 'Representante legal es un campo obligatorio.',
             'representative.string' => 'Formato inválido.',
             'dui.required' => 'DUI es un campo obligatorio.',
-            'dui.string' => 'Formato inválido.',
+            'dui.regex' => 'Formato inválido.',
             'dui.unique' => 'Este DUI ya ha sido registrado.',
             'nit.required' => 'NIT es un campo obligatorio.',
             'nit.string' => 'Formato inválido.',
             'nit.unique' => 'Este NIT ya ha sido registrado.',
             'phone.required' => 'Telefono es un campo obligatorio.',
-            'phone.string' => 'Formato incorrecto.',
+            'phone.regex' => 'Formato incorrecto.',
 //            'alias.string' => 'Formato incorrecto.',
             'address.required' => 'Dirección es un campo obligatorio.',
             'address.string' => 'Formato incorrecto.',
