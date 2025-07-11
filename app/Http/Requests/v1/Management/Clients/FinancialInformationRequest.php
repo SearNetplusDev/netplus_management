@@ -40,7 +40,7 @@ class FinancialInformationRequest extends FormRequest
             ],
             'nit' => [
                 'required',
-                'string',
+                'regex:/^\d{8}-\d$|^\d{4}-\d{6}-\d{3}-\d$/',
                 Rule::unique('clients_financial_information', 'nit')->ignore($this->route('id'))
             ],
             'phone' => 'required|regex:/^[267]\d{3}-\d{4}$/',
@@ -65,7 +65,7 @@ class FinancialInformationRequest extends FormRequest
             'dui.regex' => 'Formato inválido.',
             'dui.unique' => 'Este DUI ya ha sido registrado.',
             'nit.required' => 'NIT es un campo obligatorio.',
-            'nit.string' => 'Formato inválido.',
+            'nit.regex' => 'Formato inválido.',
             'nit.unique' => 'Este NIT ya ha sido registrado.',
             'phone.required' => 'Telefono es un campo obligatorio.',
             'phone.regex' => 'Formato incorrecto.',
