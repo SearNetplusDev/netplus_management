@@ -14,6 +14,7 @@ use App\Http\Controllers\v1\management\configuration\clients\ClientTypeControlle
 use App\Http\Controllers\v1\management\configuration\clients\MaritalStatusController;
 use App\Http\Controllers\v1\management\configuration\clients\PhoneTypeController;
 use App\Http\Controllers\v1\management\configuration\clients\KinshipController;
+use App\Http\Controllers\v1\management\configuration\clients\ContractsStatusController;
 
 Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function () {
     //      MENU
@@ -119,6 +120,14 @@ Route::prefix('v1/configuration')->middleware(['auth:sanctum'])->group(function 
             Route::post('data', [KinshipController::class, 'data']);
             Route::post('edit', [KinshipController::class, 'edit']);
             Route::put('{id}', [KinshipController::class, 'update']);
+        });
+
+        //      Contracts
+        Route::group(['prefix' => 'contracts'], function () {
+            Route::post('/', [ContractsStatusController::class, 'store']);
+            Route::post('data', [ContractsStatusController::class, 'data']);
+            Route::post('edit', [ContractsStatusController::class, 'edit']);
+            Route::put('{id}', [ContractsStatusController::class, 'update']);
         });
     });
 });
