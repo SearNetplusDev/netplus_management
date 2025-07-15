@@ -59,9 +59,13 @@ class ContractsController extends Controller
             'client.address.state',
             'client.address.municipality',
             'client.address.district',
-            'client.country'
+            'client.country',
+            'client.branch.country',
+            'client.branch.municipality',
+            'client.branch.district',
+            'client.branch.state',
         ])->find($id);
-        $pdf = Pdf::loadView('v1.management.pdf.clients.contract', ['data' => $contract])
+        $pdf = Pdf::loadView('v1.management.pdf.clients.residential_contract', ['data' => $contract])
             ->setPaper('A4', 'portrait');
         return $pdf->stream();
     }

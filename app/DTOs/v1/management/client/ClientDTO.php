@@ -2,29 +2,45 @@
 
 namespace App\DTOs\v1\management\client;
 
-use Spatie\DataTransferObject\DataTransferObject;
 use Carbon\Carbon;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
 use InvalidArgumentException;
 
-class ClientDTO extends DataTransferObject
+class ClientDTO extends Data
 {
     public function __construct(
+        #[Required, StringType]
         public readonly ?string $name,
+        #[Required, StringType]
         public readonly ?string $surname,
+        #[Required, IntegerType]
         public readonly ?int    $gender_id,
+
         public readonly ?Carbon $birthdate,
+        #[Required, IntegerType]
         public readonly ?int    $marital_status_id,
+        #[Required, IntegerType]
         public readonly ?int    $branch_id,
+        #[Required, IntegerType]
         public readonly ?int    $client_type_id,
+        #[Required, StringType]
         public readonly ?string $profession,
+        #[Required, IntegerType]
         public readonly ?int    $country_id,
+        #[Required, IntegerType]
         public readonly ?int    $document_type_id,
+        #[Required, IntegerType]
         public readonly ?int    $legal_entity,
+        #[Required, IntegerType]
         public readonly ?int    $status_id,
+        #[Required, StringType]
         public readonly ?string $comments,
     )
     {
-        $this->validate();
+//        $this->validate();
     }
 
     public static function fromArray(array $data): self
@@ -83,25 +99,25 @@ class ClientDTO extends DataTransferObject
         return $this->birthdate?->age;
     }
 
-    private function validate(): void
-    {
-        if ($this->name && strlen(trim($this->name)) < 2) {
-            throw new InvalidArgumentException("El nombre debe tener al menos 2 caracteres");
-        }
-        if ($this->surname && strlen(trim($this->surname)) < 2) {
-            throw new InvalidArgumentException("El apellido debe tener al menos 2 caracteres");
-        }
-        if ($this->birthdate && $this->birthdate->isFuture()) {
-            throw new InvalidArgumentException('La fecha de nacimiento no puede ser mayor a la fecha actual');
-        }
-        if ($this->birthdate && $this->birthdate->age > 150) {
-            throw new InvalidArgumentException('La edad de una persona no puede ser exceder los 150 años');
-        }
-        if ($this->profession && strlen(trim($this->profession)) > 100) {
-            throw new InvalidArgumentException("La profesión u oficio no puede exceder los 100 caracteres");
-        }
-        if ($this->comments && strlen($this->comments) > 1000) {
-            throw new InvalidArgumentException("El comentario no puede exceder los 1000 caracteres");
-        }
-    }
+//    private function validate(): void
+//    {
+//        if ($this->name && strlen(trim($this->name)) < 2) {
+//            throw new InvalidArgumentException("El nombre debe tener al menos 2 caracteres");
+//        }
+//        if ($this->surname && strlen(trim($this->surname)) < 2) {
+//            throw new InvalidArgumentException("El apellido debe tener al menos 2 caracteres");
+//        }
+//        if ($this->birthdate && $this->birthdate->isFuture()) {
+//            throw new InvalidArgumentException('La fecha de nacimiento no puede ser mayor a la fecha actual');
+//        }
+//        if ($this->birthdate && $this->birthdate->age > 150) {
+//            throw new InvalidArgumentException('La edad de una persona no puede ser exceder los 150 años');
+//        }
+//        if ($this->profession && strlen(trim($this->profession)) > 100) {
+//            throw new InvalidArgumentException("La profesión u oficio no puede exceder los 100 caracteres");
+//        }
+//        if ($this->comments && strlen($this->comments) > 1000) {
+//            throw new InvalidArgumentException("El comentario no puede exceder los 1000 caracteres");
+//        }
+//    }
 }

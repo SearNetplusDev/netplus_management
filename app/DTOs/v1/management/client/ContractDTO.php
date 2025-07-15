@@ -2,19 +2,28 @@
 
 namespace App\DTOs\v1\management\client;
 
-use App\Services\v1\management\client\ContractService;
-use Spatie\DataTransferObject\DataTransferObject;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Attributes\Validation\Date;
 use Carbon\Carbon;
 
-class ContractDTO extends DataTransferObject
+class ContractDTO extends Data
 {
     public function __construct(
+        #[Required, IntegerType]
         public readonly int    $client_id,
+        #[Required, Date]
         public readonly Carbon $contract_date,
+        #[Required, Date]
         public readonly Carbon $contract_end_date,
+        #[Required]
         public readonly float  $installation_price,
+        #[Required]
         public readonly float  $contract_amount,
+        #[Required, IntegerType]
         public readonly int    $contract_status_id,
+        #[Required, IntegerType]
         public readonly int    $status_id,
     )
     {

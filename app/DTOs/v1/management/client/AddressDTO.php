@@ -2,18 +2,29 @@
 
 namespace App\DTOs\v1\management\client;
 
-use Spatie\DataTransferObject\DataTransferObject;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Attributes\Validation\StringType;
 
-class AddressDTO extends DataTransferObject
+class AddressDTO extends Data
 {
     public function __construct(
+        #[Required, IntegerType]
         public readonly int    $client_id,
+        #[Required, StringType]
         public readonly string $neighborhood,
+        #[Required, StringType]
         public readonly string $address,
+        #[Required, IntegerType]
         public readonly int    $state_id,
+        #[Required, IntegerType]
         public readonly int    $municipality_id,
+        #[Required, IntegerType]
         public readonly int    $district_id,
+        #[Required, IntegerType]
         public readonly int    $country_id,
+        #[Required, IntegerType]
         public readonly int    $status_id,
     )
     {

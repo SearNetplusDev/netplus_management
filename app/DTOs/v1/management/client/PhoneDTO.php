@@ -2,14 +2,21 @@
 
 namespace App\DTOs\v1\management\client;
 
-use Spatie\DataTransferObject\DataTransferObject;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Data;
 
-class PhoneDTO extends DataTransferObject
+class PhoneDTO extends Data
 {
     public function __construct(
+        #[Required, IntegerType]
         public readonly int    $client_id,
+        #[Required, IntegerType]
         public readonly int    $phone_type_id,
+        #[Required, StringType]
         public readonly string $number,
+        #[Required, IntegerType]
         public readonly int    $status_id
     )
     {

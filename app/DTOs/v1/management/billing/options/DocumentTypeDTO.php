@@ -2,25 +2,32 @@
 
 namespace App\DTOs\v1\management\billing\options;
 
-use Spatie\DataTransferObject\DataTransferObject;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
 
-class DocumentTypeDTO extends DataTransferObject
+class DocumentTypeDTO extends Data
 {
     public function __construct(
+        #[Required, StringType]
         public readonly ?string $name,
+        #[Required, StringType]
         public readonly ?string $code,
-        public readonly ?bool   $status_id,
+        #[Required, IntegerType]
+        public readonly ?int    $status_id,
     )
     {
 
     }
 
+    public function fromArray(array $data): self
+    {
+        return self::from($data);
+    }
+
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'code' => $this->code,
-            'status_id' => $this->status_id,
-        ];
+        return $this->all();
     }
 }

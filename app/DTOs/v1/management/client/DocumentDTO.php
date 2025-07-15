@@ -2,17 +2,25 @@
 
 namespace App\DTOs\v1\management\client;
 
-use App\Models\Clients\DocumentModel;
-use Spatie\DataTransferObject\DataTransferObject;
+use Spatie\LaravelData\Attributes\Validation\Date;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Required;
 use Carbon\Carbon;
 
-class DocumentDTO extends DataTransferObject
+class DocumentDTO extends Data
 {
     public function __construct(
+        #[Required, IntegerType]
         public readonly ?int    $client_id,
+        #[Required, IntegerType]
         public readonly ?int    $document_type_id,
+        #[Required, StringType]
         public readonly ?string $number,
+        #[Required, Date]
         public readonly ?Carbon $expiration_date,
+        #[Required, IntegerType]
         public readonly int     $status_id,
     )
     {

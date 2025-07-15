@@ -1,20 +1,20 @@
 {
     "garamond": {
-        "normal": "garamond_normal_0b78b22cea2ee4d5c148edefc2bf6420"
+        "normal": "garamond_normal_effb4d2b0e1ec8968247c363eddac020"
     },
     "bodoni": {
-        "normal": "bodoni_normal_c67c245c5389552113dbadee8db3534d"
+        "normal": "bodoni_normal_22ea131f3d08c1e570d44aa71490197e"
     },
     "didot": {
         "normal": "didot_normal_7948180bb3d38da022befae9a80e7422"
     },
     "lora": {
-        "normal": "lora_normal_c621c20c71f5e5ef901ac64a2777dd2e"
+        "normal": "lora_normal_8fdd0fb2b16f68f199b3e065897385c7"
     },
     "montserrat": {
-        "normal": "montserrat_normal_c69013a7fed3afdec4f7d9f201ea7f49"
+        "normal": "montserrat_normal_481df7bf5e9c33fb5fe39bbb8eb92bd5"
     },
     "raleway": {
-        "normal": "raleway_normal_a0580b2244760b6ad99403ae74a068c9"
+        "normal": "raleway_normal_df2cfe3992020919c998c7da3a6212b9"
     }
 }
