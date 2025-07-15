@@ -13,7 +13,7 @@ class ContractStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        $status = ['Activo', 'Inactivo', 'Cancelado', 'Cancelado/Rescindido', 'Vencido', 'En revisión', 'Renovado'];
+        $status = ['Activo', 'Inactivo', 'Cancelado/Rescindido', 'Vencido', 'En revisión', 'Renovado'];
 
         foreach ($status as $item) {
             ContractStateModel::create([

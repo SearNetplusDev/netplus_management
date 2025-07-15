@@ -8,6 +8,7 @@ use App\Http\Controllers\v1\management\clients\EmailsController;
 use App\Http\Controllers\v1\management\clients\AddressesController;
 use App\Http\Controllers\v1\management\clients\ReferencesController;
 use App\Http\Controllers\v1\management\clients\FinancialInformationController;
+use App\Http\Controllers\v1\management\clients\ContractsController;
 
 Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
 
@@ -62,5 +63,14 @@ Route::prefix('v1/clients')->middleware(['auth:sanctum'])->group(function () {
         Route::post('data', [FinancialInformationController::class, 'data']);
         Route::post('edit', [FinancialInformationController::class, 'edit']);
         Route::put('{id}', [FinancialInformationController::class, 'update']);
+    });
+
+    //      Contracts
+    Route::group(['prefix' => 'contracts'], function () {
+        Route::post('/', [ContractsController::class, 'store']);
+        Route::post('data', [ContractsController::class, 'data']);
+        Route::post('edit', [ContractsController::class, 'edit']);
+        Route::put('{id}', [ContractsController::class, 'update']);
+        Route::get('print/{id}', [ContractsController::class, 'print']);
     });
 });

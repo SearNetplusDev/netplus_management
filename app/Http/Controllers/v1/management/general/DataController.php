@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\management\general;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Options\ActivityModel;
 use App\Models\Billing\Options\DocumentTypeModel as BillingDocumentType;
+use App\Models\Configuration\Clients\ContractStateModel;
 use App\Models\Configuration\Clients\DocumentTypeModel as ClientDocumentType;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
@@ -186,6 +187,16 @@ class DataController extends Controller
 
         return response()->json([
             'response' => $query->makeHidden(['status'])
+        ]);
+    }
+
+    public function contractStatusList(): JsonResponse
+    {
+        return response()->json([
+            'response' => ContractStateModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
         ]);
     }
 }

@@ -24,6 +24,7 @@ class ContractStatusRequest extends FormRequest
     {
         return [
             'name' => 'required|between:3,60',
+            'badge' => 'required|string',
             'status' => 'required|boolean',
         ];
     }
@@ -33,6 +34,8 @@ class ContractStatusRequest extends FormRequest
         return [
             'name.required' => 'Nombre es requerido',
             'name.between' => 'Nombre debe tener entre :min y :max caracteres',
+            'badge.required' => 'Color es requerido',
+            'badge.string' => 'Formato de color no válido',
         ];
     }
 
@@ -41,6 +44,7 @@ class ContractStatusRequest extends FormRequest
         return new ContractStatusDTO(
             name: $this->input('name'),
             status_id: $this->input('status'),
+            badge_color: $this->input('badge'),
         );
     }
 }

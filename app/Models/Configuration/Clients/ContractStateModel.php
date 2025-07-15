@@ -14,7 +14,7 @@ class ContractStateModel extends Model
     protected $connection = 'pgsql';
     protected $table = 'config_contracts_status';
     protected $primaryKey = 'id';
-    protected $fillable = ['name', 'status_id'];
+    protected $fillable = ['name', 'badge_color', 'status_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = ['id', 'name', 'status_id'];
     protected array $orderable = ['id', 'name', 'status_id'];

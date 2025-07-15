@@ -9,6 +9,7 @@ class ContractStatusDTO extends DataTransferObject
     public function __construct(
         public readonly string $name,
         public readonly int    $status_id,
+        public readonly string $badge_color,
     )
     {
 
@@ -19,6 +20,7 @@ class ContractStatusDTO extends DataTransferObject
         return new self(
             name: $data['name'] ?? '',
             status_id: $data['status_id'] ?? 0,
+            badge_color: $data['badge_color'] ?? '',
         );
     }
 
@@ -27,6 +29,7 @@ class ContractStatusDTO extends DataTransferObject
         return [
             'name' => $this->name ?? '',
             'status_id' => $this->status_id ?? 0,
+            'badge_color' => $this->badge_color ?? '',
         ];
     }
 }
