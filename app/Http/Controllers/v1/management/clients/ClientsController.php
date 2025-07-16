@@ -26,8 +26,8 @@ class ClientsController extends Controller
 
         return $dataViewerService->handle($request, $query, [
             'status' => fn($q, $data) => $query->whereIn('status_id', $data),
-            'branch' => fn($q, $data) => $data->whereIn('branch_id', $data),
-            'type' => fn($q, $data) => $data->whereIn('client_type_id', $data),
+            'branch' => fn($q, $data) => $query->whereIn('branch_id', $data),
+            'type' => fn($q, $data) => $query->whereIn('client_type_id', $data),
         ]);
     }
 
