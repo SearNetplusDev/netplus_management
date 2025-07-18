@@ -17,6 +17,7 @@ use App\Models\Configuration\Geography\CountryModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
+use App\Models\Infrastructure\Network\AuthServerModel;
 use Illuminate\Http\JsonResponse;
 
 class DataController extends Controller
@@ -196,6 +197,17 @@ class DataController extends Controller
             'response' => ContractStateModel::query()
                 ->where('status_id', 1)
                 ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function authServersList(): JsonResponse
+    {
+        return response()->json([
+            'response' => AuthServerModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->orderBy('name', 'ASC')
                 ->get()
         ]);
     }

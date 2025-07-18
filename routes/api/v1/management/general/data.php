@@ -21,4 +21,5 @@ Route::prefix('v1/general')->middleware('auth:sanctum')->group(function () {
     Route::get('billing/documents', [DataController::class, 'billingDocumentsList']);
     Route::get('billing/activities', [DataController::class, 'billingActivitiesList']);
     Route::get('contract/status', [DataController::class, 'contractStatusList']);
+    Route::get('infrastructure/servers', [DataController::class, 'authServersList']);
 });
