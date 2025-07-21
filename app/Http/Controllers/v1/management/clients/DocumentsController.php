@@ -49,4 +49,21 @@ class DocumentsController extends Controller
             'document' => new DocumentResource($document)
         ]);
     }
+
+    public function verify(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'dui' => 'required|regex:/^\d{8}-\d$/',
+        ]);
+        $document = DocumentModel::query()
+            ->with(['client:id,name,surname,status_id'])
+            ->where([
+                ['status_id', 1],
+                ['number', 'ILIKE', "%{$validated['dui']}%"],
+            ])
+            ->select('id', 'client_id', 'document_type_id', 'number', 'status_id')
+            ->first();
+
+        return response()->json(['response' => $document]);
+    }
 }
