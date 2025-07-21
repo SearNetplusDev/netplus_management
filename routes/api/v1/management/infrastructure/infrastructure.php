@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\infrastructure\network\AuthServersController;
 use App\Http\Controllers\v1\management\infrastructure\network\NodesController;
+use App\Http\Controllers\v1\management\infrastructure\network\NodeContactController;
 
 Route::prefix('v1/infrastructure')
     ->middleware(['auth:sanctum'])
@@ -24,6 +25,14 @@ Route::prefix('v1/infrastructure')
                 Route::post('data', [NodesController::class, 'data']);
                 Route::post('edit', [NodesController::class, 'edit']);
                 Route::put('{id}', [NodesController::class, 'update']);
+
+                //      Contacts
+                Route::group(['prefix' => 'contacts'], function () {
+                    Route::post('/', [NodeContactController::class, 'store']);
+                    Route::post('data', [NodeContactController::class, 'data']);
+                    Route::post('edit', [NodeContactController::class, 'edit']);
+                    Route::put('{id}', [NodeContactController::class, 'update']);
+                });
             });
         });
     });

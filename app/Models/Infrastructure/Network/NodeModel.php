@@ -6,6 +6,7 @@ use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
@@ -65,5 +66,11 @@ class NodeModel extends Model
     public function district(): HasOne
     {
         return $this->hasOne(DistrictModel::class, 'id', 'district_id');
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(NodeContactModel::class, 'node_id', 'id')
+            ->where('status_id', 1);
     }
 }
