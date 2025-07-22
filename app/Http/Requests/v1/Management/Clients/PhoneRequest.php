@@ -26,6 +26,7 @@ class PhoneRequest extends FormRequest
         return [
             'client' => 'required|integer',
             'type' => 'required|integer',
+            'country' => 'required',
             'number' => ['required', Rule::unique('clients_phones', 'number')->ignore($this->route('id'))],
             'status' => 'required|boolean',
         ];
@@ -38,6 +39,7 @@ class PhoneRequest extends FormRequest
             'client.integer' => 'Formato de cliente incorrecto.',
             'type.required' => 'Tipo de teléfono requerido.',
             'type.integer' => 'Formato de tipo incorrecto.',
+            'country.required' => 'País es requerido.',
             'number.required' => 'Número de teléfono es un campo obligatorio.',
             'number.unique' => 'Este número ya ha sido registrado.',
             'status.required' => 'Estado es un campo requerido.',
@@ -52,6 +54,7 @@ class PhoneRequest extends FormRequest
             phone_type_id: $this['type'],
             number: $this['number'],
             status_id: $this['status'],
+            country_code: $this['country'],
         );
     }
 }

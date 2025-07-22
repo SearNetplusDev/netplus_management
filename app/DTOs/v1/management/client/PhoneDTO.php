@@ -17,29 +17,35 @@ class PhoneDTO extends Data
         #[Required, StringType]
         public readonly string $number,
         #[Required, IntegerType]
-        public readonly int    $status_id
+        public readonly int    $status_id,
+        #[Required, StringType]
+        public readonly string $country_code,
     )
     {
 
     }
 
-    public function fromArray(array $data): self
+    public
+    function fromArray(array $data): self
     {
         return new self(
             client_id: $data['client_id'] ?? 0,
             phone_type_id: $data['phone_type_id'] ?? 0,
             number: $data['number'] ?? '',
-            status_id: $data['status_id'] ?? 0
+            status_id: $data['status_id'] ?? 0,
+            country_code: $data['country_code'] ?? null,
         );
     }
 
-    public function toArray(): array
+    public
+    function toArray(): array
     {
         return [
             'client_id' => $this->client_id ?? 0,
             'phone_type_id' => $this->phone_type_id ?? 0,
             'number' => $this->number ?? '',
-            'status_id' => $this->status_id ?? 0
+            'status_id' => $this->status_id ?? 0,
+            'country_code' => $this->country_code ?? null,
         ];
     }
 }

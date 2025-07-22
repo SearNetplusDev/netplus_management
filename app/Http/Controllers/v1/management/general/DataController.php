@@ -87,6 +87,19 @@ class DataController extends Controller
         return response()->json(['response' => $result]);
     }
 
+    public function countriesWithCode(): JsonResponse
+    {
+        $query = CountryModel::query()->select('iso_2', 'es_name')->get();
+        $result = $query->map(function ($item) {
+            return [
+                'id' => $item->iso_2,
+                'name' => $item->es_name,
+            ];
+        });
+
+        return response()->json(['response' => $result]);
+    }
+
     public function districtsByMunicipality(int $municipalityID): JsonResponse
     {
         $query = DistrictModel::query()

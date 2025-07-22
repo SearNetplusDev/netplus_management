@@ -3,6 +3,7 @@
 namespace App\Models\Clients;
 
 use App\Models\Configuration\Clients\ContractStateModel;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -26,7 +27,7 @@ class ContractModel extends Model
         'status_id'
     ];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
-    protected $appends = ['status'];
+    protected $appends = ['status', 'diff_days'];
 
     public function contract_status(): HasOne
     {
@@ -36,5 +37,17 @@ class ContractModel extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(ClientModel::class, 'client_id', 'id');
+    }
+
+    public function getDiffDaysAttribute(): ?int
+    {
+        if (!$this->contract_end_date) return null;
+        try {
+            $today = Carbon::today();
+            $end = Carbon::parse($this->contract_end_date);
+            return $today->diffInDays($end, false);
+        } catch (\Exception $exception) {
+            return $exception->getMessage();
+        }
     }
 }

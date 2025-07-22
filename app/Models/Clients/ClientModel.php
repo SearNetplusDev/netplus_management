@@ -46,6 +46,7 @@ class ClientModel extends Model
         'branch_id',
         'client_type_id',
         'status_id',
+        'dui.number'
     ];
     protected array $orderable = [
         'id',

@@ -14,8 +14,8 @@ class PhonesController extends Controller
 {
     public function data(Request $request): JsonResponse
     {
-        $query = PhoneModel::query()->with('phone_type')
-            ->where('client_id', $request->clientID)
+        $query = PhoneModel::query()->with(['phone_type', 'country'])
+            ->where('client_id', $request->input('clientID'))
             ->get();
 
         return response()->json(['response' => $query]);
@@ -34,8 +34,8 @@ class PhonesController extends Controller
     public function edit(Request $request): JsonResponse
     {
         return response()->json(['phone' => PhoneModel::query()
-            ->with('phone_type')
-            ->where('id', $request->phoneID)
+            ->with(['phone_type', 'country'])
+            ->where('id', $request->input('phoneID'))
             ->firstOrFail()
         ]);
     }

@@ -12,6 +12,7 @@ Route::prefix('v1/general')
         Route::get('state/{id}/municipalities', [DataController::class, 'municipalitiesByState']);
         Route::get('districts', [DataController::class, 'districtsList']);
         Route::get('countries', [DataController::class, 'countriesList']);
+        Route::get('countries/phones', [DataController::class, 'countriesWithCode']);
         Route::get('municipality/{id}/districts', [DataController::class, 'districtsByMunicipality']);
         Route::get('genders', [DataController::class, 'gendersList']);
         Route::get('marital', [DataController::class, 'maritalStatusList']);
