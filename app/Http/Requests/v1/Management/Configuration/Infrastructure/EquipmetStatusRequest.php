@@ -24,6 +24,7 @@ class EquipmetStatusRequest extends FormRequest
     {
         return [
             'name' => 'required',
+            'description' => 'required|between:3,200',
             'badge' => 'required',
             'status' => 'required|boolean',
         ];
@@ -33,6 +34,8 @@ class EquipmetStatusRequest extends FormRequest
     {
         return [
             'name.required' => 'Nombre es requerido.',
+            'description.required' => 'Descripción es un campo requerido.',
+            'description.between' => 'La descripción debe tener entre 3 y 200 caracteres.',
             'badge.required' => 'Color es requerido.',
         ];
     }
@@ -43,6 +46,7 @@ class EquipmetStatusRequest extends FormRequest
             name: $this->input('name'),
             badge_color: $this->input('badge'),
             status_id: $this->input('status'),
+            description: $this->input('description'),
         );
     }
 }

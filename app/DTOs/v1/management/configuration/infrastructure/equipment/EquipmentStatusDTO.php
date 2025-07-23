@@ -16,6 +16,8 @@ class EquipmentStatusDTO extends Data
         public readonly string $badge_color,
         #[Required, IntegerType]
         public readonly int    $status_id,
+        #[Required, StringType]
+        public readonly string $description,
     )
     {
     }
