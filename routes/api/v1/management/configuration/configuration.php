@@ -15,6 +15,7 @@ use App\Http\Controllers\v1\management\configuration\clients\MaritalStatusContro
 use App\Http\Controllers\v1\management\configuration\clients\PhoneTypeController;
 use App\Http\Controllers\v1\management\configuration\clients\KinshipController;
 use App\Http\Controllers\v1\management\configuration\clients\ContractsStatusController;
+use App\Http\Controllers\v1\management\configuration\infrastructure\EquipmentStatusController;
 
 Route::prefix('v1/configuration')
     ->middleware(['auth:sanctum'])
@@ -130,6 +131,22 @@ Route::prefix('v1/configuration')
                 Route::post('data', [ContractsStatusController::class, 'data']);
                 Route::post('edit', [ContractsStatusController::class, 'edit']);
                 Route::put('{id}', [ContractsStatusController::class, 'update']);
+            });
+        });
+
+        //      Infrastructure
+        Route::group(['prefix' => 'infrastructure'], function () {
+
+            //      Equipments
+            Route::group(['prefix' => 'equipments'], function () {
+
+                //      Status
+                Route::group(['prefix' => 'status'], function () {
+                    Route::post('/', [EquipmentStatusController::class, 'store']);
+                    Route::post('data', [EquipmentStatusController::class, 'data']);
+                    Route::post('edit', [EquipmentStatusController::class, 'edit']);
+                    Route::put('{id}', [EquipmentStatusController::class, 'update']);
+                });
             });
         });
     });
