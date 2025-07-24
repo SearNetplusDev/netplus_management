@@ -6,6 +6,7 @@ use App\Http\Controllers\v1\management\infrastructure\network\NodesController;
 use App\Http\Controllers\v1\management\infrastructure\network\NodeContactController;
 use App\Http\Controllers\v1\management\infrastructure\equipments\TypesController;
 use App\Http\Controllers\v1\management\infrastructure\equipments\BrandsController;
+use App\Http\Controllers\v1\management\infrastructure\equipments\ModelsController;
 
 Route::prefix('v1/infrastructure')
     ->middleware(['auth:sanctum'])
@@ -55,6 +56,14 @@ Route::prefix('v1/infrastructure')
                 Route::post('data', [BrandsController::class, 'data']);
                 Route::post('edit', [BrandsController::class, 'edit']);
                 Route::put('{id}', [BrandsController::class, 'update']);
+            });
+
+            //      Models
+            Route::group(['prefix' => 'models'], function () {
+                Route::post('/', [ModelsController::class, 'store']);
+                Route::post('data', [ModelsController::class, 'data']);
+                Route::post('edit', [ModelsController::class, 'edit']);
+                Route::put('{id}', [ModelsController::class, 'update']);
             });
         });
     });
