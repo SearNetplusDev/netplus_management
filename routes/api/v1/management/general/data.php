@@ -35,5 +35,8 @@ Route::prefix('v1/general')
             Route::get('servers', [DataController::class, 'authServersList']);
             Route::get('types', [DataController::class, 'equipmentTypesList']);
             Route::get('brands', [DataController::class, 'equipmentBrandsList']);
+            Route::get('status', [DataController::class, 'equipmentStatusList']);
+            Route::get('nodes', [DataController::class, 'nodesList']);
+            Route::get('models', [DataController::class, 'modelsList']);
         });
     });

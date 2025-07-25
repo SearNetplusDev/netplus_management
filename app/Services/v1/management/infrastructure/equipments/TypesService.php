@@ -3,7 +3,7 @@
 namespace App\Services\v1\management\infrastructure\equipments;
 
 use App\DTOs\v1\management\infrastructure\equipments\TypesDTO;
-use App\Models\Infrastructure\Equipments\TypeModel;
+use App\Models\Infrastructure\Equipment\TypeModel;
 
 class TypesService
 {

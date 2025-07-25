@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Infrastructure\Equipments;
+namespace App\Models\Infrastructure\Equipment;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +12,7 @@ class BrandModel extends Model
     use SoftDeletes, DataViewer, HasStatusTrait;
 
     protected $connection = 'pgsql';
-    protected $table = 'infrastructure_equipments_brands';
+    protected $table = 'infrastructure_equipment_brands';
     protected $primaryKey = 'id';
     protected $fillable = ['name', 'status_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];

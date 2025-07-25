@@ -3,7 +3,7 @@
 namespace App\Services\v1\management\infrastructure\equipments;
 
 use App\DTOs\v1\management\infrastructure\equipments\BrandDTO;
-use App\Models\Infrastructure\Equipments\BrandModel;
+use App\Models\Infrastructure\Equipment\BrandModel;
 
 class BrandService
 {

@@ -9,7 +9,7 @@ use App\Http\Requests\v1\Management\Infrastructure\Equipments\BrandRequest;
 use App\Services\v1\management\infrastructure\equipments\BrandService;
 use App\Services\v1\management\DataViewerService;
 use App\Http\Resources\v1\management\infrastructure\equipments\BrandResource;
-use App\Models\Infrastructure\Equipments\BrandModel;
+use App\Models\Infrastructure\Equipment\BrandModel;
 
 class BrandsController extends Controller
 {

@@ -10,8 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::hasTable('infrastructure_equipments_models')) {
-            Schema::create('infrastructure_equipments_models', function (Blueprint $table) {
+        if (!Schema::hasTable('infrastructure_equipment_models')) {
+            Schema::create('infrastructure_equipment_models', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
                 $table->integer('equipment_type_id');
@@ -28,6 +28,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('infrastructure_equipments_models');
+        Schema::dropIfExists('infrastructure_equipment_models');
     }
 };

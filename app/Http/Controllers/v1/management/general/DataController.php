@@ -17,9 +17,12 @@ use App\Models\Configuration\Geography\CountryModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
-use App\Models\Infrastructure\Equipments\BrandModel;
-use App\Models\Infrastructure\Equipments\TypeModel;
+use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
+use App\Models\Infrastructure\Equipment\BrandModel;
+use App\Models\Infrastructure\Equipment\ModelModel;
+use App\Models\Infrastructure\Equipment\TypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
+use App\Models\Infrastructure\Network\NodeModel;
 use Illuminate\Http\JsonResponse;
 
 class DataController extends Controller
@@ -242,6 +245,36 @@ class DataController extends Controller
     {
         return response()->json([
             'response' => BrandModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function equipmentStatusList(): JsonResponse
+    {
+        return response()->json([
+            'response' => EquipmentStatusModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function nodesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => NodeModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->get()
+        ]);
+    }
+
+    public function modelsList(): JsonResponse
+    {
+        return response()->json([
+            'response' => ModelModel::query()
                 ->where('status_id', 1)
                 ->select('id', 'name')
                 ->get()

@@ -9,7 +9,7 @@ use App\Http\Requests\v1\Management\Infrastructure\Equipments\ModelRequest;
 use App\Services\v1\management\DataViewerService;
 use App\Services\v1\management\infrastructure\equipments\ModelService;
 use App\Http\Resources\v1\management\infrastructure\equipments\ModelResource;
-use App\Models\Infrastructure\Equipments\ModelModel;
+use App\Models\Infrastructure\Equipment\ModelModel;
 
 
 class ModelsController extends Controller

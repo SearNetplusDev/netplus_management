@@ -9,7 +9,7 @@ use App\Http\Requests\v1\Management\Infrastructure\Equipments\TypesRequest;
 use App\Http\Resources\v1\management\infrastructure\equipments\TypesResource;
 use App\Services\v1\management\DataViewerService;
 use App\Services\v1\management\infrastructure\equipments\TypesService;
-use App\Models\Infrastructure\Equipments\TypeModel;
+use App\Models\Infrastructure\Equipment\TypeModel;
 
 class TypesController extends Controller
 {

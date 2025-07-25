@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Infrastructure\Equipments;
+namespace App\Models\Infrastructure\Equipment;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -13,7 +13,7 @@ class ModelModel extends Model
     use SoftDeletes, DataViewer, HasStatusTrait;
 
     protected $connection = 'pgsql';
-    protected $table = 'infrastructure_equipments_models';
+    protected $table = 'infrastructure_equipment_models';
     protected $primaryKey = 'id';
     protected $fillable = ['name', 'equipment_type_id', 'brand_id', 'status_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];

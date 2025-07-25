@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         if (!Schema::hasTable('infrastructure_equipment_types')) {
 
-            Schema::create('infrastructure_equipments_types', function (Blueprint $table) {
+            Schema::create('infrastructure_equipment_types', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
                 $table->boolean('status_id')->default(false);
@@ -27,6 +27,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('infrastructure_equipments_types');
+        Schema::dropIfExists('infrastructure_equipment_types');
     }
 };

@@ -7,6 +7,7 @@ use App\Http\Controllers\v1\management\infrastructure\network\NodeContactControl
 use App\Http\Controllers\v1\management\infrastructure\equipments\TypesController;
 use App\Http\Controllers\v1\management\infrastructure\equipments\BrandsController;
 use App\Http\Controllers\v1\management\infrastructure\equipments\ModelsController;
+use App\Http\Controllers\v1\management\infrastructure\network\EquipmentController;
 
 Route::prefix('v1/infrastructure')
     ->middleware(['auth:sanctum'])
@@ -40,7 +41,11 @@ Route::prefix('v1/infrastructure')
         });
 
         //      Equipments
-        Route::group(['prefix' => 'equipments'], function () {
+        Route::group(['prefix' => 'equipment'], function () {
+            Route::post('/', [EquipmentController::class, 'store']);
+            Route::post('data', [EquipmentController::class, 'data']);
+            Route::post('edit', [EquipmentController::class, 'edit']);
+            Route::put('{id}', [EquipmentController::class, 'update']);
 
             //      Types
             Route::group(['prefix' => 'types'], function () {

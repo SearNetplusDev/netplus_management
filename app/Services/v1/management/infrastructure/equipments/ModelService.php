@@ -3,7 +3,7 @@
 namespace App\Services\v1\management\infrastructure\equipments;
 
 use App\DTOs\v1\management\infrastructure\equipments\ModelDTO;
-use App\Models\Infrastructure\Equipments\ModelModel;
+use App\Models\Infrastructure\Equipment\ModelModel;
 
 class ModelService
 {
