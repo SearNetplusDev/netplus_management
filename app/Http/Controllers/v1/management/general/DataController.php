@@ -17,6 +17,8 @@ use App\Models\Configuration\Geography\CountryModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
+use App\Models\Infrastructure\Equipments\BrandModel;
+use App\Models\Infrastructure\Equipments\TypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use Illuminate\Http\JsonResponse;
 
@@ -221,6 +223,27 @@ class DataController extends Controller
                 ->where('status_id', 1)
                 ->select('id', 'name')
                 ->orderBy('name', 'ASC')
+                ->get()
+        ]);
+    }
+
+    public function equipmentTypesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => TypeModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
+                ->orderBy('name', 'ASC')
+                ->get()
+        ]);
+    }
+
+    public function equipmentBrandsList(): JsonResponse
+    {
+        return response()->json([
+            'response' => BrandModel::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
                 ->get()
         ]);
     }

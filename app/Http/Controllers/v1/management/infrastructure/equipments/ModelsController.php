@@ -21,6 +21,8 @@ class ModelsController extends Controller
 
         return $dataViewer->handle($request, $query, [
             'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+            'type' => fn($q, $data) => $q->whereIn('equipment_type_id', $data),
+            'brand' => fn($q, $data) => $q->whereIn('brand_id', $data),
         ]);
     }
 

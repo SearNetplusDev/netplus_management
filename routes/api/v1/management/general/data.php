@@ -17,12 +17,23 @@ Route::prefix('v1/general')
         Route::get('genders', [DataController::class, 'gendersList']);
         Route::get('marital', [DataController::class, 'maritalStatusList']);
         Route::get('branches', [DataController::class, 'branchesList']);
-        Route::get('client/types', [DataController::class, 'clientTypesList']);
-        Route::get('client/documents', [DataController::class, 'personalDocumentsList']);
-        Route::get('client/phones', [DataController::class, 'phoneCategoriesList']);
-        Route::get('client/references', [DataController::class, 'referencesList']);
-        Route::get('billing/documents', [DataController::class, 'billingDocumentsList']);
-        Route::get('billing/activities', [DataController::class, 'billingActivitiesList']);
         Route::get('contract/status', [DataController::class, 'contractStatusList']);
-        Route::get('infrastructure/servers', [DataController::class, 'authServersList']);
+
+        Route::group(['prefix' => 'billing'], function () {
+            Route::get('documents', [DataController::class, 'billingDocumentsList']);
+            Route::get('activities', [DataController::class, 'billingActivitiesList']);
+        });
+
+        Route::group(['prefix' => 'client'], function () {
+            Route::get('types', [DataController::class, 'clientTypesList']);
+            Route::get('documents', [DataController::class, 'personalDocumentsList']);
+            Route::get('phones', [DataController::class, 'phoneCategoriesList']);
+            Route::get('references', [DataController::class, 'referencesList']);
+        });
+
+        Route::group(['prefix' => 'infrastructure'], function () {
+            Route::get('servers', [DataController::class, 'authServersList']);
+            Route::get('types', [DataController::class, 'equipmentTypesList']);
+            Route::get('brands', [DataController::class, 'equipmentBrandsList']);
+        });
     });
