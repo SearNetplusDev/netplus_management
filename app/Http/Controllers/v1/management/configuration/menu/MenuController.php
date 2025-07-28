@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\v1\management\configuration\menu;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\Management\Configuration\MenuRequest;
+use App\Http\Resources\v1\management\configuration\menu\MenuResource;
+use App\Models\Configuration\MenuModel;
+use App\Services\v1\management\configuration\menu\MenuService;
+use App\Services\v1\management\DataviewerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\Configuration\MenuModel;
-use App\Http\Requests\v1\Management\Configuration\MenuRequest;
-use App\Services\v1\management\DataviewerService;
 
 class MenuController extends Controller
 {
@@ -22,34 +24,31 @@ class MenuController extends Controller
 
     public function edit(Request $request): JsonResponse
     {
-        return response()->json(['response' => MenuModel::find($request->id)->load('parent.parent')]);
+        return response()->json([
+            'response' => MenuModel::query()
+                ->find($request->input('id'))
+                ->load('parent.parent')
+        ]);
     }
 
-    public function store(MenuRequest $request): JsonResponse
+    public function store(MenuRequest $request, MenuService $service): JsonResponse
     {
-        $menu = MenuModel::create([
-            'name' => $request->name,
-            'url' => $request->url,
-            'icon' => $request->icon,
-            'parent_id' => $request->parent === 0 || $request->parent === null ? null : $request->parent,
-            'order' => $request->order,
-            'status_id' => $request->status,
+        $item = $service->create($request->toDTO());
+
+        return response()->json([
+            'saved' => (bool)$item,
+            'item' => new MenuResource($item)
         ]);
-        return response()->json(['saved' => (bool)$menu, 'item' => $menu]);
     }
 
-    public function update(MenuRequest $request, $id): JsonResponse
+    public function update(MenuRequest $request, MenuModel $id, MenuService $service): JsonResponse
     {
-        $menu = MenuModel::query()->findOrFail($id);
-        $update = $menu->update([
-            'name' => $request->name,
-            'url' => $request->url,
-            'icon' => $request->icon,
-            'parent_id' => $request->parent === 0 || $request->parent === null ? null : $request->parent,
-            'order' => $request->order,
-            'status_id' => $request->status,
+        $item = $service->update($id, $request->toDTO());
+
+        return response()->json([
+            'saved' => (bool)$item,
+            'item' => new MenuResource($item)
         ]);
-        return response()->json(['saved' => (bool)$update, 'item' => $menu]);
     }
 
     public function getParents(): JsonResponse

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\v1\Management\Configuration;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\DTOs\v1\management\configuration\menu\MenuDTO;
 
 class MenuRequest extends FormRequest
 {
@@ -28,6 +29,7 @@ class MenuRequest extends FormRequest
             'parent' => 'nullable|integer',
             'order' => 'nullable|integer',
             'status' => 'required|boolean',
+            'slug' => 'required|regex:/^[a-zA-Z0-9.]+$/'
         ];
     }
 
@@ -43,6 +45,22 @@ class MenuRequest extends FormRequest
             'order.integer' => 'Este campo no tiene un formato correcto.',
             'status.required' => 'Este campo es requerido.',
             'status.boolean' => 'Este campo no tiene un formato correcto.',
+            'slug.required' => 'Este campo es requerido.',
+            'slug.regex' => 'Este campo no tiene un formato correcto.',
         ];
+    }
+
+    public function toDTO(): MenuDTO
+    {
+        $parent = $this->input('parent') === 0 || $this->input('parent') === null ? null : $this->input('parent');
+        return new MenuDTO(
+            name: $this->input('name'),
+            url: $this->input('url'),
+            icon: $this->input('icon'),
+            parent_id: $parent,
+            order: $this->input('order'),
+            status_id: $this->input('status'),
+            slug: $this->input('slug')
+        );
     }
 }

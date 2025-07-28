@@ -9,10 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 use App\Traits\DataViewer;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use DataViewer, HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use DataViewer, HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
 
     protected $connection = 'pgsql';
     protected $table = 'users';
