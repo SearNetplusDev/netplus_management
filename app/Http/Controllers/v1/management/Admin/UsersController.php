@@ -19,6 +19,9 @@ class UsersController extends Controller
 
         return $service->handle($request, $query, [
             'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+            'role' => fn($q, $data) => $q->whereHas('roles', function ($x) use ($data) {
+                return $x->whereIn('id', $data);
+            }),
         ]);
     }
 

@@ -18,11 +18,13 @@ use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
+use App\Models\Configuration\MenuModel;
 use App\Models\Infrastructure\Equipment\BrandModel;
 use App\Models\Infrastructure\Equipment\ModelModel;
 use App\Models\Infrastructure\Equipment\TypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Infrastructure\Network\NodeModel;
+use App\Models\Management\PermissionModel;
 use App\Models\Management\RoleModel;
 use Illuminate\Http\JsonResponse;
 
@@ -286,6 +288,17 @@ class DataController extends Controller
     {
         return response()->json([
             'response' => RoleModel::query()->select('id', 'name')->get()
+        ]);
+    }
+
+    public function menuList(): JsonResponse
+    {
+        return response()->json([
+            'response' => MenuModel::query()
+                ->select('id', 'slug as name')
+                ->where('status_id', 1)
+                ->orderBy('name', 'ASC')
+                ->get()
         ]);
     }
 }

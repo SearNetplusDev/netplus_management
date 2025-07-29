@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\Admin\UsersController;
 use App\Http\Controllers\v1\management\Admin\Users\RolesController;
+use App\Http\Controllers\v1\management\Admin\Users\PermissionsController;
 use App\Http\Controllers\v1\management\Admin\Profiles\InternetController;
 
 Route::prefix('v1/management')
@@ -22,6 +23,14 @@ Route::prefix('v1/management')
             Route::post('data', [RolesController::class, 'data']);
             Route::post('edit', [RolesController::class, 'edit']);
             Route::put('{id}', [RolesController::class, 'update']);
+        });
+
+        //      Permissions
+        Route::group(['prefix' => 'permissions'], function () {
+            Route::post('/', [PermissionsController::class, 'store']);
+            Route::post('data', [PermissionsController::class, 'data']);
+            Route::post('edit', [PermissionsController::class, 'edit']);
+            Route::put('{id}', [PermissionsController::class, 'update']);
         });
 
         //      PROFILES

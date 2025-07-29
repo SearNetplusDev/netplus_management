@@ -43,4 +43,8 @@ Route::prefix('v1/general')
             Route::get('nodes', [DataController::class, 'nodesList']);
             Route::get('models', [DataController::class, 'modelsList']);
         });
+
+        Route::group(['prefix' => 'configuration'], function () {
+            Route::get('menu', [DataController::class, 'menuList']);
+        });
     });

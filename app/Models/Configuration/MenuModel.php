@@ -2,6 +2,7 @@
 
 namespace App\Models\Configuration;
 
+use App\Models\Management\PermissionModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,5 +35,10 @@ class MenuModel extends Model
             ->where('status_id', 1)
             ->orderBy('order')
             ->with('children');
+    }
+
+    public function permissions(): HasMany
+    {
+        return $this->hasMany(PermissionModel::class, 'menu_id', 'id');
     }
 }

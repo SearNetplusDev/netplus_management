@@ -25,6 +25,8 @@ class RolesRequest extends FormRequest
         return [
             'name' => 'required|between:3,254',
             'homepage' => 'required|between:3,254',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'integer|exists:permissions,id',     // Evalua que cada elemento del array sea valido
         ];
     }
 
@@ -44,6 +46,7 @@ class RolesRequest extends FormRequest
             name: $this->input('name'),
             guard_name: 'web',
             homepage: $this->input('homepage'),
+            permissions: $this->input('permissions', []),
         );
     }
 }
