@@ -7,21 +7,19 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\v1\Management\Admin\UsersRequest;
 use App\Models\User;
+use App\Services\v1\management\DataViewerService;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
 {
-    public function data(Request $request): JsonResponse
+    public function data(Request $request, DataViewerService $service): JsonResponse
     {
-        $query = User::query();
-        $statusFilter = collect($request->e ?? [])
-            ->firstWhere('column', 'status');
-        if ($statusFilter) {
-            $query->whereIn('status_id', json_decode($statusFilter['data']));
-        }
-        $query = $query->orderBy('status_id', 'desc')
-            ->advancedFilter();
+        $query = User::query()->with('roles');
 
-        return response()->json(['collection' => $query]);
+        return $service->handle($request, $query, [
+            'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+        ]);
     }
 
     public function store(UsersRequest $request): JsonResponse
@@ -32,24 +30,48 @@ class UsersController extends Controller
         $user->password = bcrypt($request->password);
         $user->status_id = $request->status;
         $user->save() ? $saved = true : $saved = false;
+
+        $roleID = $request->input('role');
+        $role = Role::query()->find($roleID);
+        if ($role) {
+            $user->syncRoles([$role->name]);
+        }
         return response()->json(['saved' => $saved, 'user' => $user]);
     }
 
     public function edit(Request $request): JsonResponse
     {
-        return response()->json(['user' => User::query()->find($request->id)]);
+        return response()->json([
+            'user' => User::query()
+                ->find($request->input('id'))
+                ->load('roles')
+        ]);
     }
 
     public function update(UsersRequest $request, $id): JsonResponse
     {
         $user = User::query()->find($id);
+        $isLogged = Auth::id() === $user->id;
         $user->name = $request->name;
         $user->email = $request->email;
         $user->status_id = $request->status;
-        if ($request->has('password')) {
-            $user->password = bcrypt($request->password);
+        $password = $request->input('password');
+
+        if (!is_null($password) && trim($password) != '') {
+            $user->password = bcrypt($password);
+            if ($isLogged) {
+                session()->put('password_hash_' . Auth::getDefaultDriver(), $user->getAuthPassword());
+            }
         }
-        $user->save() ? $saved = true : $saved = false;
+        $saved = $user->save();
+        $roleID = $request->input('role');
+        $role = Role::query()->find($roleID);
+
+        if ($role) {
+            $user->syncRoles([$role->name]);
+        }
+
+
         return response()->json(['saved' => $saved, 'user' => $user]);
     }
 }

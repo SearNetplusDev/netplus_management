@@ -23,6 +23,7 @@ use App\Models\Infrastructure\Equipment\ModelModel;
 use App\Models\Infrastructure\Equipment\TypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Infrastructure\Network\NodeModel;
+use App\Models\Management\RoleModel;
 use Illuminate\Http\JsonResponse;
 
 class DataController extends Controller
@@ -278,6 +279,13 @@ class DataController extends Controller
                 ->where('status_id', 1)
                 ->select('id', 'name')
                 ->get()
+        ]);
+    }
+
+    public function rolesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => RoleModel::query()->select('id', 'name')->get()
         ]);
     }
 }

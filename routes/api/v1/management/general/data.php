@@ -19,6 +19,10 @@ Route::prefix('v1/general')
         Route::get('branches', [DataController::class, 'branchesList']);
         Route::get('contract/status', [DataController::class, 'contractStatusList']);
 
+        Route::group(['prefix' => 'management'], function () {
+            Route::get('roles', [DataController::class, 'rolesList']);
+        });
+
         Route::group(['prefix' => 'billing'], function () {
             Route::get('documents', [DataController::class, 'billingDocumentsList']);
             Route::get('activities', [DataController::class, 'billingActivitiesList']);

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\v1\Management\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UsersRequest extends FormRequest
 {
@@ -24,8 +25,9 @@ class UsersRequest extends FormRequest
         $rules = [
             'name' => 'required|string|min:10',
             'email' => 'required|email|unique:users,email',
-            'password' => 'nullable|min:8',
+            'password' => 'nullable',
             'status' => 'required|boolean',
+            'role' => ['required', Rule::exists('roles', 'id')],
         ];
         if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
             $id = $this->route('id') ?? $this->input('id');
@@ -47,6 +49,8 @@ class UsersRequest extends FormRequest
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'status.required' => 'Debes ingresar el estado del usuario.',
             'status.boolean' => 'Debes seleccionar un valor valido.',
+            'role.required' => 'Debes seleccionar el rol del usuario.',
+            'role.exists' => 'El rol seleccionado no existe.',
         ];
     }
 }
