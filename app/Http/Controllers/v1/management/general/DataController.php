@@ -301,6 +301,14 @@ class DataController extends Controller
         ]);
     }
 
+    public function permissionsByRoleId(int $roleID): JsonResponse
+    {
+        $role = RoleModel::query()->with('permissions')->find($roleID);
+        return response()->json([
+            'response' => $role->permissions()->pluck('id')->toArray()
+        ]);
+    }
+
     public function menuList(): JsonResponse
     {
         return response()->json([

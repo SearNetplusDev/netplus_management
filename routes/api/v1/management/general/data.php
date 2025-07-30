@@ -20,7 +20,11 @@ Route::prefix('v1/general')
         Route::get('contract/status', [DataController::class, 'contractStatusList']);
 
         Route::group(['prefix' => 'management'], function () {
-            Route::get('roles', [DataController::class, 'rolesList']);
+
+            Route::group(['prefix' => 'roles'], function () {
+                Route::get('/', [DataController::class, 'rolesList']);
+                Route::get('{id}/permissions', [DataController::class, 'permissionsByRoleId']);
+            });
             Route::get('permissions', [DataController::class, 'permissionsList']);
         });
 

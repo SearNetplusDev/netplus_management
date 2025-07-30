@@ -7,9 +7,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\v1\Management\Admin\UsersRequest;
 use App\Models\User;
+use App\Services\v1\management\admin\users\UserService;
 use App\Services\v1\management\DataViewerService;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use App\Http\Resources\v1\management\admin\users\UserResource;
 
 class UsersController extends Controller
 {
@@ -25,56 +27,53 @@ class UsersController extends Controller
         ]);
     }
 
-    public function store(UsersRequest $request): JsonResponse
+    public function store(UsersRequest $request, UserService $service): JsonResponse
     {
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = bcrypt($request->password);
-        $user->status_id = $request->status;
-        $user->save() ? $saved = true : $saved = false;
+        $user = $service->create($request->toDTO());
 
-        $roleID = $request->input('role');
-        $role = Role::query()->find($roleID);
-        if ($role) {
-            $user->syncRoles([$role->name]);
-        }
-        return response()->json(['saved' => $saved, 'user' => $user]);
-    }
-
-    public function edit(Request $request): JsonResponse
-    {
         return response()->json([
-            'user' => User::query()
-                ->find($request->input('id'))
-                ->load('roles')
+            'saved' => (bool)$user,
+            'user' => new UserResource($user)
         ]);
     }
 
-    public function update(UsersRequest $request, $id): JsonResponse
+    public function edit(Request $request, UserService $service): JsonResponse
     {
-        $user = User::query()->find($id);
-        $isLogged = Auth::id() === $user->id;
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->status_id = $request->status;
-        $password = $request->input('password');
+        $user = $service->read($request->input('id'));
 
-        if (!is_null($password) && trim($password) != '') {
-            $user->password = bcrypt($password);
-            if ($isLogged) {
-                session()->put('password_hash_' . Auth::getDefaultDriver(), $user->getAuthPassword());
-            }
-        }
-        $saved = $user->save();
-        $roleID = $request->input('role');
-        $role = Role::query()->find($roleID);
+        return response()->json(new UserResource($user));
+    }
 
-        if ($role) {
-            $user->syncRoles([$role->name]);
-        }
+    public function update(UsersRequest $request, User $id, UserService $service): JsonResponse
+    {
+//        $user = User::query()->find($id);
+//        $isLogged = Auth::id() === $user->id;
+//        $user->name = $request->name;
+//        $user->email = $request->email;
+//        $user->status_id = $request->status;
+//        $password = $request->input('password');
+//
+//        if (!is_null($password) && trim($password) != '') {
+//            $user->password = bcrypt($password);
+//            if ($isLogged) {
+//                session()->put('password_hash_' . Auth::getDefaultDriver(), $user->getAuthPassword());
+//            }
+//        }
+//        $saved = $user->save();
+//        $roleID = $request->input('role');
+//        $role = Role::query()->find($roleID);
+//
+//        if ($role) {
+//            $user->syncRoles([$role->name]);
+//        }
+//
+//
+//        return response()->json(['saved' => $saved, 'user' => $user]);
+        $user = $service->update($id, $request->toDTO());
 
-
-        return response()->json(['saved' => $saved, 'user' => $user]);
+        return response()->json([
+            'saved' => (bool)$user,
+            'user' => new UserResource($user)
+        ]);
     }
 }
