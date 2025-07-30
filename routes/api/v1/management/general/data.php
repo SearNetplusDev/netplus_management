@@ -21,6 +21,7 @@ Route::prefix('v1/general')
 
         Route::group(['prefix' => 'management'], function () {
             Route::get('roles', [DataController::class, 'rolesList']);
+            Route::get('permissions', [DataController::class, 'permissionsList']);
         });
 
         Route::group(['prefix' => 'billing'], function () {

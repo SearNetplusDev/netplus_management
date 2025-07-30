@@ -291,6 +291,16 @@ class DataController extends Controller
         ]);
     }
 
+    public function permissionsList(): JsonResponse
+    {
+        return response()->json([
+            'response' => PermissionModel::query()
+                ->select('id as value', 'name as label')
+                ->orderBy('name', 'ASC')
+                ->get()
+        ]);
+    }
+
     public function menuList(): JsonResponse
     {
         return response()->json([

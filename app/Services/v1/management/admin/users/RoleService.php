@@ -21,9 +21,14 @@ class RoleService
         return $role->refresh();
     }
 
-    public function read(int $id): RoleModel
+    public function read(int $id): array
     {
-        return RoleModel::query()->find($id);
+        $role = RoleModel::query()->find($id);
+        $permissions = $role->permissions();
+        return [
+            'role' => $role,
+            'permissions' => $permissions->pluck('id')->toArray(),
+        ];
     }
 
     public function update(RoleModel $roleModel, RoleDTO $DTO): RoleModel
