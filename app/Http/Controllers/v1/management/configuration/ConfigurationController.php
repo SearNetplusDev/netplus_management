@@ -6,15 +6,28 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Configuration\MenuModel;
+use Illuminate\Support\Facades\Auth;
 
 class ConfigurationController extends Controller
 {
     public function getMenu(): JsonResponse
     {
-        $query = MenuModel::query()
+        $user = Auth::user();
+        $permissions = $user->getAllPermissions()->pluck('menu_id');
+        $menu = MenuModel::query()
             ->whereNull('parent_id')
-            ->with('children.children')
+            ->whereIn('id', $permissions)
+            ->where('status_id', 1)
+            ->orderBy('order')
+            ->with(['children' => function ($q) use ($permissions) {
+                $q->whereIn('id', $permissions)
+                    ->orderBy('order')
+                    ->with(['children' => fn($q) => $q->whereIn('id', $permissions)->orderBy('order')]);
+            }])
             ->get();
-        return response()->json(['data' => $query]);
+
+        return response()->json([
+            'data' => $menu,
+        ]);
     }
 }

@@ -13,7 +13,7 @@ class AuthController extends Controller
 {
     public function authenticate(AuthRequest $request): JsonResponse
     {
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'status_id' => 't'])) {
+        if (Auth::attempt(['email' => $request->input('email'), 'password' => $request->input('password'), 'status_id' => 't'])) {
             $user = Auth::user();
             $request->session()->regenerate();
 //            $token = $user->createToken('authToken')->plainTextToken;
@@ -21,7 +21,13 @@ class AuthController extends Controller
 
             return response()->json([
                 'message' => $message,
-                'user' => $user,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'roles' => $user->roles->pluck('name'),
+                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                ],
 //                'token' => $token
             ], SymfonyResponse::HTTP_OK);
         }
@@ -41,5 +47,17 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully'
         ], SymfonyResponse::HTTP_OK);
+    }
+
+    public function user(): JsonResponse
+    {
+        $user = Auth::user();
+        $data = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'roles' => $user->roles->pluck('name'),
+        ];
+        return response()->json($data);
     }
 }
