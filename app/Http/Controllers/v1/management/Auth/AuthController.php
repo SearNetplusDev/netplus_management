@@ -26,7 +26,7 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'roles' => $user->roles->pluck('name'),
-                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'permissions' => $user->getAllPermissions()->pluck('id'),
                 ],
 //                'token' => $token
             ], SymfonyResponse::HTTP_OK);
@@ -57,6 +57,7 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'roles' => $user->roles->pluck('name'),
+            'permissions' => $user->getAllPermissions()->pluck('id'),
         ];
         return response()->json($data);
     }
