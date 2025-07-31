@@ -40,10 +40,9 @@ class UserService
     public function read(int $id): array
     {
         $user = User::query()
-            ->with(['roles.permissions'])
+            ->with(['roles.permissions', 'permissions'])
             ->findOrFail($id);
-        $permissions = $user->roles
-            ->flatMap(fn($role) => $role->permissions)
+        $permissions = $user->getAllPermissions()
             ->pluck('id')
             ->unique()
             ->values();
