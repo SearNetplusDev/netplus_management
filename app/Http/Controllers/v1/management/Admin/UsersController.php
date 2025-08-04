@@ -9,8 +9,6 @@ use App\Http\Requests\v1\Management\Admin\UsersRequest;
 use App\Models\User;
 use App\Services\v1\management\admin\users\UserService;
 use App\Services\v1\management\DataViewerService;
-use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
 use App\Http\Resources\v1\management\admin\users\UserResource;
 
 class UsersController extends Controller
@@ -46,29 +44,6 @@ class UsersController extends Controller
 
     public function update(UsersRequest $request, User $id, UserService $service): JsonResponse
     {
-//        $user = User::query()->find($id);
-//        $isLogged = Auth::id() === $user->id;
-//        $user->name = $request->name;
-//        $user->email = $request->email;
-//        $user->status_id = $request->status;
-//        $password = $request->input('password');
-//
-//        if (!is_null($password) && trim($password) != '') {
-//            $user->password = bcrypt($password);
-//            if ($isLogged) {
-//                session()->put('password_hash_' . Auth::getDefaultDriver(), $user->getAuthPassword());
-//            }
-//        }
-//        $saved = $user->save();
-//        $roleID = $request->input('role');
-//        $role = Role::query()->find($roleID);
-//
-//        if ($role) {
-//            $user->syncRoles([$role->name]);
-//        }
-//
-//
-//        return response()->json(['saved' => $saved, 'user' => $user]);
         $user = $service->update($id, $request->toDTO());
 
         return response()->json([

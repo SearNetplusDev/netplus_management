@@ -8,7 +8,9 @@ use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Configuration\Clients\GenderModel;
 use App\Models\Configuration\Clients\MaritalStatusModel;
 use App\Models\Configuration\Geography\CountryModel;
+use App\Models\Services\ServiceModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -59,34 +61,34 @@ class ClientModel extends Model
     ];
     protected $appends = ['status'];
 
-    public function gender(): HasOne
+    public function gender(): BelongsTo
     {
-        return $this->hasOne(GenderModel::class, 'id', 'gender_id');
+        return $this->belongsTo(GenderModel::class, 'gender_id', 'id');
     }
 
-    public function marital_status(): HasOne
+    public function marital_status(): BelongsTo
     {
-        return $this->hasOne(MaritalStatusModel::class, 'id', 'marital_status_id');
+        return $this->belongsTo(MaritalStatusModel::class, 'marital_status_id', 'id');
     }
 
-    public function branch(): HasOne
+    public function branch(): BelongsTo
     {
-        return $this->hasOne(BranchModel::class, 'id', 'branch_id');
+        return $this->belongsTo(BranchModel::class, 'branch_id', 'id');
     }
 
-    public function client_type(): HasOne
+    public function client_type(): BelongsTo
     {
-        return $this->hasOne(ClientTypeModel::class, 'id', 'client_type_id');
+        return $this->belongsTo(ClientTypeModel::class, 'client_type_id', 'id');
     }
 
-    public function country(): HasOne
+    public function country(): BelongsTo
     {
-        return $this->hasOne(CountryModel::class, 'id', 'country_id');
+        return $this->belongsTo(CountryModel::class, 'country_id', 'id');
     }
 
-    public function billing_document(): HasOne
+    public function billing_document(): BelongsTo
     {
-        return $this->hasOne(DocumentTypeModel::class, 'id', 'document_type_id');
+        return $this->belongsTo(DocumentTypeModel::class, 'document_type_id', 'id');
     }
 
     public function personal_documents(): HasMany
@@ -132,5 +134,10 @@ class ClientModel extends Model
         return $this->hasOne(AddressModel::class, 'client_id', 'id')
             ->where('status_id', 1)
             ->latest();
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(ServiceModel::class, 'client_id', 'id');
     }
 }

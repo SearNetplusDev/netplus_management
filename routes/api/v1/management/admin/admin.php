@@ -5,6 +5,7 @@ use App\Http\Controllers\v1\management\Admin\UsersController;
 use App\Http\Controllers\v1\management\Admin\Users\RolesController;
 use App\Http\Controllers\v1\management\Admin\Users\PermissionsController;
 use App\Http\Controllers\v1\management\Admin\Profiles\InternetController;
+use App\Http\Controllers\v1\management\Admin\Users\TechniciansController;
 
 Route::prefix('v1/management')
     ->middleware(['auth:sanctum'])
@@ -31,6 +32,14 @@ Route::prefix('v1/management')
             Route::post('data', [PermissionsController::class, 'data']);
             Route::post('edit', [PermissionsController::class, 'edit']);
             Route::put('{id}', [PermissionsController::class, 'update']);
+        });
+
+        //      Technicians
+        Route::group(['prefix' => 'technicians'], function () {
+            Route::post('/', [TechniciansController::class, 'store']);
+            Route::post('data', [TechniciansController::class, 'data']);
+            Route::post('edit', [TechniciansController::class, 'edit']);
+            Route::put('{id}', [TechniciansController::class, 'update']);
         });
 
         //      PROFILES
