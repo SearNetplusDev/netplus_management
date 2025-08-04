@@ -27,6 +27,7 @@ use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\PermissionModel;
 use App\Models\Management\RoleModel;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class DataController extends Controller
 {
@@ -286,8 +287,16 @@ class DataController extends Controller
 
     public function rolesList(): JsonResponse
     {
+        $user = Auth::user()->load('roles');
+        $role = $user->roles->first()?->id;
+        $query = RoleModel::query()->select('id', 'name');
+
+        if ($role !== 1) {
+            $query->where('id', '!=', 1);
+        }
+
         return response()->json([
-            'response' => RoleModel::query()->select('id', 'name')->get()
+            'response' => $query->get()
         ]);
     }
 
