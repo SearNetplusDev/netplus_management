@@ -28,7 +28,7 @@ class TechniciansController extends Controller
 
         return response()->json([
             'saved' => (bool)$technician,
-            'technician' => new TechniciansResource($technician)
+            'technician' => new TechniciansResource($technician->load('user:id,name'))
         ]);
     }
 
@@ -47,7 +47,7 @@ class TechniciansController extends Controller
 
         return response()->json([
             'saved' => (bool)$technician,
-            'technician' => new TechniciansResource($technician)
+            'technician' => new TechniciansResource($technician->load('user:id,name'))
         ]);
     }
 }

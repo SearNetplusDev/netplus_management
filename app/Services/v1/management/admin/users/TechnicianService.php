@@ -14,7 +14,7 @@ class TechnicianService
 
     public function read(int $id): TechnicianModel
     {
-        return TechnicianModel::query()->findOrFail($id);
+        return TechnicianModel::query()->with('user:id,name')->findOrFail($id);
     }
 
     public function update(TechnicianModel $model, TechnicianDTO $DTO): TechnicianModel

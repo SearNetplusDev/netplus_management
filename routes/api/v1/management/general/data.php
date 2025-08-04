@@ -25,6 +25,10 @@ Route::prefix('v1/general')
                 Route::get('/', [DataController::class, 'rolesList']);
                 Route::get('{id}/permissions', [DataController::class, 'permissionsByRoleId']);
             });
+
+            Route::group(['prefix' => 'users'], function () {
+                Route::get('list', [DataController::class, 'usersList']);
+            });
             Route::get('permissions', [DataController::class, 'permissionsList']);
         });
 

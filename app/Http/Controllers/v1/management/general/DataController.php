@@ -26,6 +26,7 @@ use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\PermissionModel;
 use App\Models\Management\RoleModel;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -324,6 +325,17 @@ class DataController extends Controller
             'response' => MenuModel::query()
                 ->select('id', 'slug as name')
                 ->where('status_id', 1)
+                ->orderBy('name', 'ASC')
+                ->get()
+        ]);
+    }
+
+    public function usersList(): JsonResponse
+    {
+        return response()->json([
+            'response' => User::query()
+                ->where('status_id', 1)
+                ->select('id', 'name')
                 ->orderBy('name', 'ASC')
                 ->get()
         ]);
