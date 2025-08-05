@@ -25,9 +25,15 @@ class ClientsController extends Controller
         ]);
 
         return $dataViewerService->handle($request, $query, [
-            'status' => fn($q, $data) => $query->whereIn('status_id', $data),
-            'branch' => fn($q, $data) => $query->whereIn('branch_id', $data),
-            'type' => fn($q, $data) => $query->whereIn('client_type_id', $data),
+            'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+            'branch' => fn($q, $data) => $q->whereIn('branch_id', $data),
+            'type' => fn($q, $data) => $q->whereIn('client_type_id', $data),
+            'state' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
+                return $q->whereIn('state_id', $data);
+            }),
+            'district' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
+                return $q->whereIn('district_id', $data);
+            }),
         ]);
     }
 
