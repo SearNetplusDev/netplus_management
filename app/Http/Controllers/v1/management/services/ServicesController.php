@@ -5,8 +5,12 @@ namespace App\Http\Controllers\v1\management\services;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\v1\Management\Services\ServiceRequest;
 use App\Services\v1\management\DataViewerService;
+use App\Services\v1\management\services\ServService;
+use App\Http\Resources\v1\management\services\ServiceResource;
 use App\Models\Clients\ClientModel;
+use App\Models\Services\ServiceModel;
 
 class ServicesController extends Controller
 {
@@ -33,6 +37,35 @@ class ServicesController extends Controller
             'district' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
                 return $q->where('district_id', $data);
             })
+        ]);
+    }
+
+    public function store(ServiceRequest $request, ServService $servService): JsonResponse
+    {
+        $service = $servService->create($request->toDTO());
+
+        return response()->json([
+            'saved' => (bool)$service,
+            'service' => new ServiceResource($service),
+        ]);
+    }
+
+    public function read(Request $request, ServService $servService): JsonResponse
+    {
+        $service = $servService->read($request->input('id'));
+
+        return response()->json([
+            'service' => new ServiceResource($service),
+        ]);
+    }
+
+    public function update(ServiceRequest $request, ServiceModel $id, ServService $servService): JsonResponse
+    {
+        $service = $servService->update($id, $request->toDTO());
+
+        return response()->json([
+            'saved' => (bool)$service,
+            'service' => new ServiceResource($service),
         ]);
     }
 }
