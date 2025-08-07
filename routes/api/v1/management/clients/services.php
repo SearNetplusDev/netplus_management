@@ -11,4 +11,5 @@ Route::prefix('v1/services')
         Route::post('data', [ServicesController::class, 'data']);
         Route::post('/edit', [ServicesController::class, 'read']);
         Route::put('{id}', [ServicesController::class, 'update']);
+        Route::post('/client', [ServicesController::class, 'clientServices']);
     });

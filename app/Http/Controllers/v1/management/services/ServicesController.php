@@ -24,8 +24,8 @@ class ServicesController extends Controller
                 'mobile',
                 'address.state',
                 'address.district',
-                'services',
-            ]);
+            ])
+            ->withCount('services');
 
         return $viewerService->handle($request, $clients, [
             'status' => fn($q, $data) => $q->whereIn('status_id', $data),
@@ -66,6 +66,13 @@ class ServicesController extends Controller
         return response()->json([
             'saved' => (bool)$service,
             'service' => new ServiceResource($service),
+        ]);
+    }
+
+    public function clientServices(Request $request, ServService $servService): JsonResponse
+    {
+        return response()->json([
+            'client' => new ServiceResource($servService->clientServices($request->input('client'))),
         ]);
     }
 }

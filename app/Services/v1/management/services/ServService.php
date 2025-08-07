@@ -3,6 +3,7 @@
 namespace App\Services\v1\management\services;
 
 use App\DTOs\v1\management\services\ServiceDTO;
+use App\Models\Clients\ClientModel;
 use App\Models\Services\ServiceModel;
 
 class ServService
@@ -21,5 +22,16 @@ class ServService
     {
         $model->update($DTO->toArray());
         return $model;
+    }
+
+    public function clientServices(int $id): ClientModel
+    {
+        return ClientModel::query()->with([
+            'services.node:id,name',
+            'services.equipment:id,name',
+            'services.state:id,name',
+            'services.municipality:id,name',
+            'services.district:id,name',
+        ])->find($id);
     }
 }
