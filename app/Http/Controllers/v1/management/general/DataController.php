@@ -23,9 +23,11 @@ use App\Models\Infrastructure\Equipment\BrandModel;
 use App\Models\Infrastructure\Equipment\ModelModel;
 use App\Models\Infrastructure\Equipment\TypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
+use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\PermissionModel;
 use App\Models\Management\RoleModel;
+use App\Models\Management\TechnicianModel;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -339,5 +341,38 @@ class DataController extends Controller
                 ->orderBy('name', 'ASC')
                 ->get()
         ]);
+    }
+
+    public function equipmentByNode(int $id): JsonResponse
+    {
+        $query = EquipmentModel::query()
+            ->where([
+                ['node_id', $id],
+                ['status_id', 10]
+            ])
+            ->select('id', 'name')
+            ->orderBy('name', 'ASC')
+            ->get();
+
+        return response()->json(['response' => $query]);
+    }
+
+    public function technicianList(): JsonResponse
+    {
+        $query = TechnicianModel::query()
+            ->with('user:id,name')
+            ->where('status_id', 1)
+            ->get();
+        $data = [];
+
+        foreach ($query as $item) {
+            $el = [
+                'id' => $item->id,
+                'name' => $item->user?->name,
+            ];
+            $data[] = $el;
+        }
+
+        return response()->json(['response' => $data]);
     }
 }

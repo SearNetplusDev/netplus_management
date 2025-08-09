@@ -28,6 +28,7 @@ Route::prefix('v1/general')
 
             Route::group(['prefix' => 'users'], function () {
                 Route::get('list', [DataController::class, 'usersList']);
+                Route::get('technicians', [DataController::class, 'technicianList']);
             });
             Route::get('permissions', [DataController::class, 'permissionsList']);
         });
@@ -51,6 +52,7 @@ Route::prefix('v1/general')
             Route::get('status', [DataController::class, 'equipmentStatusList']);
             Route::get('nodes', [DataController::class, 'nodesList']);
             Route::get('models', [DataController::class, 'modelsList']);
+            Route::get('node/{id}/equipment', [DataController::class, 'equipmentByNode']);
         });
 
         Route::group(['prefix' => 'configuration'], function () {
