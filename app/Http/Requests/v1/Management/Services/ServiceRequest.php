@@ -19,16 +19,22 @@ class ServiceRequest extends FormRequest
         return [
             'client' => 'required|integer|exists:clients,id',
             'code' => [
+                'sometimes',
                 'nullable',
                 'string',
                 'max:10',
-                Rule::unique('services', 'code')->ignore($this->route('id'))
+                Rule::unique('services', 'code')
+                    ->ignore($this->route('id'))
+                    ->whereNotNull('code')
             ],
             'name' => [
+                'sometimes',
                 'nullable',
                 'string',
                 'max:10',
-                Rule::unique('services', 'name')->ignore($this->route('id'))
+                Rule::unique('services', 'name')
+                    ->ignore($this->route('id'))
+                    ->whereNotNull('name')
             ],
             'node' => 'required|integer|exists:infrastructure_nodes,id',
             'equipment' => 'required|integer|exists:infrastructure_equipment,id',
@@ -42,6 +48,7 @@ class ServiceRequest extends FormRequest
             'address' => 'required|string',
             'separation' => 'required|in:0,1',
             'status' => 'required|in:0,1',
+            'comments' => 'nullable|string',
         ];
     }
 
@@ -87,6 +94,7 @@ class ServiceRequest extends FormRequest
             'separation.in' => 'Formato inválido.',
             'status.required' => 'Debes seleccionar un estado.',
             'status.in' => 'Formato incorrecto.',
+            'comments.string' => 'Caracteres no permitidos.',
         ];
     }
 
@@ -108,6 +116,7 @@ class ServiceRequest extends FormRequest
             address: $this->input('address'),
             separate_billing: $this->input('separation'),
             status_id: $this->input('status'),
+            comments: $this->input('comments'),
         );
     }
 }

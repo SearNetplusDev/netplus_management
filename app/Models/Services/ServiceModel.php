@@ -38,6 +38,7 @@ class ServiceModel extends Model
         'address',
         'separate_billing',
         'status_id',
+        'comments',
     ];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = [

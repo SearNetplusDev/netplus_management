@@ -58,6 +58,9 @@ class ServiceDTO extends Data
 
         #[Required, IntegerType]
         public readonly int     $status_id,
+
+        #[Nullable]
+        public readonly ?string $comments,
     )
     {
 
