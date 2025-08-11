@@ -305,11 +305,27 @@ class DataController extends Controller
 
     public function permissionsList(): JsonResponse
     {
+        $permissions = PermissionModel::query()
+            ->selectRaw("split_part(name, '.', 1) as category, id as value, name as label")
+            ->orderBy('category', 'ASC')
+            ->orderBy('label', 'ASC')
+            ->get()
+            ->groupBy('category')
+            ->map(function ($items, $category) {
+                return [
+                    'category' => ucfirst($category),
+                    'permissions' => $items->map(function ($item) {
+                        return [
+                            'value' => $item->value,
+                            'label' => $item->label,
+                        ];
+                    })
+                ];
+            })
+            ->values();
+
         return response()->json([
-            'response' => PermissionModel::query()
-                ->select('id as value', 'name as label')
-                ->orderBy('name', 'ASC')
-                ->get()
+            'response' => $permissions
         ]);
     }
 
