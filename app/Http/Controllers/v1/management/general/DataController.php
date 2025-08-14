@@ -26,6 +26,7 @@ use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\PermissionModel;
+use App\Models\Management\Profiles\InternetModel;
 use App\Models\Management\RoleModel;
 use App\Models\Management\TechnicianModel;
 use App\Models\User;
@@ -390,5 +391,16 @@ class DataController extends Controller
         }
 
         return response()->json(['response' => $data]);
+    }
+
+    public function internetProfilesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => InternetModel::query()
+                ->select('id', 'name')
+                ->where('status_id', 1)
+                ->orderBy('name', 'ASC')
+                ->get()
+        ]);
     }
 }

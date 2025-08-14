@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ServiceModel extends Model
@@ -100,5 +101,10 @@ class ServiceModel extends Model
     public function district(): BelongsTo
     {
         return $this->belongsTo(DistrictModel::class, 'district_id', 'id');
+    }
+
+    public function internet(): HasOne
+    {
+        return $this->hasOne(ServiceInternetModel::class, 'service_id', 'id');
     }
 }

@@ -58,4 +58,8 @@ Route::prefix('v1/general')
         Route::group(['prefix' => 'configuration'], function () {
             Route::get('menu', [DataController::class, 'menuList']);
         });
+
+        Route::group(['prefix' => 'profiles'], function () {
+            Route::get('internet', [DataController::class, 'internetProfilesList']);
+        });
     });
