@@ -32,6 +32,7 @@ class ServService
             'services.state:id,name',
             'services.municipality:id,name',
             'services.district:id,name',
+            'services.internet.profile',
         ])->find($id);
     }
 }

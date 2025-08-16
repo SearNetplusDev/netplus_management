@@ -15,7 +15,7 @@ return new class extends Migration {
                 $table->id();
                 $table->foreignId('internet_profile_id')
                     ->constrained('management_internet_profiles')
-                    ->cascadeOnDelete()
+                    ->cascadeOnUpdate()
                     ->restrictOnDelete();
                 $table->foreignId('service_id')
                     ->constrained('services')

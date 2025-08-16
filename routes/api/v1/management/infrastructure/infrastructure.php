@@ -8,6 +8,7 @@ use App\Http\Controllers\v1\management\infrastructure\equipments\TypesController
 use App\Http\Controllers\v1\management\infrastructure\equipments\BrandsController;
 use App\Http\Controllers\v1\management\infrastructure\equipments\ModelsController;
 use App\Http\Controllers\v1\management\infrastructure\network\EquipmentController;
+use App\Http\Controllers\v1\management\infrastructure\equipments\InventoryController;
 
 Route::prefix('v1/infrastructure')
     ->middleware(['auth:sanctum'])
@@ -69,6 +70,14 @@ Route::prefix('v1/infrastructure')
                 Route::post('data', [ModelsController::class, 'data']);
                 Route::post('edit', [ModelsController::class, 'edit']);
                 Route::put('{id}', [ModelsController::class, 'update']);
+            });
+
+            //      Inventory
+            Route::group(['prefix' => 'inventory'], function () {
+                Route::post('/', [InventoryController::class, 'singleStore']);
+                Route::post('data', [InventoryController::class, 'data']);
+                Route::post('edit', [InventoryController::class, 'read']);
+                Route::put('{id}', [InventoryController::class, 'update']);
             });
         });
     });

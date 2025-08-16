@@ -265,6 +265,7 @@ class DataController extends Controller
             'response' => EquipmentStatusModel::query()
                 ->where('status_id', 1)
                 ->select('id', 'name')
+                ->orderBy('id', 'ASC')
                 ->get()
         ]);
     }
