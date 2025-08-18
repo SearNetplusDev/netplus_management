@@ -74,7 +74,7 @@ Route::prefix('v1/infrastructure')
 
             //      Inventory
             Route::group(['prefix' => 'inventory'], function () {
-                Route::post('/', [InventoryController::class, 'singleStore']);
+                Route::post('/', [InventoryController::class, 'store']);
                 Route::post('data', [InventoryController::class, 'data']);
                 Route::post('edit', [InventoryController::class, 'read']);
                 Route::put('{id}', [InventoryController::class, 'update']);

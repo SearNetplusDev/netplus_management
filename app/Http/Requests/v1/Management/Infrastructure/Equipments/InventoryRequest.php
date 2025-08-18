@@ -24,22 +24,23 @@ class InventoryRequest extends FormRequest
             'service' => ['nullable', 'integer', 'exists:services,id'],
             'branch' => ['required', 'integer', 'exists:config_branches,id'],
             'mac' => [
-                'required',
+                'required_if:_method,PUT',
                 'mac_address',
                 Rule::unique('infrastructure_residential_equipment_inventory', 'mac_address')
                     ->ignore($this->route('id')),
             ],
             'serial' => [
-                'required',
+                'required_if:_method,PUT',
                 'string',
                 Rule::unique('infrastructure_residential_equipment_inventory', 'serial_number')
                     ->ignore($this->route('id')),
             ],
-//            'registration' => ['required', 'date'],
             'installation' => ['nullable', 'date'],
             'technician' => ['integer', 'exists:technicians,id'],
             'status' => ['required', 'integer', 'exists:config_infrastructure_equipment_status,id'],
             'comments' => ['nullable', 'string', 'between:5,500'],
+
+            'file' => ['required_if:_method,POST', 'file', 'mimes:xls,xlsx,csv', 'max:10240'],
         ];
     }
 
@@ -73,12 +74,8 @@ class InventoryRequest extends FormRequest
             'serial.string' => 'Formato incorrecto.',
             'serial.unique' => 'Este Serial ya sido registrado.',
 
-//            'registration.required' => 'Fecha de ingreso es un campo obligatorio.',
-//            'registration.date' => 'Fecha de ingreso incorrecto.',
-
             'installation.date' => 'Fecha de instalación inválida.',
 
-//            'technician.required' => 'Tecnico es un campo obligatorio.',
             'technician.integer' => 'Formato incorrecto.',
             'technician.exists' => 'El tecnico seleccionado no existe.',
 
@@ -88,6 +85,11 @@ class InventoryRequest extends FormRequest
 
             'comments.string' => 'Formato incorrecto.',
             'comments.between' => 'El comentario debe contener entre 5 y 500 caracteres.',
+
+            'file.required_if' => 'Archivo es un campo obligatorio.',
+            'file.file' => 'Formato incorrecto.',
+            'file.mimes' => 'El archivo debe ser un archivo de tipo: xls, xlsx, csv.',
+            'file.max' => 'El archivo no debe superar los 10MB.'
         ];
     }
 

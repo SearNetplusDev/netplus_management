@@ -35,14 +35,22 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function singleStore(InventoryRequest $request, InventoryService $service): JsonResponse
+    public function store(InventoryRequest $request, InventoryService $service): JsonResponse
     {
-        $equipment = $service->singleCreate($request->toDTO());
+        $result = $service->create($request->validated(), $request->file('file'));
 
-        return response()->json([
-            'saved' => (bool)$equipment,
-            'equipment' => new InventoryResource($equipment),
-        ]);
+        if ($result['success']) {
+            return response()->json([
+                'saved' => true,
+                'message' => 'Importación completa',
+                'results' => $result['results'],
+            ]);
+        } else {
+            return response()->json([
+                'saved' => false,
+                'message' => $result['error'],
+            ], 422);
+        }
     }
 
     public function read(Request $request, InventoryService $service): JsonResponse
