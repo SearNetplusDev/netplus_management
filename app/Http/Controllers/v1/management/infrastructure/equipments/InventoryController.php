@@ -21,7 +21,6 @@ class InventoryController extends Controller
                 'type:id,name',
                 'model:id,name',
                 'branch:id,name',
-                'technician',
                 'status:id,name,badge_color',
             ]);
 
@@ -62,11 +61,14 @@ class InventoryController extends Controller
 
     public function update(InventoryRequest $request, InventoryModel $id, InventoryService $service): JsonResponse
     {
-        $equipment = $service->update($id, $request->toDTO());
+        $equipment = $service->update($id, $request);
 
         return response()->json([
             'saved' => (bool)$equipment,
             'equipment' => new InventoryResource($equipment),
+            'results' => [
+                'errors' => []
+            ],
         ]);
     }
 }

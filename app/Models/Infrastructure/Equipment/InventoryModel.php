@@ -23,14 +23,10 @@ class InventoryModel extends Model
         'brand_id',
         'type_id',
         'model_id',
-        'service_id',
         'branch_id',
         'mac_address',
         'serial_number',
         'registration_date',
-        'installation_date',
-        'user_id',
-        'technician_id',
         'status_id',
         'comments'
     ];
@@ -39,22 +35,18 @@ class InventoryModel extends Model
         'id',
         'type_id',
         'model_id',
-        'service_id',
         'branch_id',
         'mac_address',
         'serial_number',
-        'technician_id',
         'status_id',
     ];
     protected array $orderable = [
         'id',
         'type_id',
         'model_id',
-        'service_id',
         'branch_id',
         'mac_address',
         'serial_number',
-        'technician_id',
         'status_id',
     ];
 
@@ -73,24 +65,9 @@ class InventoryModel extends Model
         return $this->belongsTo(ModelModel::class, 'model_id', 'id');
     }
 
-    public function service(): BelongsTo
-    {
-        return $this->belongsTo(ServiceModel::class, 'service_id', 'id');
-    }
-
     public function branch(): BelongsTo
     {
         return $this->belongsTo(BranchModel::class, 'branch_id', 'id');
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'id');
-    }
-
-    public function technician(): BelongsTo
-    {
-        return $this->belongsTo(TechnicianModel::class, 'technician_id', 'id');
     }
 
     public function status(): BelongsTo

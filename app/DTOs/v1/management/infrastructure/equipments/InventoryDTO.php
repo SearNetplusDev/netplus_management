@@ -23,8 +23,8 @@ class InventoryDTO extends Data
         #[Required, IntegerType]
         public readonly int     $model_id,
 
-        #[Nullable, IntegerType]
-        public readonly ?int    $service_id,
+//        #[Nullable, IntegerType]
+//        public readonly ?int    $service_id,
 
         #[Required, IntegerType]
         public readonly int     $branch_id,
@@ -38,14 +38,14 @@ class InventoryDTO extends Data
         #[Required, Date]
         public readonly Carbon  $registration_date,
 
-        #[Nullable, Date]
-        public readonly ?Carbon $installation_date,
+//        #[Nullable, Date]
+//        public readonly ?Carbon $departure_date,
 
-        #[Required, IntegerType]
-        public readonly int     $user_id,
+//        #[Required, IntegerType]
+//        public readonly int     $user_id,
 
-        #[Nullable, IntegerType]
-        public readonly ?int    $technician_id,
+//        #[Nullable, IntegerType]
+//        public readonly ?int    $technician_id,
 
         #[Required, IntegerType]
         public readonly int     $status_id,

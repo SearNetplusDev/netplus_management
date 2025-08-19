@@ -4,6 +4,7 @@ namespace App\Services\v1\management\infrastructure\equipments;
 
 use App\DTOs\v1\management\infrastructure\equipments\InventoryDTO;
 use App\Models\Infrastructure\Equipment\InventoryModel;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use App\Imports\InventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -18,7 +19,6 @@ class InventoryService
             'type_id' => $formData['type'],
             'model_id' => $formData['model'],
             'branch_id' => $formData['branch'],
-            'user_id' => Auth::user()->id,
             'status_id' => $formData['status'],
             'comments' => $formData['comments'] ?? null,
         ];
@@ -46,9 +46,18 @@ class InventoryService
         return InventoryModel::query()->find($id);
     }
 
-    public function update(InventoryModel $inventoryModel, InventoryDTO $DTO): InventoryModel
+    public function update(InventoryModel $inventoryModel, $data): InventoryModel
     {
-        $inventoryModel->update($inventoryModel->toArray());
+        $inventoryModel->update([
+            'type_id' => $data['type'],
+            'brand_id' => $data['brand'],
+            'model_id' => $data['model'],
+            'branch_id' => $data['branch'],
+            'status_id' => $data['status'],
+            'mac_address' => $data['mac'],
+            'serial_number' => $data['serial'],
+            'comments' => $data['comments'] ?? null,
+        ]);
         return $inventoryModel;
     }
 }

@@ -44,12 +44,12 @@ class InventoryImport implements ToCollection, WithHeadingRow, WithValidation
                     ->exists();
 
                 if ($existingMac) {
-                    $errors[] = "Fila " . ($index + 2) . ": MAC {$row['mac_address']} ya ha sido ingresada]}";
+                    $errors[] = "Fila " . ($index + 2) . ": MAC {$row['mac_address']} ya ha sido ingresada";
                     continue;
                 }
 
                 if ($existingSerial) {
-                    $errors[] = "Fila " . ($index + 2) . ": Serial {$row['serial_number']} ya ha sido ingresada]}";
+                    $errors[] = "Fila " . ($index + 2) . ": Serial {$row['serial_number']} ya ha sido ingresada";
                     continue;
                 }
 
@@ -67,7 +67,6 @@ class InventoryImport implements ToCollection, WithHeadingRow, WithValidation
                         'mac_address' => strtoupper($row['mac_address']),
                         'serial_number' => strtoupper($row['serial_number']),
                         'registration_date' => Carbon::today(),
-                        'user_id' => $this->baseData['user_id'],
                         'status_id' => $this->baseData['status_id'],
                         'comments' => $row['comments'] ?? $this->baseData['comments'],
                     ]);
