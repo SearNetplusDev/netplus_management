@@ -3,6 +3,9 @@
 namespace App\Services\v1\management\infrastructure\equipments;
 
 use App\DTOs\v1\management\infrastructure\equipments\InventoryDTO;
+use App\DTOs\v1\management\infrastructure\equipments\InventoryLogDTO;
+use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
+use App\Models\Infrastructure\Equipment\InventoryLogModel;
 use App\Models\Infrastructure\Equipment\InventoryModel;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
@@ -58,6 +61,19 @@ class InventoryService
             'serial_number' => $data['serial'],
             'comments' => $data['comments'] ?? null,
         ]);
+
+        $status = EquipmentStatusModel::query()->find($data['status']);
+
+        $DTO = new InventoryLogDTO(
+            equipment_id: $inventoryModel->id,
+            user_id: Auth::user()->id,
+            technician_id: $data['technician'] ?? null,
+            execution_date: Carbon::today(),
+            service_id: null,
+            description: 'Equipo cambio a estado ' . $status->name . '.',
+        );
+
+        InventoryLogModel::query()->create($DTO->toArray());
         return $inventoryModel;
     }
 }

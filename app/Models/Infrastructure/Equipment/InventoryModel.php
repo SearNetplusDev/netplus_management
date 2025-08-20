@@ -4,9 +4,6 @@ namespace App\Models\Infrastructure\Equipment;
 
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
-use App\Models\Management\TechnicianModel;
-use App\Models\Services\ServiceModel;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;

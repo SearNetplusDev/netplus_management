@@ -2,7 +2,10 @@
 
 namespace App\Imports;
 
+use App\DTOs\v1\management\infrastructure\equipments\InventoryLogDTO;
+use App\Models\Infrastructure\Equipment\InventoryLogModel;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use App\Models\Infrastructure\Equipment\InventoryModel;
@@ -58,7 +61,7 @@ class InventoryImport implements ToCollection, WithHeadingRow, WithValidation
                     continue;
                 }
 
-                InventoryModel::query()
+                $equipment = InventoryModel::query()
                     ->create([
                         'brand_id' => $this->baseData['brand_id'],
                         'type_id' => $this->baseData['type_id'],
@@ -70,6 +73,18 @@ class InventoryImport implements ToCollection, WithHeadingRow, WithValidation
                         'status_id' => $this->baseData['status_id'],
                         'comments' => $row['comments'] ?? $this->baseData['comments'],
                     ]);
+
+                $log = new InventoryLogDTO(
+                    equipment_id: $equipment->id,
+                    user_id: Auth::user()->id,
+                    technician_id: null,
+                    execution_date: Carbon::today(),
+                    service_id: null,
+                    description: 'Equipo registrado desde archivo .xlsx',
+                );
+
+                InventoryLogModel::query()->create($log->toArray());
+
                 $successful++;
             } catch (\Exception $exception) {
                 $errors[] = "Fila " . ($index + 2) . ": Error - " . $exception->getMessage();
