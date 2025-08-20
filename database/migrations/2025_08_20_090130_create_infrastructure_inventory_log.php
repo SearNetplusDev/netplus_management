@@ -32,6 +32,10 @@ return new class extends Migration {
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->longText('description');
+            $table->foreignId('status_id')
+                ->constrained('config_infrastructure_equipment_status')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

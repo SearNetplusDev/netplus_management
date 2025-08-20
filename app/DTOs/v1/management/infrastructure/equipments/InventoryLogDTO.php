@@ -28,6 +28,9 @@ class InventoryLogDTO extends Data
         #[Nullable, IntegerType]
         public readonly ?int    $service_id,
 
+        #[Required, IntegerType]
+        public readonly int     $status_id,
+
         #[Required, StringType]
         public readonly ?string $description,
     )

@@ -4,8 +4,11 @@ namespace App\Models\Infrastructure\Equipment;
 
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
+use App\Models\Management\TechnicianModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 
@@ -70,5 +73,16 @@ class InventoryModel extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(EquipmentStatusModel::class, 'status_id', 'id');
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(InventoryLogModel::class, 'equipment_id', 'id');
+    }
+
+    public function last_technician(): HasOne
+    {
+        return $this->hasOne(InventoryLogModel::class, 'equipment_id', 'id')
+            ->latestOfMany('execution_date');
     }
 }

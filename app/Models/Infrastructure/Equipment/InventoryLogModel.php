@@ -2,6 +2,7 @@
 
 namespace App\Models\Infrastructure\Equipment;
 
+use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Management\TechnicianModel;
 use App\Models\Services\ServiceModel;
 use App\Models\User;
@@ -24,6 +25,7 @@ class InventoryLogModel extends Model
         'technician_id',
         'execution_date',
         'service_id',
+        'status_id',
         'description'
     ];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
@@ -33,6 +35,7 @@ class InventoryLogModel extends Model
         'user_id',
         'technician_id',
         'service_id',
+        'status_id',
     ];
     protected array $orderable = [
         'id',
@@ -40,6 +43,7 @@ class InventoryLogModel extends Model
         'user_id',
         'technician_id',
         'service_id',
+        'status_id',
     ];
 
     public function equipment(): BelongsTo
@@ -60,5 +64,10 @@ class InventoryLogModel extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(ServiceModel::class, 'service_id', 'id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(EquipmentStatusModel::class, 'status_id', 'id');
     }
 }

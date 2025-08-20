@@ -46,7 +46,7 @@ class InventoryService
 
     public function read(int $id): InventoryModel
     {
-        return InventoryModel::query()->find($id);
+        return InventoryModel::query()->with('last_technician')->find($id);
     }
 
     public function update(InventoryModel $inventoryModel, $data): InventoryModel
@@ -64,13 +64,20 @@ class InventoryService
 
         $status = EquipmentStatusModel::query()->find($data['status']);
 
+        $message = match ((int)$data['status']) {
+            1 => 'Equipo retornado a bodega',
+            2, 3, 4, 5, 6 => 'Equipo ' . strtolower($status->name),
+            7 => $status->name,
+        };
+
         $DTO = new InventoryLogDTO(
             equipment_id: $inventoryModel->id,
             user_id: Auth::user()->id,
             technician_id: $data['technician'] ?? null,
             execution_date: Carbon::today(),
             service_id: null,
-            description: 'Equipo cambio a estado ' . $status->name . '.',
+            status_id: (int)$data['status'],
+            description: $message,
         );
 
         InventoryLogModel::query()->create($DTO->toArray());

@@ -80,6 +80,7 @@ class InventoryImport implements ToCollection, WithHeadingRow, WithValidation
                     technician_id: null,
                     execution_date: Carbon::today(),
                     service_id: null,
+                    status_id: 1,
                     description: 'Equipo registrado desde archivo .xlsx',
                 );
 
