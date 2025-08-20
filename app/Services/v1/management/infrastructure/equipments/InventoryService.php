@@ -2,7 +2,6 @@
 
 namespace App\Services\v1\management\infrastructure\equipments;
 
-use App\DTOs\v1\management\infrastructure\equipments\InventoryDTO;
 use App\DTOs\v1\management\infrastructure\equipments\InventoryLogDTO;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Infrastructure\Equipment\InventoryLogModel;
@@ -82,5 +81,19 @@ class InventoryService
 
         InventoryLogModel::query()->create($DTO->toArray());
         return $inventoryModel;
+    }
+
+    public function logs(int $id): InventoryModel
+    {
+        return InventoryModel::query()
+            ->with([
+                'brand:id,name',
+                'type:id,name',
+                'model:id,name',
+                'logs.user:id,name',
+                'logs.technician.user:id,name',
+                'logs.status:id,name,badge_color',
+            ])
+            ->find($id);
     }
 }

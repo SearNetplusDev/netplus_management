@@ -71,4 +71,13 @@ class InventoryController extends Controller
             ],
         ]);
     }
+
+    public function logs(Request $request, InventoryService $service): JsonResponse
+    {
+        $logs = $service->logs($request->input('id'));
+
+        return response()->json([
+            'equipment' => new InventoryResource($logs),
+        ]);
+    }
 }
