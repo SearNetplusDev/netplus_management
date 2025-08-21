@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\services\ServicesController;
 use App\Http\Controllers\v1\management\services\ServiceInternetsController;
+use App\Http\Controllers\v1\management\services\ServiceEquipmentController;
 
 Route::prefix('v1/services')
     ->middleware(['auth:sanctum'])
@@ -19,5 +20,11 @@ Route::prefix('v1/services')
             Route::post('/', [ServiceInternetsController::class, 'store']);
             Route::post('read', [ServiceInternetsController::class, 'read']);
             Route::put('{id}', [ServiceInternetsController::class, 'update']);
+        });
+
+        //      Service Equipment
+        Route::group(['prefix' => 'equipment'], function () {
+            Route::post('/', [ServiceEquipmentController::class, 'store']);
+            Route::post('list', [ServiceEquipmentController::class, 'list']);
         });
     });

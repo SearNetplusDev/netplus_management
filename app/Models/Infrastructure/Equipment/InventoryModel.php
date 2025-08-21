@@ -5,6 +5,7 @@ namespace App\Models\Infrastructure\Equipment;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Management\TechnicianModel;
+use App\Models\Services\ServiceEquipmentModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -84,5 +85,10 @@ class InventoryModel extends Model
     {
         return $this->hasOne(InventoryLogModel::class, 'equipment_id', 'id')
             ->latestOfMany('execution_date');
+    }
+
+    public function on_service(): HasOne
+    {
+        return $this->hasOne(ServiceEquipmentModel::class, 'equipment_id', 'id');
     }
 }

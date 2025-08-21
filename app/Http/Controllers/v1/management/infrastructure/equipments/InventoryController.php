@@ -22,6 +22,7 @@ class InventoryController extends Controller
                 'model:id,name',
                 'branch:id,name',
                 'status:id,name,badge_color',
+                'on_service.service.client',
             ]);
 
         return $dataViewer->handle($request, $query, [
