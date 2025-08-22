@@ -22,6 +22,7 @@ class ServiceEquipmentRequest extends FormRequest
                 'exists:infrastructure_residential_equipment_inventory,id',
                 Rule::unique('services_equipment', 'equipment_id')
                     ->ignore($this->route('id'))
+                    ->whereNull('deleted_at')
             ],
             'service' => 'required|integer|exists:services,id',
         ];

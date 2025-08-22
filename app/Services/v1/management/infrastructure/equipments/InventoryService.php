@@ -7,10 +7,12 @@ use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Infrastructure\Equipment\InventoryLogModel;
 use App\Models\Infrastructure\Equipment\InventoryModel;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
 use App\Imports\InventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class InventoryService
 {
@@ -95,5 +97,14 @@ class InventoryService
                 'logs.status:id,name,badge_color',
             ])
             ->find($id);
+    }
+
+    public function search(string $chars): Collection
+    {
+        return InventoryModel::query()
+            ->where('status_id', 2)
+            ->whereRaw("REPLACE(mac_address, ':', '') ILIKE ?", ["%$chars%"])
+            ->select(['id', 'mac_address as name'])
+            ->get();
     }
 }

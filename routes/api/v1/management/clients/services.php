@@ -26,5 +26,6 @@ Route::prefix('v1/services')
         Route::group(['prefix' => 'equipment'], function () {
             Route::post('/', [ServiceEquipmentController::class, 'store']);
             Route::post('list', [ServiceEquipmentController::class, 'list']);
+            Route::delete('/', [ServiceEquipmentController::class, 'remove']);
         });
     });

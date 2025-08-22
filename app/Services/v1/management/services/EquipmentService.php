@@ -53,6 +53,7 @@ class EquipmentService
 
         $message = 'Equipo asignado a ';
         $message .= $service->client->name . ' ' . $service->client->surname;
+        $message .= ' en el servicio ID: ' . $service->id;
         $message .= ' mediante el módulo servicios';
 
         $logDTO = new InventoryLogDTO(
@@ -67,5 +68,33 @@ class EquipmentService
         InventoryLogModel::query()->create($logDTO->toArray());
 
         return ServiceEquipmentModel::query()->create($DTO->toArray());
+    }
+
+    public function removeEquipment(int $register): bool
+    {
+        $equipment = ServiceEquipmentModel::query()
+            ->with(['equipment', 'service.client'])
+            ->find($register);
+
+        $message = 'Equipo Desnvinculado del servicio ID: ' . $equipment->service_id;
+        $message .= ' correspondiente al cliente: ';
+        $message .= $equipment->service?->client?->name . ' ' . $equipment->service?->client?->surname;
+
+        $inventory = InventoryModel::query()->find($equipment->equipment_id);
+
+        $logDTO = new InventoryLogDTO(
+            equipment_id: $equipment->equipment_id,
+            user_id: Auth::user()->id,
+            technician_id: null,
+            execution_date: Carbon::today(),
+            service_id: $equipment->service_id,
+            status_id: 2,
+            description: $message,
+        );
+        $inventory->update(['status_id' => 2]);
+
+        InventoryLogModel::query()->create($logDTO->toArray());
+
+        return $equipment->delete();
     }
 }

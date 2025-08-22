@@ -29,4 +29,13 @@ class ServiceEquipmentController extends Controller
             'equipment' => new ServiceEquipmetResource($equipment),
         ]);
     }
+
+    public function remove(Request $request, EquipmentService $service): JsonResponse
+    {
+        $query = $service->removeEquipment($request->input('id'));
+
+        return response()->json([
+            'deleted' => (bool)$query,
+        ]);
+    }
 }

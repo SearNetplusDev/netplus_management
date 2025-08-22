@@ -81,4 +81,11 @@ class InventoryController extends Controller
             'equipment' => new InventoryResource($logs),
         ]);
     }
+
+    public function search(Request $request, InventoryService $service): JsonResponse
+    {
+        return response()->json([
+            'equipment' => new InventoryResource($service->search($request->input('mac')))
+        ]);
+    }
 }
