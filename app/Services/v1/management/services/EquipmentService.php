@@ -45,14 +45,14 @@ class EquipmentService
 
         if ($exists) {
             throw ValidationException::withMessages([
-                'equipment' => ["Este servicio ya posee un equipo de la categoría {$equipment->type->name}"]
+                'equipment' => ["Este servicio ya posee un equipo de la categoría {$equipment->type?->name}"]
             ]);
         }
 
         $equipment->update(['status_id' => 3]);
 
         $message = 'Equipo asignado a ';
-        $message .= $service->client->name . ' ' . $service->client->surname;
+        $message .= $service->client?->name . ' ' . $service->client?->surname;
         $message .= ' en el servicio ID: ' . $service->id;
         $message .= ' mediante el módulo servicios';
 
