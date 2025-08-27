@@ -35,6 +35,12 @@ class InternetDTO extends Data
         public readonly Carbon  $expiration_date,
         #[Required, IntegerType]
         public readonly int     $status_id,
+        #[Required, IntegerType]
+        public readonly int     $iptv,
+        #[Required, IntegerType]
+        public readonly int     $ftth,
+        #[Nullable, IntegerType]
+        public readonly ?int    $allowed_stb,
     )
     {
 

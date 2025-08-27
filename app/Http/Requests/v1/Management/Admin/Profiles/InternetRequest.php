@@ -33,7 +33,10 @@ class InternetRequest extends FormRequest
             'iva' => 'required|decimal:2,8',
             'price' => 'required|decimal:2,8',
             'expires' => 'required|date|after:today',
-            'status' => 'required|boolean',
+            'status' => 'required|integer|in:0,1',
+            'iptv' => 'required|integer|in:0,1',
+            'ftth' => 'required|integer|in:0,1',
+            'stb' => 'nullable|integer',
         ];
     }
 
@@ -42,23 +45,42 @@ class InternetRequest extends FormRequest
         return [
             'name.required' => 'Nombre es un campo obligatorio.',
             'name.string' => 'Formato inválido.',
+
             'alias.required' => 'Alias es un campo obligatorio.',
             'alias.string' => 'Formato incorrecto.',
+
             'description.required' => 'Descripción es un campo obligatorio.',
             'description.string' => 'Formato incorrecto.',
             'description.between' => 'Debe contener entre :min y :max caracteres.',
+
             'main_profile.required' => 'Perfil Mikrotik es un campo obligatorio.',
+
             'net_value.required' => 'Valor neto es un campo obligatorio.',
             'net_value.decimal' => 'Debe tener entre :min y :max decimales.',
+
             'iva.required' => 'IVA es un campo obligatorio.',
             'iva.decimal' => 'Debe tener entre :min y :max decimales.',
+
             'price.required' => 'Precio es un campo obligatorio.',
             'price.decimal' => 'Debe tener entre :min y :max decimales.',
+
             'expires.required' => 'Fecha de vencimiento es un campo obligatorio.',
             'expires.date' => 'Formato incorrecto.',
             'expires.after' => 'No puede ser menor a el día de ahora.',
+
             'status.required' => 'Estado es un campo obligatorio.',
-            'status.boolean' => 'Formato incorrecto.',
+            'status.integer' => 'Formato incorrecto.',
+            'status.in' => 'Formato seleccionado inválido.',
+
+            'iptv.required' => 'IPTV es un campo obligatorio.',
+            'iptv.integer' => 'Formato incorrecto.',
+            'iptv.in' => 'Formato seleccionado incorrecto.',
+
+            'ftth.required' => 'FTTH es un campo obligatorio.',
+            'ftth.integer' => 'Formato incorrecto.',
+            'ftth.in' => 'Formato seleccionado incorrecto.',
+
+            'stb.integer' => 'Cantidad de STB debe ser un número entero.',
         ];
     }
 
@@ -75,6 +97,9 @@ class InternetRequest extends FormRequest
             price: $this->input('price'),
             expiration_date: Carbon::parse($this->input('expires')),
             status_id: $this->input('status'),
+            iptv: $this->input('iptv'),
+            ftth: $this->input('ftth'),
+            allowed_stb: $this->input('stb') ?? 0,
         );
     }
 }

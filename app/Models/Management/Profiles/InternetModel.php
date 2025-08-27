@@ -5,7 +5,6 @@ namespace App\Models\Management\Profiles;
 use App\Models\Services\ServiceInternetModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
@@ -27,7 +26,10 @@ class InternetModel extends Model
         'iva',
         'price',
         'expiration_date',
-        'status_id'
+        'status_id',
+        'iptv',
+        'ftth',
+        'allowed_stb',
     ];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = [
@@ -37,6 +39,9 @@ class InternetModel extends Model
         'mk_profile',
         'price',
         'status_id',
+        'iptv',
+        'ftth',
+        'allowed_stb',
     ];
     protected array $orderable = [
         'id',
@@ -44,6 +49,9 @@ class InternetModel extends Model
         'alias',
         'price',
         'status_id',
+        'iptv',
+        'ftth',
+        'allowed_stb',
     ];
     protected $appends = ['status'];
 

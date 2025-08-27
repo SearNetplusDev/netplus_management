@@ -17,6 +17,8 @@ class InternetController extends Controller
     {
         $query = InternetModel::query();
         return $service->handle($request, $query, [
+            'iptv' => fn($q, $data) => $query->whereIn('iptv', $data),
+            'ftth' => fn($q, $data) => $query->whereIn('ftth', $data),
             'status' => fn($q, $data) => $query->whereIn('status_id', $data),
         ]);
     }
