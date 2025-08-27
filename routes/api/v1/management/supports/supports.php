@@ -2,10 +2,19 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\supports\StatusController;
+use App\Http\Controllers\v1\management\supports\TypesController;
 
 Route::prefix('v1/supports')
     ->middleware(['auth:sanctum'])
     ->group(function () {
+
+        //  Types
+        Route::group(['prefix' => 'types'], function () {
+            Route::post('/', [TypesController::class, 'store']);
+            Route::post('data', [TypesController::class, 'data']);
+            Route::post('edit', [TypesController::class, 'read']);
+            Route::put('{id}', [TypesController::class, 'update']);
+        });
 
         //  Status
         Route::group(['prefix' => 'status'], function () {
