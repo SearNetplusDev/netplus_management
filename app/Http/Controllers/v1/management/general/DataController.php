@@ -366,7 +366,7 @@ class DataController extends Controller
         $query = EquipmentModel::query()
             ->where([
                 ['node_id', $id],
-                ['status_id', 10]
+                ['status_id', 3]
             ])
             ->select('id', 'name')
             ->orderBy('name', 'ASC')
