@@ -404,4 +404,15 @@ class DataController extends Controller
                 ->get()
         ]);
     }
+
+    public function modelsByBrand(int $brandID): JsonResponse
+    {
+        return response()->json([
+            'response' => ModelModel::query()
+                ->where('brand_id', $brandID)
+                ->select('id', 'name')
+                ->orderBy('name', 'ASC')
+                ->get()
+        ]);
+    }
 }

@@ -52,6 +52,9 @@ class InventoryDTO extends Data
 
         #[Nullable, StringType]
         public readonly ?string $comments,
+
+        #[Required, IntegerType]
+        public readonly int     $company_id,
     )
     {
     }

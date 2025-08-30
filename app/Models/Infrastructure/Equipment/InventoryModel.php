@@ -4,7 +4,6 @@ namespace App\Models\Infrastructure\Equipment;
 
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
-use App\Models\Management\TechnicianModel;
 use App\Models\Services\ServiceEquipmentModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,10 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
+use App\Traits\HasCompanyTrait;
 
 class InventoryModel extends Model
 {
-    use SoftDeletes, DataViewer;
+    use SoftDeletes, DataViewer, HasCompanyTrait;
 
     protected $connection = 'pgsql';
     protected $table = 'infrastructure_residential_equipment_inventory';
@@ -29,7 +29,8 @@ class InventoryModel extends Model
         'serial_number',
         'registration_date',
         'status_id',
-        'comments'
+        'comments',
+        'company_id',
     ];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = [
@@ -40,6 +41,7 @@ class InventoryModel extends Model
         'mac_address',
         'serial_number',
         'status_id',
+        'company_id',
     ];
     protected array $orderable = [
         'id',
@@ -49,7 +51,9 @@ class InventoryModel extends Model
         'mac_address',
         'serial_number',
         'status_id',
+        'company_id',
     ];
+    protected $appends = ['company'];
 
     public function brand(): BelongsTo
     {

@@ -39,7 +39,7 @@ class InventoryRequest extends FormRequest
             'technician' => ['integer', 'exists:technicians,id'],
             'status' => ['required', 'integer', 'exists:config_infrastructure_equipment_status,id'],
             'comments' => ['nullable', 'string', 'between:5,500'],
-
+            'company' => ['required', 'integer'],
             'file' => ['required_if:_method,POST', 'file', 'mimes:xls,xlsx,csv', 'max:10240'],
         ];
     }
@@ -89,7 +89,10 @@ class InventoryRequest extends FormRequest
             'file.required_if' => 'Archivo es un campo obligatorio.',
             'file.file' => 'Formato incorrecto.',
             'file.mimes' => 'El archivo debe ser un archivo de tipo: xls, xlsx, csv.',
-            'file.max' => 'El archivo no debe superar los 10MB.'
+            'file.max' => 'El archivo no debe superar los 10MB.',
+
+            'company.required' => 'Empresa es un campo obligatorio.',
+            'company.integer' => 'Formato incorrecto.',
         ];
     }
 
@@ -105,6 +108,7 @@ class InventoryRequest extends FormRequest
             registration_date: $this->isMethod('POST') ? Carbon::today() : null,
             status_id: $this->input('status'),
             comments: $this->input('comments') ?? null,
+            company_id: $this->input('company'),
         );
     }
 }

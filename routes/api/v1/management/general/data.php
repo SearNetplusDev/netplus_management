@@ -52,6 +52,7 @@ Route::prefix('v1/general')
             Route::get('status', [DataController::class, 'equipmentStatusList']);
             Route::get('nodes', [DataController::class, 'nodesList']);
             Route::get('models', [DataController::class, 'modelsList']);
+            Route::get('brand/{id}/models', [DataController::class, 'modelsByBrand']);
             Route::get('node/{id}/equipment', [DataController::class, 'equipmentByNode']);
         });
 

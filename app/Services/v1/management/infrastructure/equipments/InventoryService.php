@@ -6,6 +6,7 @@ use App\DTOs\v1\management\infrastructure\equipments\InventoryLogDTO;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Infrastructure\Equipment\InventoryLogModel;
 use App\Models\Infrastructure\Equipment\InventoryModel;
+use App\Models\Infrastructure\Equipment\TypeModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
@@ -25,6 +26,7 @@ class InventoryService
             'branch_id' => $formData['branch'],
             'status_id' => $formData['status'],
             'comments' => $formData['comments'] ?? null,
+            'company_id' => $formData['company'],
         ];
 
         $import = new InventoryImport($baseData);
@@ -61,6 +63,7 @@ class InventoryService
             'mac_address' => $data['mac'],
             'serial_number' => $data['serial'],
             'comments' => $data['comments'] ?? null,
+            'company_id' => $data['company'],
         ]);
 
         $status = EquipmentStatusModel::query()->find($data['status']);
@@ -99,10 +102,16 @@ class InventoryService
             ->find($id);
     }
 
-    public function search(string $chars): Collection
+    public function internet_search(string $chars): Collection
     {
+        $type = TypeModel::query()
+            ->where('name', 'ILIKE', '%tv box%')
+            ->where('status_id', 1)
+            ->first();
+
         return InventoryModel::query()
             ->where('status_id', 2)
+            ->whereNot('type_id', $type->id)
             ->whereRaw("REPLACE(mac_address, ':', '') ILIKE ?", ["%$chars%"])
             ->select(['id', 'mac_address as name'])
             ->get();

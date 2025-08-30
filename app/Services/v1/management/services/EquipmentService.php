@@ -11,7 +11,6 @@ use App\Models\Services\ServiceModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 
 
 class EquipmentService
@@ -36,18 +35,21 @@ class EquipmentService
 
         $equipment = InventoryModel::query()->find($DTO->equipment_id);
 
-        $exists = ServiceEquipmentModel::query()
-            ->where('service_id', $DTO->service_id)
-            ->whereHas('equipment', function ($query) use ($equipment) {
-                $query->where('type_id', $equipment->type_id);
-            })
-            ->exists();
-
-        if ($exists) {
-            throw ValidationException::withMessages([
-                'equipment' => ["Este servicio ya posee un equipo de la categoría {$equipment->type?->name}"]
-            ]);
-        }
+        /***
+         *      Valida que solo exista un tipo de equipo asignado
+         * $exists = ServiceEquipmentModel::query()
+         * ->where('service_id', $DTO->service_id)
+         * ->whereHas('equipment', function ($query) use ($equipment) {
+         * $query->where('type_id', $equipment->type_id);
+         * })
+         * ->exists();
+         *
+         * if ($exists) {
+         * throw ValidationException::withMessages([
+         * 'equipment' => ["Este servicio ya posee un equipo de la categoría {$equipment->type?->name}"]
+         * ]);
+         * }
+         ***/
 
         $equipment->update(['status_id' => 3]);
 

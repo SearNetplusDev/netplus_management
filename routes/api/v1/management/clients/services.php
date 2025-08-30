@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\services\ServicesController;
 use App\Http\Controllers\v1\management\services\ServiceInternetsController;
 use App\Http\Controllers\v1\management\services\ServiceEquipmentController;
+use App\Http\Controllers\v1\management\services\ServiceIPTVEquipmentController;
 
 Route::prefix('v1/services')
     ->middleware(['auth:sanctum'])
@@ -24,8 +25,22 @@ Route::prefix('v1/services')
 
         //      Service Equipment
         Route::group(['prefix' => 'equipment'], function () {
-            Route::post('/', [ServiceEquipmentController::class, 'store']);
-            Route::post('list', [ServiceEquipmentController::class, 'list']);
-            Route::delete('/', [ServiceEquipmentController::class, 'remove']);
+
+            //  Service Internet Equipment
+            Route::group(['prefix' => 'internet'], function () {
+                Route::post('/', [ServiceEquipmentController::class, 'store']);
+                Route::post('list', [ServiceEquipmentController::class, 'list']);
+                Route::delete('/', [ServiceEquipmentController::class, 'remove']);
+            });
+
+            //      Service IPTV Equipment
+            Route::group(['prefix' => 'iptv'], function () {
+                Route::post('/', [ServiceIptvEquipmentController::class, 'store']);
+                Route::post('list', [ServiceIPTVEquipmentController::class, 'data']);
+                Route::post('edit', [ServiceIPTVEquipmentController::class, 'edit']);
+                Route::put('{id}', [ServiceIPTVEquipmentController::class, 'update']);
+                Route::delete('/', [ServiceIPTVEquipmentController::class, 'remove']);
+            });
         });
+
     });

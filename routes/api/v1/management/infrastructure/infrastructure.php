@@ -79,7 +79,7 @@ Route::prefix('v1/infrastructure')
                 Route::post('edit', [InventoryController::class, 'read']);
                 Route::put('{id}', [InventoryController::class, 'update']);
                 Route::post('logs', [InventoryController::class, 'logs']);
-                Route::post('search', [InventoryController::class, 'search']);
+                Route::post('internet/search', [InventoryController::class, 'internet_search']);
             });
         });
     });

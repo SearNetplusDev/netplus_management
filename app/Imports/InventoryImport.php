@@ -72,6 +72,7 @@ class InventoryImport implements ToCollection, WithHeadingRow, WithValidation
                         'registration_date' => Carbon::today(),
                         'status_id' => $this->baseData['status_id'],
                         'comments' => $row['comments'] ?? $this->baseData['comments'],
+                        'company_id' => $this->baseData['company_id'],
                     ]);
 
                 $log = new InventoryLogDTO(

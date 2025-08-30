@@ -32,6 +32,7 @@ class InventoryController extends Controller
             'branch' => fn($q, $data) => $q->whereIn('branch_id', $data),
             'technician' => fn($q, $data) => $q->whereIn('technician_id', $data),
             'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+            'company' => fn($q, $data) => $q->whereIn('company_id', $data),
         ]);
     }
 
@@ -82,10 +83,11 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function search(Request $request, InventoryService $service): JsonResponse
+    public function internet_search(Request $request, InventoryService $service): JsonResponse
     {
+        $mac = $service->internet_search($request->input('mac'));
         return response()->json([
-            'equipment' => new InventoryResource($service->search($request->input('mac')))
+            'equipment' => new InventoryResource($mac->makeHidden('company')),
         ]);
     }
 }
