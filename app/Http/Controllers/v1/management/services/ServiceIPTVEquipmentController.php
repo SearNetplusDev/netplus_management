@@ -14,7 +14,7 @@ class ServiceIPTVEquipmentController extends Controller
 {
     public function data(Request $request, IPTVEquipmentService $service): JsonResponse
     {
-        $item = $service->list($request->input('service'));
+        $item = $service->list((int)$request->input('service'));
 
         return response()->json(['collection' => new ServiceIptvEquipmentResource($item)]);
     }
@@ -25,7 +25,7 @@ class ServiceIPTVEquipmentController extends Controller
 
         return response()->json([
             'saved' => (bool)$item,
-            'equipment' => new ServiceIptvEquipmentResource($item)
+            'equipment' => new ServiceIptvEquipmentResource($item->load('equipment'))
         ]);
     }
 
@@ -44,7 +44,7 @@ class ServiceIPTVEquipmentController extends Controller
 
         return response()->json([
             'saved' => (bool)$item,
-            'equipment' => new ServiceIptvEquipmentResource($item)
+            'equipment' => new ServiceIptvEquipmentResource($item->load('equipment'))
         ]);
     }
 

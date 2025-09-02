@@ -116,4 +116,21 @@ class InventoryService
             ->select(['id', 'mac_address as name'])
             ->get();
     }
+
+    public function tvBoxSearch(string $chars): Collection
+    {
+        $type = TypeModel::query()
+            ->where('name', 'ILIKE', '%tv box%')
+            ->where('status_id', 1)
+            ->first();
+
+        return InventoryModel::query()
+            ->where([
+                ['status_id', 2],
+                ['type_id', $type->id],
+            ])
+            ->whereRaw("REPLACE(mac_address, ':', '') ILIKE ?", ["%$chars%"])
+            ->select(['id', 'mac_address as name'])
+            ->get();
+    }
 }

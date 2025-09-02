@@ -38,12 +38,12 @@ class ServiceIPTVEquipmentRequest extends FormRequest
                     ->whereNull('deleted_at');
 
                 if ($this->route('id')) {
-                    $query->where('id', '!==', $this->route('id'));
+                    $query->whereKeyNot($this->route('id'));
                 }
 
                 $count = $query->count();
 
-                if ($count > 3) {
+                if ($count >= 3) {
                     $validator->errors()->add('email', 'Este correo ya ha sido registrado en 3 equipos y no puede ser asignado nuevamente.');
                 }
             }

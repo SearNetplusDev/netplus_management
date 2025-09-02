@@ -22,7 +22,8 @@ class InventoryController extends Controller
                 'model:id,name',
                 'branch:id,name',
                 'status:id,name,badge_color',
-                'on_service.service.client',
+                'on_internet_service.service.client',
+                'on_iptv_service.service.client',
             ]);
 
         return $dataViewer->handle($request, $query, [
@@ -86,6 +87,15 @@ class InventoryController extends Controller
     public function internet_search(Request $request, InventoryService $service): JsonResponse
     {
         $mac = $service->internet_search($request->input('mac'));
+        return response()->json([
+            'equipment' => new InventoryResource($mac->makeHidden('company')),
+        ]);
+    }
+
+    public function iptv_search(Request $request, InventoryService $service): JsonResponse
+    {
+        $mac = $service->tvBoxSearch($request->input('mac'));
+
         return response()->json([
             'equipment' => new InventoryResource($mac->makeHidden('company')),
         ]);

@@ -80,6 +80,7 @@ Route::prefix('v1/infrastructure')
                 Route::put('{id}', [InventoryController::class, 'update']);
                 Route::post('logs', [InventoryController::class, 'logs']);
                 Route::post('internet/search', [InventoryController::class, 'internet_search']);
+                Route::post('iptv/search', [InventoryController::class, 'iptv_search']);
             });
         });
     });
