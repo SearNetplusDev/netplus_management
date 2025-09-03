@@ -5,6 +5,7 @@ namespace App\Services\v1\management\services;
 use App\DTOs\v1\management\services\ServiceIptvEquipmentDTO;
 use App\Models\Infrastructure\Equipment\InventoryLogModel;
 use App\Models\Infrastructure\Equipment\InventoryModel;
+use App\Models\Management\Profiles\InternetModel;
 use App\Models\Services\ServiceIptvEquipmentModel;
 use App\Models\Services\ServiceModel;
 use Carbon\Carbon;
@@ -152,6 +153,15 @@ class IPTVEquipmentService
         $service = ServiceModel::query()
             ->with(['internet.profile'])
             ->find($serviceId);
-        return $service->internet->profile->iptv;
+        return $service->internet?->profile?->iptv;
+    }
+
+    public function internet_plan(int $serviceId): InternetModel
+    {
+        $service = ServiceModel::query()
+            ->with('internet.profile')
+            ->findOrFail($serviceId);
+
+        return InternetModel::query()->find($service->internet?->profile?->id);
     }
 }

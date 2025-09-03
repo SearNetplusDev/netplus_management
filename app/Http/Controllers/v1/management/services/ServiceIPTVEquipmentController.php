@@ -15,8 +15,12 @@ class ServiceIPTVEquipmentController extends Controller
     public function data(Request $request, IPTVEquipmentService $service): JsonResponse
     {
         $item = $service->list((int)$request->input('service'));
+        $plan = $service->internet_plan((int)$request->input('service'));
 
-        return response()->json(['collection' => new ServiceIptvEquipmentResource($item)]);
+        return response()->json([
+            'collection' => new ServiceIptvEquipmentResource($item),
+            'has_iptv' => $plan->iptv
+        ]);
     }
 
     public function store(ServiceIptvEquipmentRequest $request, IPTVEquipmentService $service): JsonResponse
