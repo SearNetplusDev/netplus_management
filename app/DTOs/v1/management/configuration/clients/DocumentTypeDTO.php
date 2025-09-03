@@ -9,10 +9,17 @@ use Spatie\LaravelData\Attributes\Validation\StringType;
 
 class DocumentTypeDTO extends Data
 {
-    #[Required, StringType]
-    public ?string $name;
-    #[Required, StringType]
-    public ?string $code;
-    #[Required, IntegerType]
-    public ?int $status_id;
+    public function __construct(
+        #[Required, StringType]
+        public ?string $name,
+
+        #[Required, StringType]
+        public ?string $code,
+
+        #[Required, IntegerType]
+        public ?int    $status_id,
+    )
+    {
+
+    }
 }

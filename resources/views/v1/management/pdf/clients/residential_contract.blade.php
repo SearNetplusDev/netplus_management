@@ -178,7 +178,7 @@
                 <img src="{{ public_path('assets/img/logos/logo_color.png') }}" alt="NETPLUS LOGO" class="logo">
             </th>
             <th style="width: 75%;">
-                Contato de prestación de servicios de internet
+                Contrato de prestación de servicios de internet
             </th>
         </tr>
     </table>
@@ -401,24 +401,20 @@
             <table class="client-data-table">
                 <tr>
                     <td class="label">Nombre completo:</td>
-                    <td>{{ $data['client']['name'].' '.$data['client']['surname'] }}</td>
+                    <td>{{ $data['name'] }}</td>
                 </tr>
                 <tr>
-                    <td class="label">Número de documento:</td>
-                    <td>{{ $data['client']['dui']['number'] ?? '' }}</td>
+                    <td class="label">Número de documento ({{ $data['document_type'] }}):</td>
+                    <td>{{ $data['document_number'] }}</td>
                 </tr>
                 <tr>
                     <td class="label">Teléfono:</td>
-                    <td>{{ $data['client']['mobile']['number'] ?? '' }}</td>
+                    <td>{{ $data['phone'] }}</td>
                 </tr>
                 <tr>
                     <td class="label">Dirección:</td>
                     <td>
-                        {{ $data['client']['address']['neighborhood'] ?? '' }},
-                        {{ $data['client']['address']['address'] ?? '' }},
-                        {{ $data['client']['address']['district']['name'] ?? '' }},
-                        {{ $data['client']['address']['municipality']['name'] ?? '' }},
-                        {{ $data['client']['address']['state']['name'] ?? '' }}
+                        {{ $data['address'] }}
                     </td>
                 </tr>
             </table>
@@ -426,12 +422,7 @@
 
         <div class="date-place">
             <p><b>Lugar y Fecha: </b>
-                {{ $data['client']['branch']['address'] }},
-                {{ $data['client']['branch']['district']['name'] }},
-                {{ $data['client']['branch']['municipality']['name'] }},
-                {{ $data['client']['branch']['state']['name'] }},
-                {{ $data['client']['branch']['country']['es_name'] }},
-                {{ \Carbon\Carbon::parse($data['contract_date'])->isoFormat('D [de] MMMM [del] YYYY') }}
+                {{ $data['office_address'] }}, {{ $data['contract_date'] }}
             </p>
         </div>
 
@@ -439,10 +430,10 @@
             <div style="width: 50%; margin: 0 auto; text-align: center">
                 <div class="signature-box">
                     <div
-                            class="signature-name">{{ $data['client']['name'].' '.$data['client']['surname'] ?? 'NOMBRE DEL CLIENTE' }}</div>
+                        class="signature-name">{{ $data['name'] ?? 'NOMBRE DEL CLIENTE' }}</div>
                     <div class="signature-title">FIRMA DEL CLIENTE</div>
                     <div class="signature-title">
-                        DUI: {{ $data['client']['dui']['number'] ?? '' }}</div>
+                        {{$data['document_type']}}: {{ $data['document_number'] ?? '' }}</div>
                 </div>
             </div>
         </div>

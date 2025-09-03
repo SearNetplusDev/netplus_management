@@ -61,6 +61,20 @@ class ClientModel extends Model
     ];
     protected $appends = ['status'];
 
+    public function getPrimaryDocumentAttribute()
+    {
+        $document = $this->dui ?? $this->nit ?? $this->passport ?? $this->residence;
+
+        if (!$document) {
+            return null;
+        }
+
+        return (object)[
+            'type' => $document->document_type->name ?? 'Documento',
+            'number' => $document->number,
+        ];
+    }
+
     public function gender(): BelongsTo
     {
         return $this->belongsTo(GenderModel::class, 'gender_id', 'id');
@@ -86,7 +100,7 @@ class ClientModel extends Model
         return $this->belongsTo(CountryModel::class, 'country_id', 'id');
     }
 
-    public function billing_document(): BelongsTo
+    public function document_type(): BelongsTo
     {
         return $this->belongsTo(DocumentTypeModel::class, 'document_type_id', 'id');
     }
@@ -106,6 +120,18 @@ class ClientModel extends Model
     {
         return $this->hasOne(DocumentModel::class, 'client_id', 'id')
             ->where('document_type_id', 4);
+    }
+
+    public function passport(): HasOne
+    {
+        return $this->hasOne(DocumentModel::class, 'client_id', 'id')
+            ->where('document_type_id', 2);
+    }
+
+    public function residence(): HasOne
+    {
+        return $this->hasOne(DocumentModel::class, 'client_id', 'id')
+            ->where('document_type_id', 1);
     }
 
     public function mobile(): HasOne

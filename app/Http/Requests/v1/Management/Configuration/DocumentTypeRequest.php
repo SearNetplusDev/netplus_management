@@ -24,24 +24,15 @@ class DocumentTypeRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'name' => 'required|string',
-            'code' => 'required|string|unique:config_document_types,code',
-            'status' => 'required|boolean',
-        ];
-
-        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-
-            $model = $this->route('id');
-            $id = $model instanceof Model ? $model->getKey() : $model;
-            $rules['code'] = [
+            'code' => [
                 'required',
                 'string',
-                Rule::unique('config_document_types', 'code')->ignore($id),
-            ];
-        }
-
-        return $rules;
+                Rule::unique('config_document_types', 'code')->ignore($this->route('id'))
+            ],
+            'status' => 'required|boolean',
+        ];
     }
 
     public function messages(): array
