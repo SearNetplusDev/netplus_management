@@ -24,6 +24,7 @@ class TypesRequest extends FormRequest
             ],
             'badge' => 'nullable|string|between:5,50',
             'status' => 'required|integer|in:0,1',
+            'price' => 'required|numeric',
         ];
     }
 
@@ -41,6 +42,9 @@ class TypesRequest extends FormRequest
             'status.required' => 'Estado es un campo obligatorio.',
             'status.integer' => 'Formato de estado incorrecto.',
             'status.in' => 'Este estado no es valido.',
+
+            'price.required' => 'Precio es un campo obligatorio.',
+            'price.numeric' => 'Precio debe ser un número decimal.',
         ];
     }
 
@@ -50,6 +54,7 @@ class TypesRequest extends FormRequest
             name: $this->input('name'),
             badge_color: $this->input('badge') ?? null,
             status_id: $this->input('status'),
+            price: $this->input('price'),
         );
     }
 }
