@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\supports\StatusController;
 use App\Http\Controllers\v1\management\supports\TypesController;
+use App\Http\Controllers\v1\management\supports\SupportsController;
 
 Route::prefix('v1/supports')
     ->middleware(['auth:sanctum'])
     ->group(function () {
+        Route::post('data', [SupportsController::class, 'data']);
 
         //  Types
         Route::group(['prefix' => 'types'], function () {

@@ -1,7 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\v1\management\general\BillingController;
+use App\Http\Controllers\v1\management\general\ClientController;
+use App\Http\Controllers\v1\management\general\ConfigurationController;
 use App\Http\Controllers\v1\management\general\DataController;
+use App\Http\Controllers\v1\management\general\InfrastructureController;
+use App\Http\Controllers\v1\management\general\ManagementController;
+use App\Http\Controllers\v1\management\general\SupportsController;
 
 Route::prefix('v1/general')
     ->middleware('auth:sanctum')
@@ -22,45 +28,50 @@ Route::prefix('v1/general')
         Route::group(['prefix' => 'management'], function () {
 
             Route::group(['prefix' => 'roles'], function () {
-                Route::get('/', [DataController::class, 'rolesList']);
-                Route::get('{id}/permissions', [DataController::class, 'permissionsByRoleId']);
+                Route::get('/', [ManagementController::class, 'rolesList']);
+                Route::get('{id}/permissions', [ManagementController::class, 'permissionsByRoleId']);
             });
 
             Route::group(['prefix' => 'users'], function () {
-                Route::get('list', [DataController::class, 'usersList']);
-                Route::get('technicians', [DataController::class, 'technicianList']);
+                Route::get('list', [ManagementController::class, 'usersList']);
+                Route::get('technicians', [ManagementController::class, 'technicianList']);
             });
-            Route::get('permissions', [DataController::class, 'permissionsList']);
+            Route::get('permissions', [ManagementController::class, 'permissionsList']);
         });
 
         Route::group(['prefix' => 'billing'], function () {
-            Route::get('documents', [DataController::class, 'billingDocumentsList']);
-            Route::get('activities', [DataController::class, 'billingActivitiesList']);
+            Route::get('documents', [BillingController::class, 'billingDocumentsList']);
+            Route::get('activities', [BillingController::class, 'billingActivitiesList']);
         });
 
         Route::group(['prefix' => 'client'], function () {
-            Route::get('types', [DataController::class, 'clientTypesList']);
-            Route::get('documents', [DataController::class, 'personalDocumentsList']);
-            Route::get('phones', [DataController::class, 'phoneCategoriesList']);
-            Route::get('references', [DataController::class, 'referencesList']);
+            Route::get('types', [ClientController::class, 'clientTypesList']);
+            Route::get('documents', [ClientController::class, 'personalDocumentsList']);
+            Route::get('phones', [ClientController::class, 'phoneCategoriesList']);
+            Route::get('references', [ClientController::class, 'referencesList']);
         });
 
         Route::group(['prefix' => 'infrastructure'], function () {
-            Route::get('servers', [DataController::class, 'authServersList']);
-            Route::get('types', [DataController::class, 'equipmentTypesList']);
-            Route::get('brands', [DataController::class, 'equipmentBrandsList']);
-            Route::get('status', [DataController::class, 'equipmentStatusList']);
-            Route::get('nodes', [DataController::class, 'nodesList']);
-            Route::get('models', [DataController::class, 'modelsList']);
-            Route::get('brand/{id}/models', [DataController::class, 'modelsByBrand']);
-            Route::get('node/{id}/equipment', [DataController::class, 'equipmentByNode']);
+            Route::get('servers', [InfrastructureController::class, 'authServersList']);
+            Route::get('types', [InfrastructureController::class, 'equipmentTypesList']);
+            Route::get('brands', [InfrastructureController::class, 'equipmentBrandsList']);
+            Route::get('status', [InfrastructureController::class, 'equipmentStatusList']);
+            Route::get('nodes', [InfrastructureController::class, 'nodesList']);
+            Route::get('models', [InfrastructureController::class, 'modelsList']);
+            Route::get('brand/{id}/models', [InfrastructureController::class, 'modelsByBrand']);
+            Route::get('node/{id}/equipment', [InfrastructureController::class, 'equipmentByNode']);
         });
 
         Route::group(['prefix' => 'configuration'], function () {
-            Route::get('menu', [DataController::class, 'menuList']);
+            Route::get('menu', [ConfigurationController::class, 'menuList']);
         });
 
         Route::group(['prefix' => 'profiles'], function () {
             Route::get('internet', [DataController::class, 'internetProfilesList']);
+        });
+
+        Route::group(['prefix' => 'supports'], function () {
+            Route::get('status', [SupportsController::class, 'supports_status']);
+            Route::get('types', [SupportsController::class, 'supports_types']);
         });
     });
