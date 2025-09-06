@@ -60,4 +60,24 @@ class ClientsController extends Controller
             'client' => new GeneralDataResource($client),
         ]);
     }
+
+    public function searchByName(Request $request): JsonResponse
+    {
+        $query = ClientModel::query()
+            ->where('status_id', 1)
+            ->where('name', 'ILIKE', '%' . $request->client . '%')
+            ->orWhere('surname', 'ILIKE', '%' . $request->client . '%')
+            ->get()
+            ->makeHidden('status');
+        $data = [];
+        foreach ($query as $item) {
+            $el = [
+                'id' => $item->id,
+                'name' => ucfirst("ID: {$item->id} - {$item->name} {$item->surname}"),
+            ];
+            $data[] = $el;
+        }
+
+        return response()->json(['clients' => $data]);
+    }
 }
