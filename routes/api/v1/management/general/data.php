@@ -6,6 +6,7 @@ use App\Http\Controllers\v1\management\general\ClientController;
 use App\Http\Controllers\v1\management\general\ConfigurationController;
 use App\Http\Controllers\v1\management\general\DataController;
 use App\Http\Controllers\v1\management\general\InfrastructureController;
+use App\Http\Controllers\v1\management\general\InternetController;
 use App\Http\Controllers\v1\management\general\ManagementController;
 use App\Http\Controllers\v1\management\general\SupportsController;
 
@@ -67,7 +68,11 @@ Route::prefix('v1/general')
         });
 
         Route::group(['prefix' => 'profiles'], function () {
-            Route::get('internet', [DataController::class, 'internetProfilesList']);
+            Route::group(['prefix' => 'select'], function () {
+                Route::get('internet', [InternetController::class, 'internetPlansList']);
+                Route::get('iptv', [InternetController::class, 'iptvPlansList']);
+            });
+            Route::get('internet', [InternetController::class, 'internetProfilesList']);
         });
 
         Route::group(['prefix' => 'supports'], function () {

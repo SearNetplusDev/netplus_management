@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Controllers\v1\management\general;
+
+use App\Http\Controllers\Controller;
+use App\Models\Management\Profiles\InternetModel;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
+
+class InternetController extends Controller
+{
+    public function internetProfilesList(): JsonResponse
+    {
+        return response()->json([
+            'response' => InternetModel::query()
+                ->select(['id', 'name'])
+                ->where('status_id', 1)
+                ->orderBy('name', 'ASC')
+                ->get()
+        ]);
+    }
+
+    public function internetPlansList(): JsonResponse
+    {
+        return response()->json([
+            'response' => $this->plans(false)
+        ]);
+    }
+
+    public function iptvPlansList(): JsonResponse
+    {
+        return response()->json([
+            'response' => $this->plans(true)
+        ]);
+    }
+
+    private function plans(bool $iptv): Collection
+    {
+        return InternetModel::query()
+            ->where([
+                ['status_id', 1],
+                ['iptv', $iptv]
+            ])
+            ->select(['id', 'name'])
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->makeHidden('status');
+    }
+}

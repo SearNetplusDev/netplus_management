@@ -143,15 +143,4 @@ class DataController extends Controller
                 ->get()
         ]);
     }
-
-    public function internetProfilesList(): JsonResponse
-    {
-        return response()->json([
-            'response' => InternetModel::query()
-                ->select(['id', 'name'])
-                ->where('status_id', 1)
-                ->orderBy('name', 'ASC')
-                ->get()
-        ]);
-    }
 }
