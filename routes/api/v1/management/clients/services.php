@@ -15,6 +15,7 @@ Route::prefix('v1/services')
         Route::post('/edit', [ServicesController::class, 'read']);
         Route::put('{id}', [ServicesController::class, 'update']);
         Route::post('/client', [ServicesController::class, 'clientServices']);
+        Route::get('client/{id}', [ServicesController::class, 'servicesList']);
 
         //      Services Internet
         Route::group(['prefix' => 'internet'], function () {

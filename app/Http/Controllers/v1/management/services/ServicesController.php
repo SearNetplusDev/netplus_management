@@ -76,4 +76,11 @@ class ServicesController extends Controller
             'client' => new ServiceResource($servService->clientServices($request->input('client'))),
         ]);
     }
+
+    public function servicesList(int $clientID, ServService $service): JsonResponse
+    {
+        return response()->json([
+            'response' => new ServiceResource($service->supportList($clientID))
+        ]);
+    }
 }

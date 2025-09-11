@@ -5,6 +5,7 @@ namespace App\Services\v1\management\services;
 use App\DTOs\v1\management\services\ServiceDTO;
 use App\Models\Clients\ClientModel;
 use App\Models\Services\ServiceModel;
+use Illuminate\Support\Collection;
 
 class ServService
 {
@@ -34,5 +35,22 @@ class ServService
             'services.district:id,name',
             'services.internet.profile',
         ])->find($id);
+    }
+
+    public function supportList(int $id): Collection
+    {
+        $query = ServiceModel::query()
+            ->where([
+                ['client_id', $id],
+                ['status_id', 1]
+            ])
+            ->get();
+
+        return $query->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => "{$item->id} - {$item->address}",
+            ];
+        });
     }
 }

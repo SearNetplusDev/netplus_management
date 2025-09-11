@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\v1\management\supports;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\Management\Supports\SupportRequest;
+use App\Http\Resources\v1\management\supports\SupportResource;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\management\DataViewerService;
+use App\Services\v1\management\supports\SupportService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -36,6 +39,13 @@ class SupportsController extends Controller
             'district' => fn($q, $data) => $q->whereIn('district_id', $data),
             'user' => fn($q, $data) => $q->whereIn('user_id', $data),
             'technician' => fn($q, $data) => $q->whereIn('technician_id', $data),
+        ]);
+    }
+
+    public function store(SupportRequest $request, SupportService $service): JsonResponse
+    {
+        return response()->json([
+            'support' => new SupportResource($service->create($request->all())),
         ]);
     }
 }

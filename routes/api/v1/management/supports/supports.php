@@ -9,6 +9,7 @@ Route::prefix('v1/supports')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::post('data', [SupportsController::class, 'data']);
+        Route::post('/', [SupportsController::class, 'store']);
 
         //  Types
         Route::group(['prefix' => 'types'], function () {
