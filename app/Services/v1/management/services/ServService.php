@@ -53,4 +53,13 @@ class ServService
             ];
         });
     }
+
+    public function getAddress(int $id): ServiceModel
+    {
+        return ServiceModel::query()
+            ->select(['state_id', 'municipality_id', 'district_id', 'address'])
+            ->where('id', $id)
+            ->first()
+            ->makeHidden('status');
+    }
 }

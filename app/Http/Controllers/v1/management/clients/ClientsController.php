@@ -80,4 +80,11 @@ class ClientsController extends Controller
 
         return response()->json(['clients' => $data]);
     }
+
+    public function clientBranch(int $id, ClientGeneralDataService $service): JsonResponse
+    {
+        return response()->json([
+            'branch' => new GeneralDataResource($service->getClientBranch($id))
+        ]);
+    }
 }

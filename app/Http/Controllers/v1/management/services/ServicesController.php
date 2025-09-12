@@ -83,4 +83,11 @@ class ServicesController extends Controller
             'response' => new ServiceResource($service->supportList($clientID))
         ]);
     }
+
+    public function serviceAddress(int $serviceID, ServService $service): JsonResponse
+    {
+        return response()->json([
+            'address' => new ServiceResource($service->getAddress($serviceID))
+        ]);
+    }
 }

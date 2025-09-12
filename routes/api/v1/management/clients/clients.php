@@ -19,6 +19,7 @@ Route::prefix('v1/clients')
         Route::post('edit', [ClientsController::class, 'edit']);
         Route::put('{id}', [ClientsController::class, 'update']);
         Route::post('search', [ClientsController::class, 'searchByName']);
+        Route::get('{id}/branch', [ClientsController::class, 'clientBranch']);
 
         //      PERSONAL DOCUMENTS
         Route::group(['prefix' => 'documents'], function () {
