@@ -44,6 +44,9 @@ class SupportRequest extends FormRequest
         self::SUPPORT_TYPES['EQUIPMENT_SALE'],
     ];
 
+    //  Estados que requieren solución
+    private const STATUS_REQUIRING_SOLUTION = [3, 5];
+
     public function authorize(): bool
     {
         return true;
@@ -98,12 +101,21 @@ class SupportRequest extends FormRequest
             }
         );
 
-        //  Validación condicional para técnico y solución según estado
+        //  Validación condicional para técnico según estado
         $validator->sometimes(
-            ['technician', 'solution'],
+            'technician',
             'required',
             function ($input) {
                 return in_array((int)$input->status, self::STATUS_REQUIRING_TECHNICIAN);
+            }
+        );
+
+        //  Validación condicional para solución según estado
+        $validator->sometimes(
+            'solution',
+            'required',
+            function ($input) {
+                return in_array((int)$input->status, self::STATUS_REQUIRING_SOLUTION);
             }
         );
 

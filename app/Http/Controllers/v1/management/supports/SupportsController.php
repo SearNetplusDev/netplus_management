@@ -42,10 +42,14 @@ class SupportsController extends Controller
         ]);
     }
 
-    public function store(SupportRequest $request, SupportService $service): JsonResponse
+    public function store(SupportRequest $request, SupportService $service)/*: JsonResponse*/
     {
-        return response()->json([
-            'support' => new SupportResource($service->create($request->all())),
-        ]);
+        $support = $service->create($request->validated());
+
+        return $support;
+
+//        return response()->json([
+//            'support' => new SupportResource($support),
+//        ]);
     }
 }
