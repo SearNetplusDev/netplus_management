@@ -17,7 +17,7 @@ class SupportsController extends Controller
     {
         $query = SupportModel::query()
             ->with([
-                'type:id,name',
+                'type:id,name,badge_color',
                 'client:id,name,surname',
                 'client.client_type:id,name',
                 'branch:id,name',
@@ -26,7 +26,7 @@ class SupportsController extends Controller
                 'municipality:id,name',
                 'district:id,name',
                 'user:id,name',
-                'status:id,name',
+                'status:id,name,badge_color',
                 'details',
             ]);
 
@@ -42,14 +42,20 @@ class SupportsController extends Controller
         ]);
     }
 
-    public function store(SupportRequest $request, SupportService $service)/*: JsonResponse*/
+    public function store(SupportRequest $request, SupportService $service): JsonResponse
     {
         $support = $service->create($request->toDTO());
 
-        return $support;
+        return response()->json([
+            'saved' => (bool)$support,
+            'support' => new SupportResource($support),
+        ]);
+    }
 
-//        return response()->json([
-//            'support' => new SupportResource($support),
-//        ]);
+    public function read(Request $request, SupportService $service): JsonResponse
+    {
+        return response()->json([
+            'support' => new SupportResource($service->read($request->input('id'))),
+        ]);
     }
 }

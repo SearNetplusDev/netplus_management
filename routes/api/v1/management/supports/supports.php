@@ -10,6 +10,7 @@ Route::prefix('v1/supports')
     ->group(function () {
         Route::post('data', [SupportsController::class, 'data']);
         Route::post('/', [SupportsController::class, 'store']);
+        Route::post('edit', [SupportsController::class, 'read']);
 
         //  Types
         Route::group(['prefix' => 'types'], function () {

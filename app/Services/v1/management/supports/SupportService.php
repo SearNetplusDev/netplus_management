@@ -16,6 +16,13 @@ class SupportService
         return $strategy->handle($DTO->toArray(), $ticket);
     }
 
+    public function read(int $id): SupportModel
+    {
+        return SupportModel::query()
+            ->with(['client', 'service', 'details', 'contract'])
+            ->findOrFail($id);
+    }
+
     private function createTicket(): string
     {
         $prefix = 'NETPLUS_SPT-';

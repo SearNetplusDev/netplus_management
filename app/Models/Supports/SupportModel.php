@@ -3,6 +3,7 @@
 namespace App\Models\Supports;
 
 use App\Models\Clients\ClientModel;
+use App\Models\Clients\ContractModel;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
@@ -28,6 +29,7 @@ class SupportModel extends Model
         'ticket_number',
         'client_id',
         'service_id',
+        'contract_id',
         'branch_id',
         'creation_date',
         'due_date',
@@ -59,7 +61,7 @@ class SupportModel extends Model
         'state_id',
         'municipality_id',
         'district_id',
-        'closet_at',
+        'closed_at',
         'user_id',
         'status_id',
         'breached_sla',
@@ -139,5 +141,10 @@ class SupportModel extends Model
     public function details(): HasOne
     {
         return $this->hasOne(SupportDetailModel::class, 'support_id', 'id');
+    }
+
+    public function contract(): BelongsTo
+    {
+        return $this->belongsTo(ContractModel::class, 'contract_id', 'id');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models\Clients;
 
 use App\Models\Configuration\Clients\ContractStateModel;
+use App\Models\Supports\SupportModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,6 +38,11 @@ class ContractModel extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(ClientModel::class, 'client_id', 'id');
+    }
+
+    public function support(): HasOne
+    {
+        return $this->hasOne(SupportModel::class, 'id', 'contract_id');
     }
 
     public function getDiffDaysAttribute(): ?int

@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Strategies\v1\Supports;
+namespace App\Strategies\v1\Supports\Process;
 
 use App\Contracts\v1\Supports\SupportTypeInterface;
-use App\DTOs\v1\management\supports\SupportDTO;
+use App\Models\Clients\ContractModel;
 use App\Models\Management\Profiles\InternetModel;
+use App\Models\Supports\SupportDetailModel;
+use App\Models\Supports\SupportModel;
 use App\Models\Supports\TypeModel;
 use Carbon\Carbon;
 
 class Installation implements SupportTypeInterface
 {
 
-    public function handle(array $data, string $ticket): array
+    public function handle(array $data, string $ticket): SupportModel
     {
         /****
          * Creando Contrato
@@ -36,6 +38,7 @@ class Installation implements SupportTypeInterface
             'contract_status_id' => 1,
             'status_id' => 1,
         ];
+        $contract = ContractModel::query()->create($contractData);
 
         /****
          * Creando Soporte
@@ -46,7 +49,7 @@ class Installation implements SupportTypeInterface
             'type_id' => $data['type_id'],
             'ticket_number' => $ticket,
             'client_id' => $data['client_id'],
-            'contract_id' => $contractData['contract_amount'],
+            'contract_id' => $contract->id,
             'service_id' => $data['service_id'],
             'branch_id' => $data['branch_id'],
             'creation_date' => $creationDate->toDateTimeString(),
@@ -65,14 +68,20 @@ class Installation implements SupportTypeInterface
             'breached_sla' => false,
             'resolution_time' => null,
         ];
+        $support = SupportModel::query()->create($supportData);
 
         /****
          * Agregando detalles al Soporte
          ****/
-
-        return [
-            'contract' => $contractData,
-            'support' => $supportData,
+        $supportDetails = [
+            'support_id' => $support->id,
+            'type_id' => $data['type_id'],
+            'internet_profile_id' => $data['internet_profile_id'],
+            'node_id' => $data['node_id'],
+            'equipment_id' => $data['equipment_id'],
         ];
+        SupportDetailModel::query()->create($supportDetails);
+
+        return $support;
     }
 }

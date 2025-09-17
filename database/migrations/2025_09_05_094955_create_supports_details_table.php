@@ -21,14 +21,17 @@ return new class extends Migration {
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->foreignId('internet_profile_id')
+                ->nullable()
                 ->constrained('management_internet_profiles')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->foreignId('node_id')
+                ->nullable()
                 ->constrained('infrastructure_nodes')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->foreignId('equipment_id')
+                ->nullable()
                 ->constrained('infrastructure_equipment')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
