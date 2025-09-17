@@ -2,20 +2,23 @@
 
 namespace App\Services\v1\management\supports;
 
+use App\DTOs\v1\management\supports\SupportDTO;
 use App\Models\Supports\SupportModel;
 
 class SupportService
 {
-    public function create(array $data)/*: array*/
+    public function create(SupportDTO $DTO)/*: array*/
     {
         $ticket = $this->createTicket();
-        $data['ticket_number'] = $ticket;
-        return $data;
+
+        //  Buscando estrategia correcta
+        $strategy = SupportFactory::make((int)$DTO->type_id);
+        return $strategy->handle($DTO->toArray(), $ticket);
     }
 
     private function createTicket(): string
     {
-        $prefix = 'NTP-';
+        $prefix = 'NETPLUS_SPT-';
         $total = SupportModel::query()->withTrashed()->count();
         $totalLength = 10;
         $zeroFill = max(0, $totalLength - strlen($total));

@@ -53,7 +53,7 @@ class SupportDTO extends Data
         public readonly string  $address,
 
         #[Nullable, Date]
-        public readonly ?Carbon $closet_at,
+        public readonly ?Carbon $closed_at,
 
         #[Nullable, StringType]
         public readonly ?string $solution,

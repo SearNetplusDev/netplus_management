@@ -44,7 +44,7 @@ class SupportsController extends Controller
 
     public function store(SupportRequest $request, SupportService $service)/*: JsonResponse*/
     {
-        $support = $service->create($request->validated());
+        $support = $service->create($request->toDTO());
 
         return $support;
 

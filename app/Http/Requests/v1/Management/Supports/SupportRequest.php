@@ -2,9 +2,13 @@
 
 namespace App\Http\Requests\v1\Management\Supports;
 
+use App\DTOs\v1\management\supports\SupportDTO;
 use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Services\ServiceModel;
+use App\Models\Supports\SupportModel;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class SupportRequest extends FormRequest
 {
@@ -21,8 +25,20 @@ class SupportRequest extends FormRequest
         'EQUIPMENT_SALE' => 9,
     ];
 
+    private const STATUS_TYPES = [
+        'PENDING' => 1,
+        'ASSIGNED' => 2,
+        'ENDED' => 3,
+        'CANCELLED' => 4,
+        'OBSERVED' => 5,
+    ];
+
     //  Estados que requieren técnico y solución
-    private const STATUS_REQUIRING_TECHNICIAN = [2, 3];
+    private const STATUS_REQUIRING_TECHNICIAN = [
+        self::STATUS_TYPES['ASSIGNED'],
+        self::STATUS_TYPES['ENDED'],
+        self::STATUS_TYPES['OBSERVED'],
+    ];
 
     //  Tipos que requieren detalles de instalación/contrato
     private const TYPES_REQUIRING_CONTRACT_DETAILS = [
@@ -45,7 +61,9 @@ class SupportRequest extends FormRequest
     ];
 
     //  Estados que requieren solución
-    private const STATUS_REQUIRING_SOLUTION = [3, 5];
+    private const STATUS_REQUIRING_SOLUTION = [
+        self::STATUS_TYPES['ENDED']
+    ];
 
     public function authorize(): bool
     {
@@ -85,7 +103,7 @@ class SupportRequest extends FormRequest
     {
         //  Validación condicional para campos requeridos según tipo de soporte
         $validator->sometimes(
-            ['profile', 'node', 'equipment'],
+            ['profile'/*, 'node', 'equipment'*/],
             'required',
             function ($input) {
                 return in_array((int)$input->type, self::TYPES_REQUIRING_CONTRACT_DETAILS);
@@ -137,10 +155,15 @@ class SupportRequest extends FormRequest
             }
         );
 
-        //  Validación personalizada para verificar que el servicio pertenece al cliente
+        /************************
+         *  Validación personalizada para verificar que el servicio pertenece al cliente.
+         *  Y que no tenga soportes de instalación activos o soportes pendientes
+         ***********************/
         $validator->after(function ($validator) {
             $this->validateServiceBelongsToClient($validator);
             $this->validateEquipmentBelongsToNode($validator);
+            $this->validateClientHasNoPendingInstallation($validator);
+            $this->validateClientHasNoPendingSupport($validator);
         });
     }
 
@@ -175,6 +198,60 @@ class SupportRequest extends FormRequest
             if (!$equipmentExists) {
                 $validator->errors()->add('equipment', 'El equipo seleccionado no pertenece al nodo');
             }
+        }
+    }
+
+    private function validateClientHasNoPendingInstallation($validator): void
+    {
+        //  Validando que el soporte que intenta crear sea una instalación
+        if (in_array((int)$this->input('type'), [
+            self::SUPPORT_TYPES['INTERNET_INSTALLATION'],
+            self::SUPPORT_TYPES['IPTV_INSTALLATION']
+        ])) {
+            $clientId = $this->input('client');
+
+            //  Buscando soportes de instalación del mismo cliente que no estén finalizados
+            $exists = SupportModel::query()
+                ->where('client_id', $clientId)
+                ->whereIn('type_id', [
+                    self::SUPPORT_TYPES['INTERNET_INSTALLATION'],
+                    self::SUPPORT_TYPES['IPTV_INSTALLATION']
+                ])
+                ->whereNull('closed_at')
+                ->whereNotIn('status_id', [3, 5])
+                ->exists();
+
+            if ($exists) {
+                $validator->errors()->add('client', 'Este cliente tiene una instalación en proceso.');
+            }
+
+        }
+    }
+
+    private function validateClientHasNoPendingSupport($validator): void
+    {
+        $supportType = (int)$this->input('type');
+        $clientId = (int)$this->input('client');
+
+        //  Verificando si el soporte es venta de equipo
+        if ($supportType === self::SUPPORT_TYPES['EQUIPMENT_SALE']) return;
+
+        //  Buscando cualquier soporte del cliente que no esté finalizado/cancelado/observado
+        $exists = SupportModel::query()
+            ->where([
+                ['client_id', $clientId],
+                ['type_id', $supportType]
+            ])
+            ->whereNull('closed_at')
+            ->whereNotIn('status_id', [
+                self::STATUS_TYPES['ENDED'],
+                self::STATUS_TYPES['CANCELLED'],
+                self::STATUS_TYPES['OBSERVED']
+            ])
+            ->exists();
+
+        if ($exists) {
+            $validator->errors()->add('client', 'Este cliente ya tiene un soporte pendiente de este tipo.');
         }
     }
 
@@ -244,5 +321,36 @@ class SupportRequest extends FormRequest
             'equipment.integer' => 'Formato inválido.',
             'equipment.exists' => 'El equipo seleccionado no existe.',
         ];
+    }
+
+    public function toDTO(): SupportDTO
+    {
+        return new SupportDTO(
+            type_id: $this->input('type'),
+            ticket_number: '',
+            client_id: $this->input('client'),
+            service_id: $this->input('service'),
+            branch_id: $this->input('branch'),
+            creation_date: Carbon::now(),
+            due_date: null,
+            description: $this->input('description'),
+            technician_id: $this->input('technician') ?? null,
+            state_id: $this->input('state'),
+            municipality_id: $this->input('municipality'),
+            district_id: $this->input('district'),
+            address: $this->input('address'),
+            closed_at: null,
+            solution: $this->input('solution') ?? null,
+            comments: $this->input('comments') ?? null,
+            user_id: Auth::user()->id,
+            status_id: $this->input('status'),
+            breached_sla: false,
+            resolution_time: null,
+            internet_profile_id: $this->input('profile') ?? null,
+            node_id: $this->input('node') ?? null,
+            equipment_id: $this->input('equipment') ?? null,
+            contract_date: Carbon::parse($this->input('initial_date')) ?? null,
+            contract_end_date: Carbon::parse($this->input('final_date')) ?? null,
+        );
     }
 }
