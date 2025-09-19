@@ -12,15 +12,24 @@ use InvalidArgumentException;
 
 class SupportFactory
 {
+    protected static array $map = [
+        1 => Installation::class,
+        2 => Installation::class,
+        3 => Maintenance::class,
+        4 => Maintenance::class,
+        5 => ChangeAddress::class,
+        6 => Installation::class,
+        7 => Installation::class,
+        8 => Uninstall::class,
+        9 => EquipmentSale::class,
+    ];
+
     public static function make(int $type): SupportTypeInterface
     {
-        return match ($type) {
-            1, 2, 6, 7 => new Installation(),
-            3, 4 => new Maintenance(),
-            5 => new ChangeAddress(),
-            8 => new Uninstall(),
-            9 => new EquipmentSale(),
-            default => throw new InvalidArgumentException("Tipo de soporte no válido"),
-        };
+        if (!isset(self::$map[$type])) {
+            throw new InvalidArgumentException("Tipo de soporte no válido.");
+        }
+
+        return app(self::$map[$type]);
     }
 }

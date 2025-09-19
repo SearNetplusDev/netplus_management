@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\management\supports;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\Management\Supports\SupportRequest;
+use App\Http\Requests\v1\Management\Supports\UpdateSupportRequest;
 use App\Http\Resources\v1\management\supports\SupportResource;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\management\DataViewerService;
@@ -56,6 +57,16 @@ class SupportsController extends Controller
     {
         return response()->json([
             'support' => new SupportResource($service->read($request->input('id'))),
+        ]);
+    }
+
+    public function update(SupportRequest $request, SupportModel $id, SupportService $service): JsonResponse
+    {
+        $support = $service->update($id, $request->toDTO());
+
+        return response()->json([
+            'saved' => (bool)$support,
+            'support' => new SupportResource($support),
         ]);
     }
 }

@@ -2,55 +2,49 @@
 
 namespace App\Http\Requests\v1\Management\Supports;
 
-use App\DTOs\v1\management\supports\SupportDTO;
 use App\Enums\v1\Supports\SupportStatus;
 use App\Enums\v1\Supports\SupportType;
 use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
+use App\Traits\Validation\Supports\EnumValidation;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
-class SupportRequest extends FormRequest
+class UpdateSupportRequest extends FormRequest
 {
+    use EnumValidation;
+
     public function authorize(): bool
     {
-        return true;
+//        $supportId = $this->route('support') ?? $this->input('id');
+        $supportId = $this->route('id') ?? $this->input('id');
+        $support = SupportModel::query()->findOrFail($supportId);
+        return $support !== null;
     }
 
     public function rules(): array
     {
         return [
-            //  Campos requeridos en todos los soportes
-            'type' => [
-                'required',
-                'integer',
-                'exists:supports_types,id',
-                Rule::enum(SupportType::class),
-            ],
-            'client' => ['required', 'integer', 'exists:clients,id',],
-            'branch' => ['required', 'integer', 'exists:config_branches,id'],
+            'id' => ['sometimes', 'integer', 'exists:supports,id'],
+
+            //  Usando métodos del trait para reglas del enum
+            'type' => $this->getOptionalSupportTypeRule(),
+            'status' => $this->getOptionalSupportStatusRule(),
+
+            'client' => ['sometimes', 'integer', 'exists:clients,id'],
+            'branch' => ['sometimes', 'integer', 'exists:config_branches,id'],
             'state' => ['required', 'integer', 'exists:config_states,id'],
             'municipality' => ['required', 'integer', 'exists:config_municipalities,id'],
             'district' => ['required', 'integer', 'exists:config_districts,id'],
-            'status' => [
-                'required',
-                'integer',
-                'exists:supports_status,id',
-                Rule::enum(SupportStatus::class),
-            ],
             'description' => ['required', 'string'],
             'address' => ['required', 'string'],
+            'solution' => ['sometimes', 'string'],
+            'comments' => ['sometimes', 'string'],
 
-            //  Campos condicionales según estado de soporte
             'technician' => ['nullable', 'integer', 'exists:technicians,id'],
-
-            //  Campos condicionales según tipo de soporte
             'service' => ['nullable', 'integer', 'exists:services,id'],
-            'solution' => ['nullable', 'string'],
-            'comments' => ['nullable', 'string'],
             'profile' => ['nullable', 'integer', 'exists:management_internet_profiles,id'],
             'initial_date' => ['nullable', 'date'],
             'final_date' => ['nullable', 'date'],
@@ -61,73 +55,64 @@ class SupportRequest extends FormRequest
 
     public function withValidator($validator): void
     {
-        $supportType = SupportType::tryFrom((int)$this->input('type'));
-        $supportStatus = SupportStatus::tryFrom((int)$this->input('status'));
+        if (!$this->supportExists()) {
+            $validator->errors()->add('type', 'El soporte no existe.');
+            return;
+        }
+
+        //  Obtener tipos efectivos (actuales o nuevos)
+        $supportType = $this->getEffectiveSupportType();
+        $supportStatus = $this->getEffectiveSupportStatus();
 
         if (!$supportType || !$supportStatus) return;
 
-        //  Validación condicional para campos requeridos según tipo de soporte
-        $validator->sometimes(
-            ['profile'],
-            'required',
-            function ($input) use ($supportType) {
-                return $supportType->requiresContractDetails();
-            }
-        );
 
-        //  Validación condicional para servicio según tipo de soporte
-        $validator->sometimes(
-            ['service'],
-            'required',
-            function ($input) use ($supportType) {
-                return $supportType->requiresService();
-            }
-        );
+        //  Validaciones condicionales usando los métodos de enum
+        if ($this->has('type') || $supportType->requiresContractDetails()) {
+            $validator->sometimes(
+                ['profile'],
+                'required',
+                fn() => $supportType->requiresContractDetails()
+            );
+        }
 
-        //  Validación condicional para técnico, según estado de soporte
-        $validator->sometimes(
-            'technician',
-            'required',
-            function ($input) use ($supportStatus) {
-                return $supportStatus->requiresTechnicians();
-            }
-        );
+        if ($this->has('type') || $supportType->requiresService()) {
+            $validator->sometimes(
+                'service',
+                'required',
+                fn() => $supportType->requiresService()
+            );
+        }
 
-        //  Validación condicional para solución según estado
-        $validator->sometimes(
-            'solution',
-            'required',
-            function ($input) use ($supportStatus) {
-                return $supportStatus->requiresSolution();
-            }
-        );
+        if ($this->requiresSolutionForClosure()) {
+            $validator->sometimes(
+                'solution',
+                'required',
+                fn() => true
+            );
+        }
 
-        //  Validación adicional: si hay fecha final, debe haber fecha inicial
         $validator->sometimes(
             'initial_date',
             'required',
-            function ($input) {
-                return !empty($input->final_date);
-            }
+            fn($input) => !empty($input->final_date)
         );
 
-        //  Validación adicional: si hay equipo debe haber nodo
         $validator->sometimes(
             'node',
             'required',
-            function ($input) {
-                return !empty($input->equipment);
-            }
+            fn($input) => !empty($input->equipment)
         );
 
-        /*******************************
-         *  Validaciones personalizadas usando enums
-         ******************************/
+        //  Validaciones personalizadas
         $validator->after(function ($validator) use ($supportType) {
             $this->validateServiceBelongsToClient($validator);
             $this->validateEquipmentBelongsToNode($validator);
-//            $this->validateClientHasNoPendingInstallation($validator, $supportType);
-//            $this->validateClientHasNoPendingSupport($validator, $supportType);
+
+            //  Solo validar duplicados si se está cambiando el cliente o el tipo
+            if ($this->has('client') || $this->has('type')) {
+                $this->validateNoDuplicateSupport($validator, $supportType);
+            }
         });
     }
 
@@ -158,51 +143,106 @@ class SupportRequest extends FormRequest
                 ->exists();
 
             if (!$equipmentExists) {
-                $validator->errors()->add('equipment', 'El equipo seleccionado no pertenece nodo.');
+                $validator->errors()->add('equipment', 'El equipo seleccionado no pertenece al nodo.');
             }
         }
     }
 
-    private function validateClientHasNoPendingInstallation($validator, SupportType $supportType): void
+    //  Validación adicional para duplicados excluyendo el registro actual
+    private function validateNoDuplicateSupport($validator, SupportType $supportType): void
     {
-        // Usando el método del enum para verificar si es instalación
-        if ($supportType->isInstallation()) {
-            $clientId = $this->input('client');
+        if (!$this->has('client') || $this->has('type')) return;
 
-            //  Usando método estático del enum para obtener tipos de instalación
-            $exists = SupportModel::query()
-                ->where('client_id', $clientId)
-                ->whereIn('type_id', SupportType::getInstallationTypes())
-                ->whereNull('closed_at')
-                ->whereNotIn('status_id', SupportStatus::getClosedStatuses())
-                ->exists();
+        $supportId = $this->getSupportId();
+        $clientId = (int)$this->input('client');
 
-            if ($exists) {
-                $validator->errors()->add('client', 'Este cliente tiene una instalación en proceso');
-            }
-        }
-    }
-
-    private function validateClientHasNoPendingSupport($validator, SupportType $supportType): void
-    {
-        $clientId = $this->input('client');
-
-        //  Verificando si el soporte permite duplicados
+        //  No validar duplicados para tipos que lo permiten
         if ($supportType->allowsDuplicates()) return;
 
-        // Buscando cualquier soporte del cliente que no esté finalizado/cancelado/observado
-        $exists = SupportModel::query()
+        //  Buscar soportes del mismo tipo y cliente excluyendo el actual
+        $query = SupportModel::query()
             ->where([
                 ['client_id', $clientId],
-                ['type_id', $supportType->value],
+                ['type_id', $supportType->value]
             ])
             ->whereNull('closed_at')
-            ->whereNotIn('status_id', SupportStatus::getClosedStatuses())
-            ->exists();
+            ->whereNotIn('status_id', SupportStatus::getClosedStatuses());
 
-        if ($exists) {
-            $validator->errors()->add('client', 'Este cliente ya tiene un soporte pendiente.');
+        //  Excluír el registro actual si existe
+        if ($supportId) {
+            $query->where('id', '!=', $supportId);
         }
+
+        if ($query->exists()) {
+            $validator->errors()->add('client', 'El cliente ya tiene un soporte pendiente de este tipo.');
+        }
+    }
+
+    /**********
+     * Obteniendo el id del soporte que se está editando
+     **********/
+    protected function getSupportId(): ?int
+    {
+        return $this->route('id') ?? $this->input('id');
+    }
+
+    //  Obteniendo soporte que se está editando
+    protected function getCurrentSupport(): ?SupportModel
+    {
+        $supportId = $this->getSupportId();
+        return $supportId ? SupportModel::query()->find($supportId) : null;
+    }
+
+    //  Verificando si el soporte existe
+    protected function supportExists(): bool
+    {
+        return $this->getCurrentSupport() !== null;
+    }
+
+    //  Obtiene el tipo de soporte actual o el que se está enviando
+    protected function getEffectiveSupportType(): ?SupportType
+    {
+        if ($this->has('type')) {
+            return SupportType::tryFrom((int)$this->input('type'));
+        }
+
+        $currentSupport = $this->getCurrentSupport();
+        return $currentSupport ? SupportType::tryFrom($currentSupport->type_id) : null;
+    }
+
+    //  Obtiene el estado del soporte actual o el que se le está enviando
+    protected function getEffectiveSupportStatus(): ?SupportStatus
+    {
+        if ($this->has('status')) {
+            return SupportStatus::tryFrom((int)$this->input('status'));
+        }
+        $currentSupport = $this->getCurrentSupport();
+        return $currentSupport ? SupportStatus::tryFrom($currentSupport->status_id) : null;
+    }
+
+    //  Verifica si se está cambiando de un estado abierto a cerrado
+    protected function isClosingSupport(): bool
+    {
+        if (!$this->has('status')) return false;
+
+        $currentSupport = $this->getCurrentSupport();
+        if (!$currentSupport) return false;
+
+        $currentStatus = SupportStatus::tryFrom($currentSupport->status_id);
+        $newStatus = SupportStatus::tryFrom((int)$this->input('status'));
+
+        return $currentStatus && $newStatus && $currentStatus->isActive() && $newStatus->isClosed();
+    }
+
+    //  Verifica si se requiere una solución cuando se cierra
+    protected function requiresSolutionForClosure(): bool
+    {
+        if (!$this->isClosingSupport()) {
+            return false;
+        }
+
+        $newStatus = SupportStatus::tryFrom((int)$this->input('status'));
+        return $newStatus && $newStatus->requiresSolution();
     }
 
     public function messages(): array
@@ -211,6 +251,7 @@ class SupportRequest extends FormRequest
             'type.required' => 'Tipo de soporte es un campo obligatorio.',
             'type.integer' => 'Formato inválido.',
             'type.exists' => 'El tipo de soporte no existe.',
+            'type.enum' => 'El tipo de soporte seleccionado no es válido.',
 
             'client.required' => 'Cliente es un campo obligatorio.',
             'client.integer' => 'Formato inválido.',
@@ -235,6 +276,7 @@ class SupportRequest extends FormRequest
             'status.required' => 'Estado de soporte es un campo obligatorio.',
             'status.integer' => 'Formato inválido.',
             'status.exists' => 'El estado seleccionado no existe.',
+            'status.enum' => 'El estado seleccionado no es válido.',
 
             'description.required' => 'Descripción es un campo obligatorio.',
             'description.string' => 'Solo se admiten letras.',
@@ -259,9 +301,10 @@ class SupportRequest extends FormRequest
             'profile.integer' => 'Formato inválido.',
             'profile.exists' => 'El perfil seleccionado no existe.',
 
-            'initial_date.date' => 'No es una fecha.',
+            'initial_date.required' => 'Fecha inicial es requerida cuando hay fecha final.',
+            'initial_date.date' => 'No es una fecha válida.',
 
-            'final_date.date' => 'No es una fecha.',
+            'final_date.date' => 'No es una fecha válida.',
 
             'node.required' => 'Nodo es un campo obligatorio.',
             'node.integer' => 'Formato inválido.',
@@ -299,8 +342,8 @@ class SupportRequest extends FormRequest
             internet_profile_id: $this->input('profile') ?? null,
             node_id: $this->input('node') ?? null,
             equipment_id: $this->input('equipment') ?? null,
-            contract_date: Carbon::parse($this->input('initial_date')) ?? null,
-            contract_end_date: Carbon::parse($this->input('final_date')) ?? null,
+            contract_date: $this->filled('initial_date') ? Carbon::parse($this->input('initial_date')) : null,
+            contract_end_date: $this->filled('final_date') ? Carbon::parse($this->input('final_date')) : null,
         );
     }
 
