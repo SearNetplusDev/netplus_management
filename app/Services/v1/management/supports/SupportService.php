@@ -73,6 +73,12 @@ class SupportService
         return $support;
     }
 
+    public function printTicket(SupportModel $support): string
+    {
+        $strategy = TicketFactory::make((int)$support->type_id);
+        return $strategy->render($support);
+    }
+
     private function createTicket(): string
     {
         $prefix = 'NETPLUS_SPT-';

@@ -9,6 +9,7 @@ use App\Http\Resources\v1\management\supports\SupportResource;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\management\DataViewerService;
 use App\Services\v1\management\supports\SupportService;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -68,5 +69,17 @@ class SupportsController extends Controller
             'saved' => (bool)$support,
             'support' => new SupportResource($support),
         ]);
+    }
+
+    public function print(int $id, SupportService $service): Response
+    {
+        $support = SupportModel::query()
+            ->with(['client', 'contract', 'details'])
+            ->findOrFail($id);
+        $pdfBinary = $service->printTicket($support);
+
+        return response($pdfBinary, 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="ticket.pdf"');
     }
 }
