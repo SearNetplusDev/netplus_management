@@ -6,6 +6,7 @@ use App\DTOs\v1\management\supports\SupportDTO;
 use App\Enums\v1\Supports\SupportStatus;
 use App\Enums\v1\Supports\SupportType;
 use App\Models\Supports\SupportModel;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class SupportService
@@ -45,8 +46,31 @@ class SupportService
     public function update(SupportModel $model, SupportDTO $DTO)/*: SupportModel*/
     {
         $strategy = SupportFactory::make((int)$DTO->type_id);
+        $support = $strategy->update($model, $DTO->toArray());
 
-        return $strategy->update($model, $DTO->toArray());
+        //  Si el soporte se está cerrando
+        if ((int)$DTO->status_id === SupportStatus::ENDED->value) {
+            $closedAt = Carbon::now();
+            $support->closed_at = $closedAt;
+            $support->solution = $DTO->solution ?? $support->solution;
+            $support->comments = $DTO->comment ?? $support->comments;
+
+            //  Calculando tiempo de resolución
+            if ($support->creation_date) {
+                $dueDate = Carbon::parse($support->due_date);
+                $closedAt = Carbon::parse($support->close_date);
+                $support->resolution_time = $closedAt->diffInMicroseconds($dueDate);
+
+                //  Verificando SLA
+                if ($support->due_date && $closedAt->greaterThan($dueDate)) {
+                    $support->breached_sla = true;
+                } else {
+                    $support->breached_sla = false;
+                }
+            }
+            $support->save();
+        }
+        return $support;
     }
 
     private function createTicket(): string
