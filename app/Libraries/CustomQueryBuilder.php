@@ -77,26 +77,67 @@ class CustomQueryBuilder
 
     public function equalTo(array $f, Builder $q, string $boolean = 'and'): Builder
     {
+        if (in_array($f['column'], $this->getDateColumns())) {
+            try {
+                return $q->whereDate($f['column'], '=', Carbon::parse($f['query_1'])->format('Y-m-d'), $boolean);
+            } catch (\Exception $e) {
+
+            }
+        }
         return $q->where($f['column'], '=', $f['query_1'], $boolean);
     }
 
     public function notEqualTo(array $f, Builder $q, string $boolean = 'and'): Builder
     {
+        if (in_array($f['column'], $this->getDateColumns())) {
+            try {
+                return $q->whereDate($f['column'], '!=', Carbon::parse($f['query_1'])->format('Y-m-d'), $boolean);
+            } catch (\Exception $e) {
+                // Fall back to regular comparison if date parsing fails
+            }
+        }
         return $q->where($f['column'], '!=', $f['query_1'], $boolean);
     }
 
     public function lessThan(array $f, Builder $q, string $boolean = 'and'): Builder
     {
+        if (in_array($f['column'], $this->getDateColumns())) {
+            try {
+                $date = Carbon::parse($f['query_1'])->startOfDay();
+                return $q->where($f['column'], '<', $date, $boolean);
+            } catch (\Exception $e) {
+                // Fall back to regular comparison if date parsing fails
+            }
+        }
+
         return $q->where($f['column'], '<', $f['query_1'], $boolean);
     }
 
     public function greaterThan(array $f, Builder $q, string $boolean = 'and'): Builder
     {
+        if (in_array($f['column'], $this->getDateColumns())) {
+            try {
+                $date = Carbon::parse($f['query_1'])->endOfDay();
+                return $q->where($f['column'], '>', $date, $boolean);
+            } catch (\Exception $e) {
+                // Fall back to regular comparison if date parsing fails
+            }
+        }
         return $q->where($f['column'], '>', $f['query_1'], $boolean);
     }
 
     public function between(array $f, Builder $q, string $boolean = 'and'): Builder
     {
+        //  Verificando si es una columna tipo fecha
+        if (in_array($f['column'], $this->getDateColumns())) {
+            try {
+                $startDate = Carbon::parse($f['query_1'])->startOfDay();
+                $endDate = Carbon::parse($f['query_2'])->endOfDay();
+                return $q->whereBetween($f['column'], [$startDate, $endDate], $boolean);
+            } catch (\Exception $e) {
+                return $q->whereBetween($f['column'], [$f['query_1'], $f['query_2']], $boolean);
+            }
+        }
         return $q->whereBetween($f['column'], [$f['query_1'], $f['query_2']], $boolean);
     }
 
@@ -186,5 +227,16 @@ class CustomQueryBuilder
     {
         $method = $boolean === 'and' ? 'has' : 'orHas';
         return $q->$method($relation, '>', $f['query_1']);
+    }
+
+    private function getDateColumns(): array
+    {
+        return [
+            'closed_at',
+            'creation_date',
+            'created_at',
+            'updated_at',
+            'due_date',
+        ];
     }
 }

@@ -58,7 +58,14 @@ trait DataViewer
             'less_than_count',
             'greater_than_count',
             'equal_to_count',
-            'not_equal_to_count'
+            'not_equal_to_count',
+            //  Operadores de fecha
+            'date_equals',
+            'date_between',
+            'date_greater_than',
+            'date_less_than',
+            'date_greater_than_or_equal',
+            'date_less_than_or_equal',
         ]);
     }
 }
