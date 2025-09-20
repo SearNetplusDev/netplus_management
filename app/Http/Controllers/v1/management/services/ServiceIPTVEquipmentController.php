@@ -19,7 +19,8 @@ class ServiceIPTVEquipmentController extends Controller
 
         return response()->json([
             'collection' => new ServiceIptvEquipmentResource($item),
-            'has_iptv' => $plan->iptv
+            'has_iptv' => $plan->iptv,
+            'allowed_devices' => $plan->allowed_stb,
         ]);
     }
 

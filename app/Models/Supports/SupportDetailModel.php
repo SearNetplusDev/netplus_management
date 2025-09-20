@@ -2,6 +2,7 @@
 
 namespace App\Models\Supports;
 
+use App\Models\Management\Profiles\InternetModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -40,5 +41,10 @@ class SupportDetailModel extends Model
     public function support(): BelongsTo
     {
         return $this->belongsTo(SupportModel::class, 'support_id', 'id');
+    }
+
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(InternetModel::class, 'internet_profile_id', 'id');
     }
 }

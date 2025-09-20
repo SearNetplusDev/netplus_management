@@ -417,6 +417,24 @@
                         {{ $data['address'] }}
                     </td>
                 </tr>
+                <tr>
+                    <td class="label">Plan contratado:</td>
+                    <td>
+                        {{ $data['plan'] }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Cuota mensual:</td>
+                    <td>
+                        ${{ $data['price'] }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Costo de instalación:</td>
+                    <td>
+                        ${{ $data['installation_price'] }}
+                    </td>
+                </tr>
             </table>
         </div>
 

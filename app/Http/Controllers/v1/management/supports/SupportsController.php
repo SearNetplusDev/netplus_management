@@ -74,7 +74,22 @@ class SupportsController extends Controller
     public function print(int $id, SupportService $service): Response
     {
         $support = SupportModel::query()
-            ->with(['client', 'contract', 'details'])
+            ->with([
+                'branch.state:id,name',
+                'branch.municipality:id,name',
+                'branch.district:id,name',
+                'client.dui',
+                'client.nit',
+                'client.passport',
+                'client.residence',
+                'client.mobile',
+                'contract',
+                'state',
+                'municipality',
+                'district',
+                'details',
+                'type',
+            ])
             ->findOrFail($id);
         $pdfBinary = $service->printTicket($support);
 
