@@ -53,55 +53,51 @@ class ContractsController extends Controller
         ]);
     }
 
-    public function print(int $id): Response
+    public function print(int $id)/*: Response*/
     {
-        $contract = ContractModel::query()
+        $query = ContractModel::query()
             ->with([
+                'support.type',
+                'support.details',
+                'client.branch.state:id,name',
+                'client.branch.municipality:id,name',
+                'client.branch.district:id,name',
                 'client.dui',
                 'client.nit',
                 'client.passport',
                 'client.residence',
-                'client.address.state',
-                'client.address.municipality',
-                'client.address.district',
-                'client.country',
                 'client.mobile',
+                'support.state:id,name',
+                'support.municipality:id,name',
+                'support.district:id,name',
             ])
-            ->where('id', $id)
-            ->get();
+            ->find($id);
 
-        $branch = BranchModel::query()
-            ->with(['state:id,name', 'municipality:id,name', 'district:id,name', 'country:id,es_name'])
-            ->find(1);
-        $branchAddress = $branch->address . ', ';
-        $branchAddress .= "distrito de {$branch->district?->name}, ";
-        $branchAddress .= "municipio de {$branch->municipality?->name}, ";
-        $branchAddress .= "departamento de {$branch->state?->name}, ";
-        $branchAddress .= "{$branch->country?->es_name}";
+        $clientAddress = $query->support?->address . ', ';
+        $clientAddress .= $query->support?->district?->name . ', ';
+        $clientAddress .= $query->support?->municipality?->name . ', ';
+        $clientAddress .= $query->support?->state?->name;
 
-        $mappedContract = $contract->map(function ($contract) use ($branchAddress) {
-            $address = $contract->client?->address?->neighborhood . ', ';
-            $address .= $contract->client?->address?->address . ', ';
-            $address .= $contract->client?->address?->district?->name . ', ';
-            $address .= $contract->client?->address?->municipality?->name . ', ';
-            $address .= $contract->client?->address?->state?->name;
+        $branchAddress = $query->client?->branch?->address . ', ';
+        $branchAddress .= $query->client?->branch?->district?->name . ', ';
+        $branchAddress .= $query->client?->branch?->municipality?->name . ', ';
+        $branchAddress .= $query->client?->branch?->state?->name;
 
-            return [
-                'name' => "{$contract->client?->name} {$contract->client?->surname}",
-                'document_type' => $contract->client?->primary_document
-                    ? "{$contract->client?->primary_document->type}"
-                    : '',
-                'document_number' => $contract->client?->primary_document
-                    ? "{$contract->client?->primary_document->number}"
-                    : "",
-                'phone' => $contract->client?->mobile?->number ?? '',
-                'address' => $address,
-                'contract_date' => Carbon::parse($contract->contract_date)->isoFormat('D [de] MMMM [del] YYYY'),
-                'office_address' => $branchAddress ?? '',
-            ];
-        });
+        $data = [
+            'name' => "{$query->client?->name} {$query->client?->surname}",
+            'document_type' => $query->client?->primary_document ? "{$query->client?->primary_document->type}" : "",
+            'document_number' => $query->client?->primary_document ? "{$query->client?->primary_document->number}" : "",
+            'phone' => $query->client?->mobile?->number,
+            'address' => $clientAddress,
+            'contract_date' => Carbon::parse($query->contract_date)->isoFormat('D [de] MMMM [del] YYYY'),
+            'office_address' => $branchAddress,
+            'plan' => $query->support?->details?->profile?->name,
+            'price' => number_format($query->support?->details?->profile?->price, 2),
+            'installation_price' => number_format($query->support?->type?->price, 2),
+        ];
 
-        $pdf = Pdf::loadView('v1.management.pdf.clients.residential_contract', ['data' => $mappedContract->first()])
+//        return $data;
+        $pdf = Pdf::loadView('v1.management.pdf.clients.residential_contract', ['data' => $data])
             ->setPaper('A4', 'portrait');
         return $pdf->stream();
     }

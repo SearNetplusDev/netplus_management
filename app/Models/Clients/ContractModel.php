@@ -42,7 +42,7 @@ class ContractModel extends Model
 
     public function support(): HasOne
     {
-        return $this->hasOne(SupportModel::class, 'id', 'contract_id');
+        return $this->hasOne(SupportModel::class, 'contract_id', 'id');
     }
 
     public function getDiffDaysAttribute(): ?int
