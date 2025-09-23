@@ -5,56 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    @include('v1.management.pdf.fonts')
     <style>
-        @font-face {
-            font-family: 'Garamond';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/Garamond/EBGaramond-Regular.ttf') }}") format("truetype");
-        }
-
-        @font-face {
-            font-family: 'Bodoni';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/Bodoni/LibreBodoni-Regular.ttf') }}") format("truetype");
-        }
-
-        @font-face {
-            font-family: 'Didot';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/Didot/GFSDidot-Regular.ttf') }}") format("truetype");
-        }
-
-        @font-face {
-            font-family: 'Lora';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/Lora/Lora-Regular.ttf') }}") format("truetype");
-        }
-
-        @font-face {
-            font-family: 'Montserrat';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/Montserrat/Montserrat-Regular.ttf') }}") format("truetype");
-        }
-
-        @font-face {
-            font-family: 'Raleway';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/Raleway/Raleway-Regular.ttf') }}") format("truetype");
-        }
-
-        @font-face {
-            font-family: Calibri;
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/Calibri/calibri-regular.ttf') }}") format("truetype");
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -62,7 +14,6 @@
         }
 
         body {
-            /*font-family: 'Raleway', sans-serif;*/
             font-family: 'Arial', sans-serif;
             font-size: 12px;
             line-height: 1.15em;
@@ -70,7 +21,6 @@
             background: #fff;
             margin: 1.5cm 1.9cm;
             text-align: justify;
-            /*border: 1px solid cornflowerblue;*/
         }
 
         .header {
@@ -131,6 +81,7 @@
             padding: 4px;
             border: 1px solid #333;
             vertical-align: middle;
+            line-height: 0.9;
         }
 
         .client-data-table .label {

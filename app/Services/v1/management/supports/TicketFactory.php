@@ -4,7 +4,7 @@ namespace App\Services\v1\management\supports;
 
 use App\Contracts\v1\Supports\SupportTicketInterface;
 use App\Strategies\v1\Supports\Tickets\ContractTicket;
-use PHPUnit\Framework\Attributes\Ticket;
+use App\Strategies\v1\Supports\Tickets\GenericTicket;
 
 class TicketFactory
 {
@@ -14,11 +14,11 @@ class TicketFactory
         6 => ContractTicket::class,
         7 => ContractTicket::class,
 
-        3 => Ticket::class,
-        4 => Ticket::class,
-        5 => Ticket::class,
-        8 => Ticket::class,
-        9 => Ticket::class,
+        3 => GenericTicket::class,
+        4 => GenericTicket::class,
+        5 => GenericTicket::class,
+        8 => GenericTicket::class,
+        9 => GenericTicket::class,
     ];
 
     public static function make(int $type): SupportTicketInterface
