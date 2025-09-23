@@ -19,7 +19,7 @@
             line-height: 1.15em;
             color: #333;
             /*background: #fff;*/
-            margin: 0.5cm;
+            margin: 0.5cm 0.5cm;
             text-align: justify;
         }
 
@@ -29,7 +29,7 @@
         }
 
         .logo {
-            width: 80px;
+            width: 95px;
             vertical-align: middle;
             text-align: left;
         }
@@ -51,7 +51,7 @@
 
         .row {
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             display: block;
             font-size: 0;
             white-space: nowrap;
@@ -63,11 +63,11 @@
         }
 
         .col-half {
-            width: 48%;
+            width: 48.5%;
             display: inline-block;
             vertical-align: top;
             font-size: 11px;
-            margin-right: 2%;
+            margin-right: 1.5%;
         }
 
         .col-third {
@@ -78,12 +78,16 @@
             margin-right: 1%;
         }
 
-        /*.col-half:first-child {*/
-        /*    margin-right: 2%;*/
-        /*}*/
+        .col-fourth {
+            width: 23.8%;
+            display: inline-block;
+            vertical-align: top;
+            font-size: 11px;
+            margin-right: 1%;
+        }
 
         .field {
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .field label {
@@ -99,7 +103,7 @@
             border: 1px solid #999;
             padding: 2px;
             min-height: 10px;
-            line-height: 0.9;
+            line-height: 1.0;
             background-color: #fafafa;
             border-radius: 3px;
             font-size: 11px;
@@ -109,7 +113,7 @@
             border: 1px solid #999;
             padding: 2px;
             min-height: 60px;
-            line-height: 0.9;
+            line-height: 1.0;
             background-color: #fafafa;
             border-radius: 3px;
             font-size: 11px;
@@ -118,13 +122,50 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
+
+        .signature-section {
+            margin-top: 40px;
+            padding-top: 8px;
+            border-top: 1px solid #ccc;
+        }
+
+        .signature-box {
+            width: 100%;
+            height: 50px;
+            border: 1px solid #999;
+            margin-top: 5px;
+            position: relative;
+            border-radius: 3px;
+        }
+
+        .signature-line {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            text-align: center;
+            font-size: 9px;
+            border-top: 1px solid #333;
+            padding-top: 2px;
+        }
+
+        .footer {
+            /*position: absolute;*/
+            bottom: 5px;
+            right: 8px;
+            font-size: 8px;
+            color: #666;
+            font-weight: bold;
+            font-family: Bodoni, sans-serif;
+        }
     </style>
 </head>
 <body>
 <div class="header">
     <table class="header-table">
         <tr>
-            <th style="width: 25%; border-right: #0a0a0a 1px solid;">
+            <th style="width: 25%; border-right: #0a0a0a 1px solid; text-align: left;">
                 <img src="{{ public_path('assets/img/logos/logo_blk.png') }}" alt="NETPLUS LOGO" class="logo">
             </th>
             <th style="width: 75%;">
@@ -155,9 +196,96 @@
 
         <div class="col-third">
             <div class="field">
-                <label>Cliente</label>
+                <label>Teléfono</label>
                 <div class="field-content">
-                    {{ ucwords($data['client']) }}
+                    {{ ucwords($data['mobile']) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-fourth">
+            <div class="field">
+                <label>Nodo</label>
+                <div class="field-content">
+                    {{ ucwords($data['node']) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-fourth">
+            <div class="field">
+                <label>Equipo</label>
+                <div class="field-content">
+                    {{ ucwords($data['equipment']) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-fourth">
+            <div class="field">
+                <label>Latitud</label>
+                <div class="field-content">
+                    {{ ucwords($data['latitude']) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-fourth">
+            <div class="field">
+                <label>Longitud</label>
+                <div class="field-content">
+                    {{ ucwords($data['longitude']) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-third">
+            <div class="field">
+                <label>Técnico Asignado</label>
+                <div class="field-content">
+                    {{ $data['technician'] }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-third">
+            <div class="field">
+                <label>Departamento</label>
+                <div class="field-content">
+                    {{ $data['state'] }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-third">
+            <div class="field">
+                <label>Distrito</label>
+                <div class="field-content">
+                    {{ $data['district'] }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-half">
+            <div class="field">
+                <label>Dirección</label>
+                <div class="field-content-large">
+                    {{ $data['address'] }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-half">
+            <div class="field">
+                <label>Descripción</label>
+                <div class="field-content-large">
+                    {{ $data['description'] }}
                 </div>
             </div>
         </div>
@@ -168,12 +296,34 @@
             <div class="field">
                 <label>Solución</label>
                 <div class="field-content-large">
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus ad cupiditate ex facere incidunt
-                    minus perspiciatis porro provident, quod soluta. Aspernatur blanditiis doloribus eum ex hic impedit
-                    inventore praesentium tempora.
+                    {{ $data['solution'] ?? '' }}
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="row">
+        <div class="col-half">
+            <div class="field">
+                <label>Firma de {{ $data['client'] }} o delegado</label>
+                <div class="field-content-large">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-half">
+            <div class="field">
+                <label>Firma de Técnico ({{ $data['technician'] }})</label>
+                <div class="field-content-large">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        NETPLUS - Soporte Técnico | Ticket: {{ $data['ticket'] }} | Contacto: +503 7626 6022 |
+        netpluscompanywork@gmail.com | Atención 24/7 | Confidencial: No redistribuir.
+        &copy; {{ \Carbon\Carbon::today()->format('Y') }}
     </div>
 </div>
 </body>

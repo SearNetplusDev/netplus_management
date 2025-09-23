@@ -16,6 +16,16 @@ class GenericTicket implements SupportTicketInterface
                 'type' => $support->type?->name,
                 'ticket' => $support->ticket_number,
                 'client' => "{$support->client?->name} {$support->client?->surname}",
+                'node' => $support->service?->node?->name,
+                'equipment' => $support->service?->equipment?->name,
+                'latitude' => $support->service?->latitude,
+                'longitude' => $support->service?->longitude,
+                'state' => $support->state?->name,
+                'district' => $support->district?->name,
+                'address' => $support->address,
+                'description' => $support->description,
+                'technician' => $support->technician?->user?->name,
+                'mobile' => $support->client?->mobile?->number,
             ],
         ])->setPaper('A4', 'portrait');
 
