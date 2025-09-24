@@ -58,7 +58,7 @@
         }
 
         .col-full {
-            width: 100%;
+            width: 98.5%;
             display: block;
         }
 
@@ -101,20 +101,24 @@
 
         .field-content {
             border: 1px solid #999;
+            /*padding: 2px 10px;*/
             padding: 2px;
             min-height: 10px;
             line-height: 1.0;
             background-color: #fafafa;
+            /*border-radius: 20%;*/
             border-radius: 3px;
             font-size: 11px;
         }
 
         .field-content-large {
             border: 1px solid #999;
+            /*padding: 2px 16px;*/
             padding: 2px;
             min-height: 60px;
             line-height: 1.0;
             background-color: #fafafa;
+            /*border-radius: 20%;*/
             border-radius: 3px;
             font-size: 11px;
             display: block;
@@ -135,7 +139,7 @@
             border: 1px solid #999;
             margin-top: 5px;
             position: relative;
-            border-radius: 3px;
+            border-radius: 20%;
         }
 
         .signature-line {
@@ -323,7 +327,7 @@
     <div class="footer">
         NETPLUS - Soporte Técnico | Ticket: {{ $data['ticket'] }} | Contacto: +503 7626 6022 |
         netpluscompanywork@gmail.com | Atención 24/7 | Confidencial: No redistribuir.
-        &copy; {{ \Carbon\Carbon::today()->format('Y') }}
+        &copy; {{ $data['year'] }}
     </div>
 </div>
 </body>

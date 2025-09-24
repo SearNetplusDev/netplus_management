@@ -5,6 +5,7 @@ namespace App\Strategies\v1\Supports\Tickets;
 use App\Contracts\v1\Supports\SupportTicketInterface;
 use App\Models\Supports\SupportModel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class GenericTicket implements SupportTicketInterface
 {
@@ -26,6 +27,7 @@ class GenericTicket implements SupportTicketInterface
                 'description' => $support->description,
                 'technician' => $support->technician?->user?->name,
                 'mobile' => $support->client?->mobile?->number,
+                'year' => Carbon::today()->format('Y'),
             ],
         ])->setPaper('A4', 'portrait');
 

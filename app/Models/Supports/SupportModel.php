@@ -16,7 +16,10 @@ use App\Traits\DataViewer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Observers\SupportObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ObservedBy([SupportObserver::class])]
 class SupportModel extends Model
 {
     use SoftDeletes, DataViewer;
