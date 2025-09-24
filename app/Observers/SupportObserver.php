@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Models\Supports\SupportModel;
 use App\Models\Supports\LogModel;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class SupportObserver
@@ -18,7 +20,7 @@ class SupportObserver
             'user_id' => Auth::id(),
             'action' => 'create',
             'before' => null,
-            'after' => $support->getAttributes(),
+            'after' => $this->convert($support->getAttributes()),
         ]);
     }
 
@@ -31,8 +33,8 @@ class SupportObserver
             'support_id' => $support->id,
             'user_id' => Auth::id(),
             'action' => 'update',
-            'before' => $support->getOriginal(),
-            'after' => $support->getAttributes(),
+            'before' => $this->convert($support->getOriginal()),
+            'after' => $this->convert($support->getAttributes()),
         ]);
     }
 
@@ -45,7 +47,7 @@ class SupportObserver
             'support_id' => $support->id,
             'user_id' => Auth::id(),
             'action' => 'deleted',
-            'before' => $support->getOriginal(),
+            'before' => $this->convert($support->getOriginal()),
             'after' => null,
         ]);
     }
@@ -64,5 +66,21 @@ class SupportObserver
     public function forceDeleted(SupportModel $supportModel): void
     {
         //
+    }
+
+    private function convert($data): Collection
+    {
+        return collect($data)->map(function ($val) {
+            return $this->convertDate($val);
+        });
+    }
+
+    private function convertDate($val)
+    {
+        if ($val instanceof \DateTimeInterface) {
+            return Carbon::parse($val)->setTimezone('America/El_Salvador')->format('Y-m-d H:i:s');
+        }
+
+        return $val;
     }
 }

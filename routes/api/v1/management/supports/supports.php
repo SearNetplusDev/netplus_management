@@ -13,6 +13,7 @@ Route::prefix('v1/supports')
         Route::post('edit', [SupportsController::class, 'read']);
         Route::put('{id}', [SupportsController::class, 'update']);
         Route::get('print/{id}', [SupportsController::class, 'print']);
+        Route::post('logs', [SupportsController::class, 'logs']);
 
         //  Types
         Route::group(['prefix' => 'types'], function () {

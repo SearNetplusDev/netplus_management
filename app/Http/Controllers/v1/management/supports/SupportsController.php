@@ -97,4 +97,13 @@ class SupportsController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="ticket.pdf"');
     }
+
+    public function logs(Request $request, SupportService $service): JsonResponse
+    {
+        $log = $service->getLogs($request->input('id'));
+
+        return response()->json([
+            'logs' => new SupportResource($log),
+        ]);
+    }
 }

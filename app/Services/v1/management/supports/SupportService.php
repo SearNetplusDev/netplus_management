@@ -5,8 +5,10 @@ namespace App\Services\v1\management\supports;
 use App\DTOs\v1\management\supports\SupportDTO;
 use App\Enums\v1\Supports\SupportStatus;
 use App\Enums\v1\Supports\SupportType;
+use App\Models\Supports\LogModel;
 use App\Models\Supports\SupportModel;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class SupportService
@@ -77,6 +79,19 @@ class SupportService
     {
         $strategy = TicketFactory::make((int)$support->type_id);
         return $strategy->render($support);
+    }
+
+    public function getLogs(int $id): array
+    {
+        $query = LogModel::query()
+            ->with(['user:id,name'])
+            ->where('support_id', $id)
+            ->get();
+
+        return [
+            'ticket' => $query->first()->support?->ticket_number,
+            'collection' => $query,
+        ];
     }
 
     private function createTicket(): string
