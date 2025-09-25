@@ -3,6 +3,8 @@
 namespace App\Models\Clients;
 
 use App\Models\Billing\Options\ActivityModel;
+use App\Observers\Clients\FinancialInformationObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -10,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasStatusTrait;
 use App\Traits\DataViewer;
 
+#[ObservedBy(FinancialInformationObserver::class)]
 class FinancialInformationModel extends Model
 {
     use DataViewer, HasStatusTrait, SoftDeletes;

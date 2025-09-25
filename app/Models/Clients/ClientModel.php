@@ -16,7 +16,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
+use App\Observers\Clients\ClientObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ObservedBy([ClientObserver::class])]
 class ClientModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

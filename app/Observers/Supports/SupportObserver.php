@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Supports;
 
-use App\Models\Supports\SupportModel;
 use App\Models\Supports\LogModel;
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use App\Models\Supports\SupportModel;
+use App\Observers\Base\Conversion;
 use Illuminate\Support\Facades\Auth;
 
-class SupportObserver
+class SupportObserver extends Conversion
 {
     /**
      * Handle the SupportModel "created" event.
@@ -66,21 +65,5 @@ class SupportObserver
     public function forceDeleted(SupportModel $supportModel): void
     {
         //
-    }
-
-    private function convert($data): Collection
-    {
-        return collect($data)->map(function ($val) {
-            return $this->convertDate($val);
-        });
-    }
-
-    private function convertDate($val)
-    {
-        if ($val instanceof \DateTimeInterface) {
-            return Carbon::parse($val)->setTimezone('America/El_Salvador')->format('Y-m-d H:i:s');
-        }
-
-        return $val;
     }
 }

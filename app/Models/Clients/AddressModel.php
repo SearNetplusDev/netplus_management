@@ -5,6 +5,8 @@ namespace App\Models\Clients;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
+use App\Observers\Clients\AddressObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy(AddressObserver::class)]
 class AddressModel extends Model
 {
     use DataViewer, HasStatusTrait, SoftDeletes;

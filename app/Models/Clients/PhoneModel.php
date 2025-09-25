@@ -4,6 +4,8 @@ namespace App\Models\Clients;
 
 use App\Models\Configuration\Clients\PhoneTypeModel;
 use App\Models\Configuration\Geography\CountryModel;
+use App\Observers\Clients\PhoneObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -11,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
+#[ObservedBy(PhoneObserver::class)]
 class PhoneModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

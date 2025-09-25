@@ -3,12 +3,15 @@
 namespace App\Models\Clients;
 
 use App\Models\Configuration\Clients\DocumentTypeModel;
+use App\Observers\Clients\DocumentObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
+#[ObservedBy(DocumentObserver::class)]
 class DocumentModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

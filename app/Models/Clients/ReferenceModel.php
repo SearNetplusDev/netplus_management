@@ -3,6 +3,8 @@
 namespace App\Models\Clients;
 
 use App\Models\Configuration\Clients\KinshipModel;
+use App\Observers\Clients\ReferenceObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
@@ -10,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy(ReferenceObserver::class)]
 class ReferenceModel extends Model
 {
     use DataViewer, HasStatusTrait, SoftDeletes;

@@ -4,13 +4,16 @@ namespace App\Models\Clients;
 
 use App\Models\Configuration\Clients\ContractStateModel;
 use App\Models\Supports\SupportModel;
+use App\Observers\Clients\ContractObserver;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasStatusTrait;
 
+#[ObservedBy(ContractObserver::class)]
 class ContractModel extends Model
 {
     use HasStatusTrait, SoftDeletes;

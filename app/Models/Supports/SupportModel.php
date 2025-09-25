@@ -11,13 +11,13 @@ use App\Models\Configuration\Geography\StateModel;
 use App\Models\Management\TechnicianModel;
 use App\Models\Services\ServiceModel;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use App\Observers\Supports\SupportObserver;
 use App\Traits\DataViewer;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Observers\SupportObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 #[ObservedBy([SupportObserver::class])]
 class SupportModel extends Model

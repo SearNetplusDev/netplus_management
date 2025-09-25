@@ -2,12 +2,15 @@
 
 namespace App\Models\Clients;
 
+use App\Observers\Clients\EmailObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
+#[ObservedBy(EmailObserver::class)]
 class EmailModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;
