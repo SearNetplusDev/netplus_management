@@ -6,6 +6,7 @@ use App\Models\Clients\ClientModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
+use App\Models\Infrastructure\Equipment\InventoryModel;
 use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\TechnicianModel;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -106,5 +108,15 @@ class ServiceModel extends Model
     public function internet(): HasOne
     {
         return $this->hasOne(ServiceInternetModel::class, 'service_id', 'id');
+    }
+
+    public function internet_devices(): HasMany
+    {
+        return $this->hasMany(ServiceEquipmentModel::class, 'service_id', 'id');
+    }
+
+    public function iptv_devices(): HasMany
+    {
+        return $this->hasMany(ServiceIptvEquipmentModel::class, 'service_id', 'id');
     }
 }
