@@ -15,6 +15,7 @@ Route::prefix('v1/supports')
         Route::get('print/{id}', [SupportsController::class, 'print']);
         Route::post('logs', [SupportsController::class, 'logs']);
 
+
         //  Types
         Route::group(['prefix' => 'types'], function () {
             Route::post('/', [TypesController::class, 'store']);

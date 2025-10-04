@@ -8,7 +8,6 @@ use App\Enums\v1\Supports\SupportType;
 use App\Models\Supports\LogModel;
 use App\Models\Supports\SupportModel;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class SupportService
@@ -31,7 +30,7 @@ class SupportService
             }
         }
 
-        $ticket = $this->createTicket();
+        $ticket = $this->createTicketNumber($DTO->type_id);
 
         //  Buscando estrategia correcta
         $strategy = SupportFactory::make((int)$DTO->type_id);
@@ -102,6 +101,32 @@ class SupportService
         $zeroFill = max(0, $totalLength - strlen($total));
         $filling = str_repeat('0', $zeroFill);
         $prefix .= $filling . ($total + 1);
+        return $prefix;
+    }
+
+    private function createTicketNumber(int $type): string
+    {
+        $totalLength = 5;
+        $totalSupports = SupportModel::query()
+            ->where('type_id', $type)
+            ->whereBetween('creation_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])
+            ->withTrashed()
+            ->count();
+        $zeroFill = max(0, $totalLength - strlen($totalSupports));
+        $filling = str_repeat('0', $zeroFill);
+        $prefix = match ($type) {
+            1 => 'NETPLUS-INI-',
+            2 => 'NETPLUS-INE-',
+            3 => 'NETPLUS-SPI-',
+            4 => 'NETPLUS-SPE-',
+            5 => 'NETPLUS-CDO-',
+            6 => 'NETPLUS-RNI-',
+            7 => 'NETPLUS-RNE-',
+            8 => 'NETPLUS-DES-',
+            9 => 'NETPLUS-VEQ-',
+        };
+        $prefix .= Carbon::today()->format('Y') . '-';
+        $prefix .= $filling . ($totalSupports + 1);
         return $prefix;
     }
 }

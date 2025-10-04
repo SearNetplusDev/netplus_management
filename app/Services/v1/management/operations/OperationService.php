@@ -15,6 +15,8 @@ class OperationService
                 'service.internet.profile',
                 'service.internet_devices',
                 'service.iptv_devices.equipment',
+                'service.node',
+                'service.equipment',
             ])->find($id);
     }
 }
