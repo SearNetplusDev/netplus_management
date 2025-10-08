@@ -10,13 +10,14 @@ class OperationService
     {
         return SupportModel::query()
             ->with([
+                'type:id,name',
                 'details.profile',
                 'client',
                 'service.internet.profile',
                 'service.internet_devices',
                 'service.iptv_devices.equipment',
-                'service.node',
-                'service.equipment',
+                'service.node:id,name',
+                'service.equipment:id,name',
             ])->find($id);
     }
 }

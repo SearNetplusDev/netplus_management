@@ -87,4 +87,16 @@ class ClientsController extends Controller
             'branch' => new GeneralDataResource($service->getClientBranch($id))
         ]);
     }
+
+    public function searchById(int $id): JsonResponse
+    {
+        $query = ClientModel::query()
+            ->findOrFail($id);
+
+        $data = [
+            'id' => $query->id,
+            'name' => ucwords("{$query->name} {$query->surname}"),
+        ];
+        return response()->json(['response' => [$data]]);
+    }
 }
