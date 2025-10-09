@@ -13,6 +13,7 @@ use Illuminate\Http\UploadedFile;
 use App\Imports\InventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Validators\ValidationException;
 use phpDocumentor\Reflection\Types\Boolean;
 
 class InventoryService
@@ -29,6 +30,7 @@ class InventoryService
             'company_id' => $formData['company'],
         ];
 
+
         $import = new InventoryImport($baseData);
 
         try {
@@ -39,6 +41,21 @@ class InventoryService
                 'results' => $import->getResults(),
             ];
 
+        } catch (ValidationException $e) {
+            $failures = [];
+
+            foreach ($e->failures() as $failure) {
+                $failures[] = [
+                    'row' => $failure->row(),
+                    'attribute' => $failure->attribute(),
+                    'errors' => $failure->errors(),
+                ];
+            }
+            return [
+                'success' => false,
+                'error' => $failures,
+//                'error' => $e->errors(),
+            ];
         } catch (\Exception $e) {
             return [
                 'success' => false,

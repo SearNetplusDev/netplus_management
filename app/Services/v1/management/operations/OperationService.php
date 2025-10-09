@@ -14,7 +14,7 @@ class OperationService
                 'details.profile',
                 'client',
                 'service.internet.profile',
-                'service.internet_devices',
+                'service.internet_devices.equipment.type:id,name',
                 'service.iptv_devices.equipment',
                 'service.node:id,name',
                 'service.equipment:id,name',

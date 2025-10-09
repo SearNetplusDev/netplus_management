@@ -40,7 +40,7 @@ class InventoryRequest extends FormRequest
             'status' => ['required', 'integer', 'exists:config_infrastructure_equipment_status,id'],
             'comments' => ['nullable', 'string', 'between:5,500'],
             'company' => ['required', 'integer'],
-            'file' => ['required_if:_method,POST', 'file', 'mimes:xls,xlsx,csv', 'max:10240'],
+            'file' => ['required_if:_method,POST', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
         ];
     }
 

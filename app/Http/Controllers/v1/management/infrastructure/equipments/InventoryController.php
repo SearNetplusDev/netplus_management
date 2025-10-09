@@ -39,7 +39,8 @@ class InventoryController extends Controller
 
     public function store(InventoryRequest $request, InventoryService $service): JsonResponse
     {
-        $result = $service->create($request->validated(), $request->file('file'));
+        $validatedData = $request->validated();
+        $result = $service->create($validatedData, $request->file('file'));
 
         if ($result['success']) {
             return response()->json([
