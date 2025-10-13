@@ -24,6 +24,7 @@ class InventoryController extends Controller
                 'status:id,name,badge_color',
                 'on_internet_service.service.client',
                 'on_iptv_service.service.client',
+                'on_sold_devices.service.client',
             ]);
 
         return $dataViewer->handle($request, $query, [
@@ -99,6 +100,23 @@ class InventoryController extends Controller
 
         return response()->json([
             'equipment' => new InventoryResource($mac->makeHidden('company')),
+        ]);
+    }
+
+    public function sales_search(Request $request, InventoryService $service): JsonResponse
+    {
+        $device = $service->salesSearch($request->input('mac'));
+        return response()->json([
+            'device' => new InventoryResource($device)
+        ]);
+    }
+
+    public function sell_device(Request $request, InventoryService $service): JsonResponse
+    {
+        $device = $service->sell($request->input('device'), $request->input('service'), $request->input('client'));
+        return response()->json([
+            'saved' => (bool)$device,
+            'device' => new InventoryResource($device)
         ]);
     }
 }

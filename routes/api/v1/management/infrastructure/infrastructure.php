@@ -81,6 +81,8 @@ Route::prefix('v1/infrastructure')
                 Route::post('logs', [InventoryController::class, 'logs']);
                 Route::post('internet/search', [InventoryController::class, 'internet_search']);
                 Route::post('iptv/search', [InventoryController::class, 'iptv_search']);
+                Route::post('search', [InventoryController::class, 'sales_search']);
+                Route::post('sale', [InventoryController::class, 'sell_device']);
             });
         });
     });

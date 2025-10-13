@@ -6,6 +6,7 @@ use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Services\ServiceEquipmentModel;
 use App\Models\Services\ServiceIptvEquipmentModel;
+use App\Models\Services\ServiceSoldDeviceModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -100,5 +101,10 @@ class InventoryModel extends Model
     public function on_iptv_service(): HasOne
     {
         return $this->hasOne(ServiceIptvEquipmentModel::class, 'equipment_id', 'id');
+    }
+
+    public function on_sold_devices(): HasOne
+    {
+        return $this->hasOne(ServiceSoldDeviceModel::class, 'equipment_id', 'id');
     }
 }

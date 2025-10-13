@@ -3,10 +3,12 @@
 namespace App\Services\v1\management\infrastructure\equipments;
 
 use App\DTOs\v1\management\infrastructure\equipments\InventoryLogDTO;
+use App\Models\Clients\ClientModel;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Infrastructure\Equipment\InventoryLogModel;
 use App\Models\Infrastructure\Equipment\InventoryModel;
 use App\Models\Infrastructure\Equipment\TypeModel;
+use App\Models\Services\ServiceSoldDeviceModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
@@ -14,7 +16,6 @@ use App\Imports\InventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Validators\ValidationException;
-use phpDocumentor\Reflection\Types\Boolean;
 
 class InventoryService
 {
@@ -149,5 +150,41 @@ class InventoryService
             ->whereRaw("REPLACE(mac_address, ':', '') ILIKE ?", ["%$chars%"])
             ->select(['id', 'mac_address as name'])
             ->get();
+    }
+
+    public function salesSearch(string $chars): Collection
+    {
+        return InventoryModel::query()
+            ->where('status_id', 2)
+            ->whereRaw("REPLACE(mac_address, ':', '') ILIKE ?", ["%$chars%"])
+            ->select(['id', 'mac_address as name'])
+            ->get()
+            ->makeHidden('company');
+    }
+
+    public function sell(int $deviceId, int $serviceId, int $clientId): InventoryModel
+    {
+        $deviceQuery = InventoryModel::query()->findOrFail($deviceId);
+        $deviceQuery->update(['status_id' => 5]);
+        $client = ClientModel::query()->findOrFail($clientId);
+        $message = "Equipo vendido a {$client->name} {$client->surname}";
+
+        ServiceSoldDeviceModel::query()
+            ->create([
+                'equipment_id' => $deviceId,
+                'service_id' => $serviceId,
+            ]);
+        $DTO = new InventoryLogDTO(
+            equipment_id: $deviceId,
+            user_id: Auth::user()->id,
+            technician_id: null,
+            execution_date: Carbon::today(),
+            service_id: null,
+            status_id: 5,
+            description: $message,
+        );
+
+        InventoryLogModel::query()->create($DTO->toArray());
+        return $deviceQuery;
     }
 }

@@ -15,7 +15,8 @@ class OperationService
                 'client',
                 'service.internet.profile',
                 'service.internet_devices.equipment.type:id,name',
-                'service.iptv_devices.equipment',
+                'service.iptv_devices.equipment.type:id,name',
+                'service.sold_devices.equipment.type:id,name',
                 'service.node:id,name',
                 'service.equipment:id,name',
             ])->find($id);

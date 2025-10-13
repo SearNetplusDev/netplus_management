@@ -119,4 +119,9 @@ class ServiceModel extends Model
     {
         return $this->hasMany(ServiceIptvEquipmentModel::class, 'service_id', 'id');
     }
+
+    public function sold_devices(): HasMany
+    {
+        return $this->hasMany(ServiceSoldDeviceModel::class, 'service_id', 'id');
+    }
 }
