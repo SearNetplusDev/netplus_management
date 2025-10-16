@@ -24,6 +24,7 @@ class NodesRequest extends FormRequest
     {
         return [
             'name' => 'required|between:3,60',
+            'prefix' => 'required|string|between:2,3',
             'server' => 'required|numeric',
             'lat' => 'required|decimal:6,8',
             'lng' => 'required|decimal:6,8',
@@ -43,14 +44,23 @@ class NodesRequest extends FormRequest
         return [
             'name.required' => 'Nombre es un campo obligatorio.',
             'name.between' => 'Nombre debe tener entre 3 y 60 caracteres.',
+
+            'prefix.required' => 'Prefijo es un campo obligatorio.',
+            'prefix.string' => 'Formato inválido para prefijo.',
+            'prefix.between' => 'El prefijo debe tener entre 2 y 3 caracteres.',
+
             'lat.required' => 'Latitud es un campo obligatorio.',
             'lat.decimal' => 'Debe contener entre 6 y 8 decimales.',
+
             'lng.required' => 'Longitud es un campo obligatorio.',
             'lng.decimal' => 'Debe contener entre 6 y 8 decimales.',
+
             'address.required' => 'Dirección es un campo obligatorio.',
             'address.between' => 'Debe tener entre 10 y 250 caracteres.',
+
             'nc.required' => 'NC es un campo obligatorio.',
             'nc.size' => 'Debe contener 12 caracteres.',
+
             'owner.required' => 'Propietario es un campo obligatorio.',
             'owner.between' => 'Debe tener entre 3 y 100 caracteres.',
         ];
@@ -60,6 +70,7 @@ class NodesRequest extends FormRequest
     {
         return new NodeDTO(
             name: $this->input('name'),
+            prefix: $this->input('prefix'),
             server_id: $this->input('server'),
             latitude: $this->input('lat'),
             longitude: $this->input('lng'),

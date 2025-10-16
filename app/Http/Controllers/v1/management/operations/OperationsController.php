@@ -63,9 +63,9 @@ class OperationsController extends Controller
         ]);
     }
 
-    public function processSupport(OperationRequest $request, OperationService $service): JsonResponse
+    public function processSupport(OperationRequest $request, SupportModel $id, OperationService $service): JsonResponse
     {
-        $transaction = $service->process($request->toArray());
+        $transaction = $service->process($id, $request->toArray());
 
         return response()->json([
             'saved' => (bool)$transaction,

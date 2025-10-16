@@ -2,17 +2,27 @@
 
 namespace App\Strategies\v1\Operations\Technical;
 
-use App\Contracts\v1\Supports\ProcessSupportInterface;
 use App\DTOs\v1\management\services\ServiceDTO;
+use App\DTOs\v1\management\services\ServiceInternetDTO;
+use App\Enums\v1\Supports\SupportStatus;
+use App\Models\Clients\ClientModel;
+use App\Models\Infrastructure\Network\NodeModel;
+use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
 use Carbon\Carbon;
 
-class InstallationStrategy implements ProcessSupportInterface
+class InstallationStrategy extends BaseSupportStrategy
 {
-
-    public function process(array $params): SupportModel
+    public function handle(SupportModel $model, array $params): SupportModel
     {
+        /****
+         * Creando Servicio
+         ****/
+        $status = SupportStatus::tryFrom((int)$params['status']);
+        if (!$status || !$status->isFinalized()) return $model;
+        if ($model->service_id) return $model;
+
         $serviceDTO = new ServiceDTO(
             client_id: $params['client'],
             code: null,
@@ -31,9 +41,47 @@ class InstallationStrategy implements ProcessSupportInterface
             status_id: 1,
             comments: $params['comments'] ?? null,
         );
+        $service = ServiceModel::query()->create($serviceDTO->toArray());
 
-        dd($serviceDTO);
+        /****
+         * Creando credenciales de internet
+         ****/
 
-//        ServiceModel::query()->create($serviceDTO->toArray());
+        $prefix = 'NetPlus';
+        $node = NodeModel::query()
+            ->select('prefix')
+            ->findOrFail((int)$params['node']);
+        $client = ClientModel::query()
+            ->select(['name', 'surname'])
+            ->findOrFail((int)$params['client']);
+        $prefix .= $node->prefix;
+        $secret = $this->generateSecret($client);
+
+        $credentialsDTO = new ServiceInternetDTO(
+            internet_profile_id: (int)$params['profile'],
+            service_id: $service->id,
+            user: $prefix,
+            secret: $secret,
+            status_id: 1
+        );
+        ServiceInternetModel::query()->create($credentialsDTO->toArray());
+
+        /****
+         * Actualizando Soporte
+         ****/
+        $model->service_id = $service->id;
+        $model->comments = $params['comments'] ?? $model->comments;
+        $model->save();
+
+        return $model;
+
+    }
+
+    private function generateSecret(object $client): string
+    {
+        $firstName = explode(' ', trim($client->name))[0];
+        $firstSurname = explode(' ', trim($client->surname))[0];
+        $name = $firstName . '_' . $firstSurname;
+        return transliterator_transliterate('Any-Latin; Latin-ASCII', $name);
     }
 }

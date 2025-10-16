@@ -8,7 +8,7 @@ use App\Models\Supports\SupportModel;
 class ChangeAddressStrategy implements ProcessSupportInterface
 {
 
-    public function process(array $params): SupportModel
+    public function process(SupportModel $model, array $params): SupportModel
     {
         // TODO: Implement process() method.
     }

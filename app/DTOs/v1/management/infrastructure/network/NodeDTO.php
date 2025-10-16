@@ -12,6 +12,8 @@ class NodeDTO extends Data
     public function __construct(
         #[Required, StringType]
         public readonly string  $name,
+        #[Required, StringType]
+        public readonly string  $prefix,
         #[Required, IntegerType]
         public readonly int     $server_id,
         #[Required]

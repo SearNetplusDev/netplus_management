@@ -22,9 +22,9 @@ class OperationService
             ])->find($id);
     }
 
-    public function process(array $params)
+    public function process(SupportModel $model, array $params)
     {
         $strategy = ProcessSupportFactory::make((int)$params['type']);
-        return $strategy->process($params);
+        return $strategy->process($model, $params);
     }
 }

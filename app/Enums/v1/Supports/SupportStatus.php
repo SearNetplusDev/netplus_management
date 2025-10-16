@@ -94,4 +94,9 @@ enum SupportStatus: int
             self::OBSERVED->value,
         ];
     }
+
+    public function isFinalized(): bool
+    {
+        return $this === self::ENDED;
+    }
 }

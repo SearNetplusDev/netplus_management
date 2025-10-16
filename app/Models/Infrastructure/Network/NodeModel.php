@@ -21,6 +21,7 @@ class NodeModel extends Model
     protected $primaryKey = 'id';
     protected $fillable = [
         'name',
+        'prefix',
         'server_id',
         'latitude',
         'longitude',
@@ -37,6 +38,7 @@ class NodeModel extends Model
     protected array $allowedFilters = [
         'id',
         'name',
+        'prefix',
         'nc',
         'status_id',
     ];

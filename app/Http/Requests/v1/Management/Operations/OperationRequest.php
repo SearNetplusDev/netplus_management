@@ -39,19 +39,39 @@ class OperationRequest extends FormRequest
             'description' => ['required', 'string'],
             'address' => ['required', 'string'],
             'latitude' => [
-                'required',
+                Rule::requiredIf(fn() => !in_array((int)$this->input('status'), [
+                    SupportStatus::CANCELLED->value,
+                    SupportStatus::OBSERVED->value,
+                ])),
                 'regex:/^-?([0-8]?[0-9]|90)\.\d{6,}$/',
                 'numeric',
                 'between:-90,90',
             ],
             'longitude' => [
-                'required',
+                Rule::requiredIf(fn() => !in_array((int)$this->input('status'), [
+                    SupportStatus::CANCELLED->value,
+                    SupportStatus::OBSERVED->value,
+                ])),
                 'regex:/^-?(1[0-7][0-9]|[0-9]?[0-9]|180)\.\d{6,}$/',
                 'numeric',
                 'between:-180,180'
             ],
-            'node' => ['required', 'integer', 'exists:infrastructure_nodes,id'],
-            'equipment' => ['required', 'integer', 'exists:infrastructure_equipment,id'],
+            'node' => [
+                Rule::requiredIf(fn() => !in_array((int)$this->input('status'), [
+                    SupportStatus::CANCELLED->value,
+                    SupportStatus::OBSERVED->value,
+                ])),
+                'integer',
+                'exists:infrastructure_nodes,id'
+            ],
+            'equipment' => [
+                Rule::requiredIf(fn() => !in_array((int)$this->input('status'), [
+                    SupportStatus::CANCELLED->value,
+                    SupportStatus::OBSERVED->value,
+                ])),
+                'integer',
+                'exists:infrastructure_equipment,id'
+            ],
             'profile' => ['required', 'integer', 'exists:management_internet_profiles,id'],
             'technician' => ['required', 'integer'],
 
@@ -88,13 +108,13 @@ class OperationRequest extends FormRequest
         );
 
         //  Validando comentario según estado
-        $validator->sometimes(
-            'comments',
-            'required',
-            function ($input) use ($supportStatus) {
-                return $supportStatus->requiresComments();
-            }
-        );
+//        $validator->sometimes(
+//            'comments',
+//            'required',
+//            function ($input) use ($supportStatus) {
+//                return $supportStatus->requiresComments();
+//            }
+//        );
     }
 
     public function messages(): array
