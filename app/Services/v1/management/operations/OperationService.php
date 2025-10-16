@@ -21,4 +21,10 @@ class OperationService
                 'service.equipment:id,name',
             ])->find($id);
     }
+
+    public function process(array $params)
+    {
+        $strategy = ProcessSupportFactory::make((int)$params['type']);
+        return $strategy->process($params);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\DTOs\v1\management\services;
 
+use App\Cast\v1\management\Services\EmptyStringToNullCast;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
@@ -9,6 +10,7 @@ use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\Numeric;
 use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 
 class ServiceDTO extends Data
@@ -17,10 +19,10 @@ class ServiceDTO extends Data
         #[Required, IntegerType]
         public readonly int     $client_id,
 
-        #[Nullable, StringType]
+        #[Nullable, StringType, WithCast(EmptyStringToNullCast::class)]
         public readonly ?string $code,
 
-        #[Nullable, StringType]
+        #[Nullable, StringType, WithCast(EmptyStringToNullCast::class)]
         public readonly ?string $name,
 
         #[Required, IntegerType]
@@ -59,7 +61,7 @@ class ServiceDTO extends Data
         #[Required, IntegerType]
         public readonly int     $status_id,
 
-        #[Nullable]
+        #[Nullable, WithCast(EmptyStringToNullCast::class)]
         public readonly ?string $comments,
     )
     {

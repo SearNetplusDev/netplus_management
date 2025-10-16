@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\management\operations;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\Management\Operations\OperationRequest;
 use App\Http\Resources\v1\management\supports\SupportResource;
 use App\Models\Management\TechnicianModel;
 use App\Models\Supports\SupportModel;
@@ -59,6 +60,16 @@ class OperationsController extends Controller
 
         return response()->json([
             'support' => new SupportResource($support),
+        ]);
+    }
+
+    public function processSupport(OperationRequest $request, OperationService $service): JsonResponse
+    {
+        $transaction = $service->process($request->toArray());
+
+        return response()->json([
+            'saved' => (bool)$transaction,
+            'support' => new SupportResource($transaction),
         ]);
     }
 }

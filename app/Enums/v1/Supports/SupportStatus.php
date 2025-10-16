@@ -2,6 +2,8 @@
 
 namespace App\Enums\v1\Supports;
 
+use function Symfony\Component\String\s;
+
 enum SupportStatus: int
 {
     case PENDING = 1;
@@ -45,6 +47,15 @@ enum SupportStatus: int
     public function requiresSolution(): bool
     {
         return $this === self::ENDED;
+    }
+
+    public function requiresComments(): bool
+    {
+        return match ($this) {
+            self::CANCELLED => true,
+            self::OBSERVED => true,
+            default => false,
+        };
     }
 
     public function isClosed(): bool

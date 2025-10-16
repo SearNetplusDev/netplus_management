@@ -11,5 +11,6 @@ Route::prefix('v1/operations')
         Route::group(['prefix' => 'technical'], function () {
             Route::post('data', [OperationsController::class, 'data']);
             Route::post('edit', [OperationsController::class, 'edit']);
+            Route::put('{id}', [OperationsController::class, 'processSupport']);
         });
     });

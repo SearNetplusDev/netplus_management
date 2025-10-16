@@ -3,7 +3,6 @@
 namespace App\Contracts\v1\Supports;
 
 use App\Models\Supports\SupportModel;
-use Illuminate\Support\Collection;
 
 interface SupportTypeInterface
 {
