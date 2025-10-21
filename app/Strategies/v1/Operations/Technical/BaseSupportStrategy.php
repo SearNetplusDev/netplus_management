@@ -3,6 +3,7 @@
 namespace App\Strategies\v1\Operations\Technical;
 
 use App\Contracts\v1\Supports\ProcessSupportInterface;
+use App\Enums\v1\General\CommonStatus;
 use App\Enums\v1\Supports\SupportStatus;
 use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
@@ -82,7 +83,9 @@ abstract class BaseSupportStrategy implements ProcessSupportInterface
     protected function ensureServiceStatus(SupportModel $model): void
     {
         $service = ServiceModel::query()->findOrFail($model->service_id);
-        if (!$service->status_id !== true) {
+        $status = CommonStatus::from($service->status_id);
+
+        if ($status->isInactive()) {
             throw ValidationException::withMessages([
                 'service' => 'Este servicio se encuentra inactivo.',
             ]);

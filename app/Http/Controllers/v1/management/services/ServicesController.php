@@ -25,8 +25,8 @@ class ServicesController extends Controller
                 'address.state',
                 'address.district',
             ])
-            ->withCount('services')
-            ->where('status_id', 1);
+            ->withCount('services');
+//            ->where('status_id', 1);
 
         return $viewerService->handle($request, $clients, [
             'status' => fn($q, $data) => $q->whereIn('status_id', $data),
