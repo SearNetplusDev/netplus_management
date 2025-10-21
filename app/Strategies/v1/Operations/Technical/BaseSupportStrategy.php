@@ -4,8 +4,10 @@ namespace App\Strategies\v1\Operations\Technical;
 
 use App\Contracts\v1\Supports\ProcessSupportInterface;
 use App\Enums\v1\Supports\SupportStatus;
+use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 abstract class BaseSupportStrategy implements ProcessSupportInterface
 {
@@ -60,5 +62,30 @@ abstract class BaseSupportStrategy implements ProcessSupportInterface
             SupportStatus::CANCELLED->value,
             SupportStatus::OBSERVED->value,
         ]);
+    }
+
+    /****
+     * @throws ValidationException
+     ****/
+    protected function ensureExistingService(SupportModel $model): void
+    {
+        if (!$model->service_id) {
+            throw ValidationException::withMessages([
+                'support' => 'El servicio no existe.',
+            ]);
+        }
+    }
+
+    /*****
+     * @throws ValidationException
+     *****/
+    protected function ensureServiceStatus(SupportModel $model): void
+    {
+        $service = ServiceModel::query()->findOrFail($model->service_id);
+        if (!$service->status_id !== true) {
+            throw ValidationException::withMessages([
+                'service' => 'Este servicio se encuentra inactivo.',
+            ]);
+        }
     }
 }

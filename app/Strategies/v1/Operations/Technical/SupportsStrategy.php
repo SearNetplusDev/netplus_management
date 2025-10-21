@@ -21,6 +21,9 @@ class SupportsStrategy extends BaseSupportStrategy
 
         try {
             DB::transaction(function () use ($model, $params, $status) {
+                $this->ensureExistingService($model);
+                $this->ensureServiceStatus($model);
+
                 if (isset($params['solution']))
                     $model->solution = $params['solution'];
 

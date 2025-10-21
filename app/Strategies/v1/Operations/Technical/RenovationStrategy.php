@@ -24,6 +24,7 @@ class RenovationStrategy extends BaseSupportStrategy
         try {
             DB::transaction(function () use ($model, $params) {
                 $this->validateExistingService($model);
+                $this->ensureServiceStatus($model);
                 $this->updateInternetProfile($model, $params);
             });
         } catch (Throwable $e) {

@@ -35,31 +35,7 @@ class ChangeAddressStrategy extends BaseSupportStrategy
         return $model;
     }
 
-    /*****
-     * Verifica la existencia del servicio
-     * @throws ValidationException
-     *****/
-    private function ensureExistingService(SupportModel $model): void
-    {
-        if (!$model->service_id) {
-            throw ValidationException::withMessages([
-                'support' => "No se puede trasladar un servicio que no existe"
-            ]);
-        }
-    }
-
-    /*****
-     * @throws ValidationException
-     *****/
-    private function ensureServiceStatus(SupportModel $model): void
-    {
-        $service = ServiceModel::query()->findOrFail($model->service_id);
-        if ($service->status_id !== true) throw ValidationException::withMessages([
-            'service' => "El servicio se encuentra inactivo, por lo tanto no puede ser trasladado."
-        ]);
-    }
-
-    private function updateServiceAddress(SupportModel $model, array $params): ServiceModel
+    private function updateServiceAddress(SupportModel $model, array $params): void
     {
         $service = ServiceModel::query()->findOrFail($model->service_id);
         $updateData = collect([
@@ -74,6 +50,6 @@ class ChangeAddressStrategy extends BaseSupportStrategy
         ])->filter(fn($val) => !is_null($val));
 
         $service->update($updateData->toArray());
-        return $service->refresh();
+//        return $service->refresh();
     }
 }
