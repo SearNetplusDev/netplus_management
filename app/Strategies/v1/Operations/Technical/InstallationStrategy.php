@@ -4,6 +4,7 @@ namespace App\Strategies\v1\Operations\Technical;
 
 use App\DTOs\v1\management\services\ServiceDTO;
 use App\DTOs\v1\management\services\ServiceInternetDTO;
+use App\Enums\v1\General\CommonStatus;
 use App\Enums\v1\Supports\SupportStatus;
 use App\Models\Clients\ClientModel;
 use App\Models\Infrastructure\Network\NodeModel;
@@ -35,8 +36,8 @@ class InstallationStrategy extends BaseSupportStrategy
 
         try {
             DB::transaction(function () use ($model, $params) {
-                $service = $this->createService($params);
-                $credentials = $this->createInternetCredentials($service, $params);
+                $service = $this->findOrCreateService($params);
+                $credentials = $this->findOrCreateCredentials($service, $params);
                 $this->updateSupport($model, $service->id, $params);
             });
 
@@ -58,10 +59,45 @@ class InstallationStrategy extends BaseSupportStrategy
     private function validateClientStatus(int $clientId): void
     {
         $client = ClientModel::query()->select('status_id')->findOrFail($clientId);
-        if ($client->status_id !== true) {
+        if ($client->status_id !== CommonStatus::ACTIVE->value) {
             throw ValidationException::withMessages([
                 'client' => "El cliente debe estar activo para crearse el servicio."
             ]);
+        }
+    }
+
+    /*****
+     *  Busca servicios inactivos para reactivarlos o crea nuevos
+     *****/
+    private function findOrCreateService(array $params): ServiceModel
+    {
+        $service = ServiceModel::query()
+            ->where([
+                ['client_id', (int)$params['client']],
+                ['status_id', CommonStatus::INACTIVE->value],
+            ])
+            ->latest('updated_at')
+            ->first();
+
+        if ($service) {
+            $service->update([
+                'status_id' => CommonStatus::ACTIVE->value,
+                'installation_date' => Carbon::today(),
+                'node_id' => (int)$params['node'],
+                'equipment_id' => (int)$params['equipment'],
+                'latitude' => $params['latitude'],
+                'longitude' => $params['longitude'],
+                'state_id' => (int)$params['state'],
+                'municipality_id' => (int)$params['municipality'],
+                'district_id' => (int)$params['district'],
+                'address' => $params['address'],
+                'technician_id' => (int)$params['technician'],
+                'comments' => $params['comments'] ?? $service->comments,
+            ]);
+
+            return $service->refresh();
+        } else {
+            return $this->createService($params);
         }
     }
 
@@ -84,11 +120,32 @@ class InstallationStrategy extends BaseSupportStrategy
             municipality_id: $params['municipality'],
             district_id: $params['district'],
             address: $params['address'],
-            separate_billing: 1,
-            status_id: 1,
+            separate_billing: CommonStatus::ACTIVE->value,
+            status_id: CommonStatus::ACTIVE->value,
             comments: $params['comments'] ?? null,
         );
         return ServiceModel::query()->create($DTO->toArray());
+    }
+
+    private function findOrCreateCredentials(ServiceModel $service, array $params): ServiceInternetModel
+    {
+        $credentials = ServiceInternetModel::query()
+            ->where([
+                ['service_id', (int)$service->id],
+                ['status_id', CommonStatus::INACTIVE->value],
+            ])
+            ->first();
+
+        if ($credentials) {
+            $credentials->update([
+                'internet_profile_id' => $params['profile'],
+                'status_id' => CommonStatus::ACTIVE->value,
+            ]);
+
+            return $credentials->refresh();
+        } else {
+            return $this->createInternetCredentials($service, $params);
+        }
     }
 
     /*****
@@ -105,7 +162,7 @@ class InstallationStrategy extends BaseSupportStrategy
             service_id: $service->id,
             user: $user,
             secret: $secret,
-            status_id: 1
+            status_id: CommonStatus::ACTIVE->value,
         );
         return ServiceInternetModel::query()->create($DTO->toArray());
     }
