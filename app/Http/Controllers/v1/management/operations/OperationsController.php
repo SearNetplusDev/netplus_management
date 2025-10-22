@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Auth;
 
 class OperationsController extends Controller
 {
+    /***
+     * @param Request $request
+     * @param DataViewerService $dataViewer
+     * @return JsonResponse
+     */
     public function data(Request $request, DataViewerService $dataViewer): JsonResponse
     {
         $user = Auth::user();
@@ -54,6 +59,11 @@ class OperationsController extends Controller
         ]);
     }
 
+    /***
+     * @param Request $request
+     * @param OperationService $service
+     * @return JsonResponse
+     */
     public function edit(Request $request, OperationService $service): JsonResponse
     {
         $support = $service->getSupportData($request->input('id'));
@@ -63,6 +73,12 @@ class OperationsController extends Controller
         ]);
     }
 
+    /***
+     * @param OperationRequest $request
+     * @param SupportModel $id
+     * @param OperationService $service
+     * @return JsonResponse
+     */
     public function processSupport(OperationRequest $request, SupportModel $id, OperationService $service): JsonResponse
     {
         $transaction = $service->process($id, $request->toArray());
@@ -70,6 +86,20 @@ class OperationsController extends Controller
         return response()->json([
             'saved' => (bool)$transaction,
             'support' => new SupportResource($transaction),
+        ]);
+    }
+
+    /***
+     * @param OperationService $service
+     * @return JsonResponse
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
+     * @throws \RouterOS\Exceptions\QueryException
+     */
+    public function routerOSTest(OperationService $service): JsonResponse
+    {
+        return response()->json([
+            'response' => $service->mikrotik()
         ]);
     }
 }

@@ -59,7 +59,9 @@ class InstallationStrategy extends BaseSupportStrategy
     private function validateClientStatus(int $clientId): void
     {
         $client = ClientModel::query()->select('status_id')->findOrFail($clientId);
-        if ($client->status_id !== CommonStatus::ACTIVE->value) {
+        $status = CommonStatus::from($client->status_id);
+
+        if ($status->isInactive()) {
             throw ValidationException::withMessages([
                 'client' => "El cliente debe estar activo para crearse el servicio."
             ]);
