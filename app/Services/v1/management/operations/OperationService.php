@@ -28,26 +28,4 @@ class OperationService
         $strategy = ProcessSupportFactory::make((int)$params['type']);
         return $strategy->process($model, $params);
     }
-
-    /***
-     * @return array
-     * @throws \RouterOS\Exceptions\ClientException
-     * @throws \RouterOS\Exceptions\ConfigException
-     * @throws \RouterOS\Exceptions\QueryException
-     */
-    public function mikrotik(): array
-    {
-        $routerOs = new MikrotikAPI();
-        return $routerOs->executeQuery(
-            '192.168.1.86',
-            'Eustass',
-            'jg3kifei8s',
-            '/ppp/profile/print',
-        );
-//        return $routerOs->listPPPPoeProfiles(
-//            '192.168.1.86',
-//            'Eustass',
-//            'jg3kifei8s'
-//        );
-    }
 }

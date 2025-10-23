@@ -6,8 +6,10 @@ use App\DTOs\v1\management\services\ServiceDTO;
 use App\DTOs\v1\management\services\ServiceInternetDTO;
 use App\Enums\v1\General\CommonStatus;
 use App\Enums\v1\Supports\SupportStatus;
+use App\Libraries\MikrotikAPI;
 use App\Models\Clients\ClientModel;
 use App\Models\Infrastructure\Network\NodeModel;
+use App\Models\Management\Profiles\InternetModel;
 use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
@@ -129,6 +131,11 @@ class InstallationStrategy extends BaseSupportStrategy
         return ServiceModel::query()->create($DTO->toArray());
     }
 
+    /***
+     * @param ServiceModel $service
+     * @param array $params
+     * @return ServiceInternetModel
+     */
     private function findOrCreateCredentials(ServiceModel $service, array $params): ServiceInternetModel
     {
         $credentials = ServiceInternetModel::query()
@@ -155,9 +162,13 @@ class InstallationStrategy extends BaseSupportStrategy
      *****/
     private function createInternetCredentials(ServiceModel $service, array $params): ServiceInternetModel
     {
-        $node = NodeModel::query()->select('prefix')->findOrFail((int)$params['node']);
+        $node = NodeModel::query()
+            ->with('auth_server')
+            ->select('prefix')
+            ->findOrFail((int)$params['node']);
+
         $client = ClientModel::query()->select(['name', 'surname'])->findOrFail((int)$params['client']);
-        $user = $this->generateUser($node->prefix);
+        $user = $this->generateUser($node->prefix, $node->id);
         $secret = $this->generateSecret($client);
         $DTO = new ServiceInternetDTO(
             internet_profile_id: (int)$params['profile'],
@@ -166,15 +177,43 @@ class InstallationStrategy extends BaseSupportStrategy
             secret: $secret,
             status_id: CommonStatus::ACTIVE->value,
         );
+        $server = $node->auth_server;
+        $internetProfile = InternetModel::query()->find((int)$params['profile']);
+        try {
+            $mikrotik = new MikrotikAPI();
+            $secretData = [
+                'name' => $user,
+                'password' => $secret,
+                'service' => 'pppoe',
+                'profile' => $internetProfile->mk_profile,
+                'comment' => "{$client->name} {$client->surname}",
+                'disabled' => 'no',
+            ];
+            $mikrotik->createPPPSecret($server->ip, $server->user, $server->secret, $secretData);
+        } catch (Throwable $exception) {
+            throw ValidationException::withMessages([
+                'support' => "Ha ocurrido un problema al crear credenciales: {$exception->getMessage()}",
+            ]);
+        }
+
         return ServiceInternetModel::query()->create($DTO->toArray());
     }
 
     /*****
      *  Genera el usuario del servicio
      ******/
-    private function generateUser(string $prefix): string
+    private function generateUser(string $prefix, int $node): string
     {
-        return 'NetPlus' . $prefix;
+        $prefix = 'NetPlus' . $prefix;
+        $service = ServiceModel::query()
+            ->where('node_id', $node)
+            ->withTrashed()
+            ->count();
+        $maxLength = 5;
+        $zeroFill = max(0, $maxLength - strlen($service));
+        $filling = str_repeat('0', $zeroFill);
+        $prefix .= $filling . $service + 1;
+        return $prefix;
     }
 
     /*****

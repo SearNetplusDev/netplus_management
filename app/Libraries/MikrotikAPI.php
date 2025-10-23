@@ -143,4 +143,36 @@ class MikrotikAPI
             return $client->query($query)->read();
         }, $port);
     }
+
+    /***
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param array $secretData
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     * @throws QueryException
+     */
+    public function createPPPSecret(
+        string $host,
+        string $user,
+        string $pass,
+        array  $secretData,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($secretData) {
+            $query = (new Query('/ppp/secret/add'))
+                ->equal('name', $secretData['name']) // NetPlusXX000XX
+                ->equal('password', $secretData['password']) // Nombre_Cliente
+                ->equal('service', $secretData['service'])  //  pppoe
+                ->equal('profile', $secretData['profile'])  //  25Mbps
+                ->equal('comment', $secretData['comment'])  //  Nombre Cliente
+                ->equal('disabled', $secretData['disabled']);   //  no
+
+            return $client->query($query)->read();
+        }, $port);
+    }
 }

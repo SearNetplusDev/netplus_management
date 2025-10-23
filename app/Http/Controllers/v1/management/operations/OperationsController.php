@@ -88,18 +88,4 @@ class OperationsController extends Controller
             'support' => new SupportResource($transaction),
         ]);
     }
-
-    /***
-     * @param OperationService $service
-     * @return JsonResponse
-     * @throws \RouterOS\Exceptions\ClientException
-     * @throws \RouterOS\Exceptions\ConfigException
-     * @throws \RouterOS\Exceptions\QueryException
-     */
-    public function routerOSTest(OperationService $service): JsonResponse
-    {
-        return response()->json([
-            'response' => $service->mikrotik()
-        ]);
-    }
 }

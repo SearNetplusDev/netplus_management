@@ -12,6 +12,5 @@ Route::prefix('v1/operations')
             Route::post('data', [OperationsController::class, 'data']);
             Route::post('edit', [OperationsController::class, 'edit']);
             Route::put('{id}', [OperationsController::class, 'processSupport']);
-            Route::get('mikrotik', [OperationsController::class, 'routerOSTest']);
         });
     });

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\v1\management\general;
 
 use App\Http\Controllers\Controller;
+use App\Libraries\MikrotikAPI;
+use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Management\Profiles\InternetModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
@@ -31,6 +33,37 @@ class InternetController extends Controller
     {
         return response()->json([
             'response' => $this->plans(true)
+        ]);
+    }
+
+    /***
+     * @return JsonResponse
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
+     * @throws \RouterOS\Exceptions\QueryException
+     */
+    public function mikrotikProfilesList(): JsonResponse
+    {
+        $server = AuthServerModel::query()->find(env("MK_MAIN"));
+        $routerOS = new MikrotikAPI();
+        $profiles = $routerOS->executeQuery(
+            $server->ip,
+            $server->user,
+            $server->secret,
+            '/ppp/profile/print',
+        );
+
+        $data = collect($profiles)->filter(function ($profile) {
+            return stripos($profile['name'], 'default') === false;
+        })->map(function ($profile) {
+            return [
+                'id' => $profile['name'],
+                'name' => $profile['name'],
+            ];
+        });
+
+        return response()->json([
+            'response' => $data->values()
         ]);
     }
 

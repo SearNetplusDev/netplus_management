@@ -73,6 +73,7 @@ Route::prefix('v1/general')
                 Route::get('iptv', [InternetController::class, 'iptvPlansList']);
             });
             Route::get('internet', [InternetController::class, 'internetProfilesList']);
+            Route::get('mikrotik', [InternetController::class, 'mikrotikProfilesList']);
         });
 
         Route::group(['prefix' => 'supports'], function () {
