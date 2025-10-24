@@ -2,10 +2,12 @@
 
 namespace App\Models\Infrastructure\Network;
 
+use App\Enums\v1\General\CommonStatus;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -49,10 +51,10 @@ class NodeModel extends Model
     ];
     protected $appends = ['status'];
 
-    public function auth_server(): HasOne
+    public function auth_server(): BelongsTo
     {
-        return $this->hasOne(AuthServerModel::class, 'id', 'server_id')
-            ->where('status_id', 1);
+        return $this->belongsTo(AuthServerModel::class, 'server_id', 'id')
+            ->where('status_id', CommonStatus::ACTIVE->value);
     }
 
     public function state(): HasOne

@@ -56,7 +56,7 @@ class OperationsController extends Controller
             'district' => fn($q, $data) => $q->whereIn('district_id', $data),
             'user' => fn($q, $data) => $q->whereIn('user_id', $data),
             'technician' => fn($q, $data) => $q->whereIn('technician_id', $data),
-        ]);
+        ], 'id', 'desc');
     }
 
     /***

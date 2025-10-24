@@ -39,7 +39,7 @@ class InstallationStrategy extends BaseSupportStrategy
         try {
             DB::transaction(function () use ($model, $params) {
                 $service = $this->findOrCreateService($params);
-                $credentials = $this->findOrCreateCredentials($service, $params);
+                $this->findOrCreateCredentials($service, $params);
                 $this->updateSupport($model, $service->id, $params);
             });
 
@@ -158,14 +158,19 @@ class InstallationStrategy extends BaseSupportStrategy
     }
 
     /*****
-     *  Crea las credenciales de internet para el servicio
-     *****/
+     * @param ServiceModel $service
+     * @param array $params
+     * @return ServiceInternetModel
+     * @throws Throwable
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
+     * @throws \RouterOS\Exceptions\QueryException
+     */
     private function createInternetCredentials(ServiceModel $service, array $params): ServiceInternetModel
     {
         $node = NodeModel::query()
             ->with('auth_server')
-            ->select('prefix')
-            ->findOrFail((int)$params['node']);
+            ->find((int)$params['node']);
 
         $client = ClientModel::query()->select(['name', 'surname'])->findOrFail((int)$params['client']);
         $user = $this->generateUser($node->prefix, $node->id);
@@ -177,6 +182,7 @@ class InstallationStrategy extends BaseSupportStrategy
             secret: $secret,
             status_id: CommonStatus::ACTIVE->value,
         );
+
         $server = $node->auth_server;
         $internetProfile = InternetModel::query()->find((int)$params['profile']);
         try {
@@ -190,9 +196,11 @@ class InstallationStrategy extends BaseSupportStrategy
                 'disabled' => 'no',
             ];
             $mikrotik->createPPPSecret($server->ip, $server->user, $server->secret, $secretData);
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (Throwable $exception) {
             throw ValidationException::withMessages([
-                'support' => "Ha ocurrido un problema al crear credenciales: {$exception->getMessage()}",
+                'operation' => "Error inesperado al crear el usuario. {$exception->getMessage()}",
             ]);
         }
 
@@ -205,14 +213,14 @@ class InstallationStrategy extends BaseSupportStrategy
     private function generateUser(string $prefix, int $node): string
     {
         $prefix = 'NetPlus' . $prefix;
-        $service = ServiceModel::query()
+        $services = ServiceModel::query()
             ->where('node_id', $node)
             ->withTrashed()
             ->count();
         $maxLength = 5;
-        $zeroFill = max(0, $maxLength - strlen($service));
+        $zeroFill = max(0, $maxLength - strlen($services));
         $filling = str_repeat('0', $zeroFill);
-        $prefix .= $filling . $service + 1;
+        $prefix .= $filling . $services;
         return $prefix;
     }
 

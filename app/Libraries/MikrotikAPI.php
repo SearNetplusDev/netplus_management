@@ -2,6 +2,7 @@
 
 namespace App\Libraries;
 
+use Illuminate\Validation\ValidationException;
 use RouterOS\Client;
 use RouterOS\Config;
 use RouterOS\Exceptions\BadCredentialsException;
@@ -10,6 +11,8 @@ use RouterOS\Exceptions\ConnectException;
 use RouterOS\Exceptions\ClientException;
 use RouterOS\Exceptions\QueryException;
 use RouterOS\Query;
+use Throwable;
+use function Symfony\Component\Translation\t;
 
 class MikrotikAPI
 {
@@ -85,6 +88,10 @@ class MikrotikAPI
         try {
             $this->connect($host, $user, $pass, $port);
             return $action($this->client);
+        } catch (BadCredentialsException|ConnectException|QueryException $e) {
+            throw ValidationException::withMessages([
+                'operation' => "Ha ocurrido un error al conectarse al equipo de Mikrotik. {$e->getMessage()}",
+            ]);
         } finally {
             $this->disconnect();
         }
@@ -165,12 +172,12 @@ class MikrotikAPI
     {
         return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($secretData) {
             $query = (new Query('/ppp/secret/add'))
-                ->equal('name', $secretData['name']) // NetPlusXX000XX
-                ->equal('password', $secretData['password']) // Nombre_Cliente
-                ->equal('service', $secretData['service'])  //  pppoe
-                ->equal('profile', $secretData['profile'])  //  25Mbps
-                ->equal('comment', $secretData['comment'])  //  Nombre Cliente
-                ->equal('disabled', $secretData['disabled']);   //  no
+                ->equal('name', $secretData['name'])
+                ->equal('password', $secretData['password'])
+                ->equal('service', $secretData['service'])
+                ->equal('profile', $secretData['profile'])
+                ->equal('comment', $secretData['comment'])
+                ->equal('disabled', $secretData['disabled']);
 
             return $client->query($query)->read();
         }, $port);
