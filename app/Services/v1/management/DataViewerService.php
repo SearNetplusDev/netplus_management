@@ -8,6 +8,14 @@ use Illuminate\Http\JsonResponse;
 
 class DataViewerService
 {
+    /***
+     * @param Request $request
+     * @param Builder $query
+     * @param array $filterColumns
+     * @param string|null $defaultOrderColumn
+     * @param string|null $defaultOrderDirection
+     * @return JsonResponse
+     */
     public function handle(
         Request $request,
         Builder $query,

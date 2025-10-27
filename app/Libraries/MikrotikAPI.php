@@ -12,7 +12,6 @@ use RouterOS\Exceptions\ClientException;
 use RouterOS\Exceptions\QueryException;
 use RouterOS\Query;
 use Throwable;
-use function Symfony\Component\Translation\t;
 
 class MikrotikAPI
 {
@@ -180,6 +179,121 @@ class MikrotikAPI
                 ->equal('disabled', $secretData['disabled']);
 
             return $client->query($query)->read();
+        }, $port);
+    }
+
+    /***
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $secretName
+     * @param bool $disable
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function togglePPPSecret(
+        string $host,
+        string $user,
+        string $pass,
+        string $secretName,
+        bool   $disable = true,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($secretName, $disable) {
+            $queryFind = (new Query('/ppp/secret/print'))->where('name', $secretName);
+            $result = $client->query($queryFind)->read();
+
+            if (empty($result)) {
+                throw ValidationException::withMessages([
+                    'secret' => "No se encontró el usuario {$secretName}."
+                ]);
+            }
+            $secretID = $result[0]['.id'];
+
+            $queryToggle = (new Query('/ppp/secret/set'))
+                ->equal('.id', $secretID)
+                ->equal('disabled', $disable ? 'yes' : 'no');
+
+            return $client->query($queryToggle)->read();
+        }, $port);
+    }
+
+    /***
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $currentName
+     * @param array $newData
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function updatePPPSecret(
+        string $host,
+        string $user,
+        string $pass,
+        string $currentName,
+        array  $newData,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($currentName, $newData) {
+            $queryFind = (new Query('/ppp/secret/print'))->where('name', $currentName);
+            $result = $client->query($queryFind)->read();
+
+            if (empty($result)) {
+                throw ValidationException::withMessages([
+                    'secret' => "No se encontró el usuario {$currentName}."
+                ]);
+            }
+            $secretID = $result[0]['.id'];
+
+            $queryUpdate = (new Query('/ppp/secret/set'))
+                ->equal('.id', $secretID);
+
+            foreach ($newData as $key => $value) {
+                $queryUpdate->equal($key, $value);
+            }
+
+            return $client->query($queryUpdate)->read();
+        }, $port);
+    }
+
+    /***
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $secretName
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function deletePPPSecret(
+        string $host,
+        string $user,
+        string $pass,
+        string $secretName,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($secretName) {
+            $queryFind = (new Query('/ppp/secret/print'))->where('name', $secretName);
+            $result = $client->query($queryFind)->read();
+
+            if (empty($result)) {
+                throw ValidationException::withMessages([
+                    'secret' => "No se encontró el usuario {$secretName}."
+                ]);
+            }
+            $secretID = $result[0]['.id'];
+
+            $queryDelete = (new Query('/ppp/secret/remove'))->equal('.id', $secretID);
+            return $client->query($queryDelete)->read();
         }, $port);
     }
 }

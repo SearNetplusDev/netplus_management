@@ -41,6 +41,6 @@ class SupportsStrategy extends BaseSupportStrategy
             ]);
         }
 
-        return $model;
+        return $model->refresh();
     }
 }

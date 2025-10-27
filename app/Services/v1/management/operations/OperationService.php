@@ -3,6 +3,7 @@
 namespace App\Services\v1\management\operations;
 
 use App\Libraries\MikrotikAPI;
+use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Management\Profiles\InternetModel;
 use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
