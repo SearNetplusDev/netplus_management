@@ -2,17 +2,18 @@
 
 namespace App\Strategies\v1\Operations\Technical;
 
+
 use App\DTOs\v1\management\services\ServiceDTO;
 use App\DTOs\v1\management\services\ServiceInternetDTO;
 use App\Enums\v1\General\CommonStatus;
 use App\Enums\v1\Supports\SupportStatus;
-use App\Libraries\MikrotikAPI;
 use App\Models\Clients\ClientModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\Profiles\InternetModel;
 use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
+use App\Services\v1\network\MikrotikInternetService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -20,44 +21,48 @@ use Throwable;
 
 class InstallationStrategy extends BaseSupportStrategy
 {
-    /**
-     * @throws ValidationException
-     **/
+    /***
+     * @param MikrotikInternetService $mikrotikService
+     */
+    public function __construct(private MikrotikInternetService $mikrotikService)
+    {
 
+    }
+
+    /***
+     * @param SupportModel $model
+     * @param array $params
+     * @return SupportModel
+     */
     public function handle(SupportModel $model, array $params): SupportModel
     {
-        /*****
-         * To Do: Conectar con API de Mikrotik
-         *****/
-
         $status = SupportStatus::tryFrom((int)$params['status']);
         if (!$status || !$status->isFinalized()) return $model;
         if ($model->service_id) return $model;
 
-        $this->validateClientStatus((int)$params['client']);
+        $this->validateClientStatus($params['client']);
 
         try {
             DB::transaction(function () use ($model, $params) {
                 $service = $this->findOrCreateService($params);
-                $this->findOrCreateCredentials($service, $params);
+                $this->handleCredentials($service, $params);
                 $this->updateSupport($model, $service->id, $params);
             });
 
-        } catch (ValidationException $e) {
-            throw $e;
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
-                'process' => "No se pudo completar la instalación. Intenta nuevamente.",
+                'process' => "No se pudo completar la instalación: {$e->getMessage()}"
             ]);
         }
 
-        return $model->fresh();
+        return $model;
     }
 
-    /****
-     *  Verifica que el cliente este activo
-     * @throws ValidationException
-     *****/
+    /***
+     * Verifica el estado del cliente
+     * @param int $clientId
+     * @return void
+     */
     private function validateClientStatus(int $clientId): void
     {
         $client = ClientModel::query()->select('status_id')->findOrFail($clientId);
@@ -65,52 +70,48 @@ class InstallationStrategy extends BaseSupportStrategy
 
         if ($status->isInactive()) {
             throw ValidationException::withMessages([
-                'client' => "El cliente debe estar activo para crearse el servicio."
+                'client' => "Este cliente debe estar activo para crear el servicio."
             ]);
         }
     }
 
-    /*****
-     *  Busca servicios inactivos para reactivarlos o crea nuevos
-     *****/
+    /***
+     * @param array $params
+     * @return ServiceModel
+     */
     private function findOrCreateService(array $params): ServiceModel
     {
         $service = ServiceModel::query()
-            ->where([
-                ['client_id', (int)$params['client']],
-                ['status_id', CommonStatus::INACTIVE->value],
-            ])
-            ->latest('updated_at')
+            ->where('client_id', (int)$params['client'])
+            ->where('status_id', CommonStatus::INACTIVE->value)
+            ->oldest()
             ->first();
 
-        if ($service) {
-            $service->update([
+        return $service
+            ? tap($service)->update([
                 'status_id' => CommonStatus::ACTIVE->value,
                 'installation_date' => Carbon::today(),
-                'node_id' => (int)$params['node'],
-                'equipment_id' => (int)$params['equipment'],
+                'node_id' => $params['node'],
+                'equipment_id' => $params['equipment'],
                 'latitude' => $params['latitude'],
                 'longitude' => $params['longitude'],
-                'state_id' => (int)$params['state'],
-                'municipality_id' => (int)$params['municipality'],
-                'district_id' => (int)$params['district'],
+                'state_id' => $params['state'],
+                'municipality_id' => $params['municipality'],
+                'district_id' => $params['district'],
                 'address' => $params['address'],
-                'technician_id' => (int)$params['technician'],
-                'comments' => $params['comments'] ?? $service->comments,
-            ]);
-
-            return $service->refresh();
-        } else {
-            return $this->createService($params);
-        }
+                'technician_id' => $params['technician'],
+                'comments' => $params['comments'] ?? null,
+            ])
+            : $this->createService($params);
     }
 
-    /*****
-     *  Crea el servicio principal
-     *****/
+    /***
+     * @param array $params
+     * @return ServiceModel
+     */
     private function createService(array $params): ServiceModel
     {
-        $DTO = new ServiceDTO(
+        $dto = new ServiceDTO(
             client_id: $params['client'],
             code: null,
             name: null,
@@ -128,7 +129,8 @@ class InstallationStrategy extends BaseSupportStrategy
             status_id: CommonStatus::ACTIVE->value,
             comments: $params['comments'] ?? null,
         );
-        return ServiceModel::query()->create($DTO->toArray());
+
+        return ServiceModel::query()->create($dto->toArray());
     }
 
     /***
@@ -136,80 +138,115 @@ class InstallationStrategy extends BaseSupportStrategy
      * @param array $params
      * @return ServiceInternetModel
      */
-    private function findOrCreateCredentials(ServiceModel $service, array $params): ServiceInternetModel
+    private function handleCredentials(ServiceModel $service, array $params): ServiceInternetModel
     {
         $credentials = ServiceInternetModel::query()
-            ->where([
-                ['service_id', (int)$service->id],
-                ['status_id', CommonStatus::INACTIVE->value],
-            ])
+            ->where('service_id', $service->id)
             ->first();
 
-        if ($credentials) {
-            $credentials->update([
-                'internet_profile_id' => $params['profile'],
-                'status_id' => CommonStatus::ACTIVE->value,
-            ]);
+        $node = NodeModel::query()->with('auth_server')->findOrFail((int)$params['node']);
+        $server = $node->auth_server->toArray();
+        $profile = InternetModel::query()->findOrFail((int)$params['profile']);
+        $client = ClientModel::query()->select(['name', 'surname'])->findOrFail((int)$params['client']);
+        $comment = "{$client->name} {$client->surname}";
 
-            return $credentials->refresh();
-        } else {
+        //  No encuentra credenciales, crearlas
+        if (!$credentials) return $this->createInternetCredentials($service, $params);
+
+        $nodeChanged = $service->node_id !== (int)$params['node'];
+        $profileChanged = $credentials->internet_profile_id !== (int)$params['profile'];
+
+        //  Hay credenciales, pero los nodos no coinciden eliminar credenciales y crear nuevas
+        if ($nodeChanged) {
+            try {
+                //  Eliminando usuario de nodo antiguo.
+                $oldNode = NodeModel::query()->with('auth_server')->findOrFail($service->node_id);
+                $oldServer = $oldNode->auth_server->toArray();
+
+                $this->mikrotikService->deleteUser($oldServer, $credentials->user);
+            } catch (Throwable $e) {
+                throw ValidationException::withMessages([
+                    'mikrotik' => "Error al eliminar el usuario PPPoe: {$e->getMessage()}"
+                ]);
+            }
+            $credentials->delete();
+
             return $this->createInternetCredentials($service, $params);
         }
+
+        //  Hay credenciales, pero los perfiles no coinciden
+        if ($profileChanged) {
+            try {
+                $this->mikrotikService->updateUser($server, $credentials->user, [
+                    'profile' => $profile->mk_profile,
+                    'comment' => $comment,
+                ]);
+
+                $credentials->update([
+                    'internet_profile_id' => (int)$params['profile'],
+                    'status_id' => CommonStatus::ACTIVE->value,
+                ]);
+            } catch (Throwable $e) {
+                throw ValidationException::withMessages([
+                    'mikrotik' => "Error al actualizar el usuario PPPoe: {$e->getMessage()}",
+                ]);
+            }
+        }
+
+        //  Credenciales inactivas
+        if ($credentials->status_id === CommonStatus::INACTIVE->value) {
+            try {
+                //  Habilitar usuario
+                $this->mikrotikService->enableUser($server, $credentials->user);
+                $credentials->update([
+                    'status_id' => CommonStatus::ACTIVE->value,
+                ]);
+
+            } catch (Throwable $e) {
+                throw ValidationException::withMessages([
+                    'mikrotik' => "Error al reactivar el usuario PPPoe: {$e->getMessage()}"
+                ]);
+            }
+        }
+
+        return $credentials->refresh();
     }
 
-    /*****
+    /***
      * @param ServiceModel $service
      * @param array $params
      * @return ServiceInternetModel
-     * @throws Throwable
-     * @throws \RouterOS\Exceptions\ClientException
-     * @throws \RouterOS\Exceptions\ConfigException
-     * @throws \RouterOS\Exceptions\QueryException
      */
     private function createInternetCredentials(ServiceModel $service, array $params): ServiceInternetModel
     {
-        $node = NodeModel::query()
-            ->with('auth_server')
-            ->find((int)$params['node']);
-
+        $node = NodeModel::query()->with('auth_server')->findOrFail((int)$params['node']);
         $client = ClientModel::query()->select(['name', 'surname'])->findOrFail((int)$params['client']);
-        $user = $this->generateUser($node->prefix, $node->id);
-        $secret = $this->generateSecret($client);
-        $DTO = new ServiceInternetDTO(
+
+        $username = $this->generateUser($node->prefix, $node->id);
+        $password = $this->generateSecret($client);
+
+        $dto = new ServiceInternetDTO(
             internet_profile_id: (int)$params['profile'],
             service_id: $service->id,
-            user: $user,
-            secret: $secret,
+            user: $username,
+            secret: $password,
             status_id: CommonStatus::ACTIVE->value,
         );
 
-        $server = $node->auth_server;
-        $internetProfile = InternetModel::query()->find((int)$params['profile']);
-        try {
-            $mikrotik = new MikrotikAPI();
-            $secretData = [
-                'name' => $user,
-                'password' => $secret,
-                'service' => 'pppoe',
-                'profile' => $internetProfile->mk_profile,
-                'comment' => "{$client->name} {$client->surname}",
-                'disabled' => 'no',
-            ];
-            $mikrotik->createPPPSecret($server->ip, $server->user, $server->secret, $secretData);
-        } catch (ValidationException $exception) {
-            throw $exception;
-        } catch (Throwable $exception) {
-            throw ValidationException::withMessages([
-                'operation' => "Error inesperado al crear el usuario. {$exception->getMessage()}",
-            ]);
-        }
+        $server = $node->auth_server->toArray();
+        $profile = InternetModel::query()->findOrFail((int)$params['profile'])->toArray();
+        $comment = "{$client->name} {$client->surname}";
 
-        return ServiceInternetModel::query()->create($DTO->toArray());
+        $this->mikrotikService->createUser($server, $profile, $username, $password, $comment);
+
+        return ServiceInternetModel::query()->create($dto->toArray());
     }
 
-    /*****
-     *  Genera el usuario del servicio
-     ******/
+    /***
+     * @param string $prefix
+     * @param int $node
+     * @return string
+     */
     private function generateUser(string $prefix, int $node): string
     {
         $prefix = 'NetPlus' . $prefix;
@@ -224,9 +261,10 @@ class InstallationStrategy extends BaseSupportStrategy
         return $prefix;
     }
 
-    /*****
-     *  Genera la contraseña del servicio
-     *****/
+    /***
+     * @param object $client
+     * @return string
+     */
     private function generateSecret(object $client): string
     {
         $firstName = explode(' ', trim($client->name))[0];
@@ -235,9 +273,12 @@ class InstallationStrategy extends BaseSupportStrategy
         return transliterator_transliterate('Any-Latin; Latin-ASCII', $name);
     }
 
-    /*****
-     *  Actualiza el soporte con el ID del servicio creado
-     *****/
+    /***
+     * @param SupportModel $model
+     * @param int $serviceId
+     * @param array $params
+     * @return void
+     */
     private function updateSupport(SupportModel $model, int $serviceId, array $params): void
     {
         $model->update([
