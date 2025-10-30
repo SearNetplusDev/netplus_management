@@ -132,7 +132,7 @@ class RenovationStrategy extends BaseSupportStrategy
         $credentials->update([
             'internet_profile_id' => (int)$params['profile'],
             'user' => $user,
-            'password' => $password,
+            'secret' => $password,
             'status_id' => CommonStatus::ACTIVE->value,
         ]);
 
