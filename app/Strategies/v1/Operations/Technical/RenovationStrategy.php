@@ -24,9 +24,11 @@ class RenovationStrategy extends BaseSupportStrategy
     {
     }
 
-    /**
-     * @throws ValidationException
-     * */
+    /***
+     * @param SupportModel $model
+     * @param array $params
+     * @return SupportModel
+     */
     public function handle(SupportModel $model, array $params): SupportModel
     {
         $status = SupportStatus::tryFrom((int)$params['status']);
@@ -47,6 +49,11 @@ class RenovationStrategy extends BaseSupportStrategy
         return $model->refresh();
     }
 
+    /***
+     * @param SupportModel $model
+     * @param array $params
+     * @return void
+     */
     private function updateInternetProfile(SupportModel $model, array $params): void
     {
         $service = ServiceModel::query()->findOrFail((int)$params['service']);
@@ -54,11 +61,17 @@ class RenovationStrategy extends BaseSupportStrategy
         $nodeChanged = $service->node_id !== (int)$params['node'];
         $profileChanged = $credentials->internet_profile_id !== (int)$params['profile'];
 
-        if ($nodeChanged) $this->changeNode($service, $params);
-        if ($profileChanged) $this->changeProfile();
+        if ($nodeChanged) $this->changeNode($service, $credentials, $params);
+        if ($profileChanged) $this->changeProfile($credentials, $params);
     }
 
-    private function changeNode(ServiceModel $service, array $params): void
+    /***
+     * @param ServiceModel $service
+     * @param ServiceInternetModel $credentials
+     * @param array $params
+     * @return void
+     */
+    private function changeNode(ServiceModel $service, ServiceInternetModel $credentials, array $params): void
     {
         $newNode = $this->getNode((int)$params['node']);
         $oldNode = $this->getNode($service->node_id);
@@ -77,9 +90,6 @@ class RenovationStrategy extends BaseSupportStrategy
         ]);
         $oldServer = $oldNode->auth_server->toArray();
 
-        //  Obteniendo Credenciales
-        $credentials = $this->getCredentials($service->id);
-
         //  Eliminando credenciales en old server
         $this->mikrotikInternetService->deleteUser($oldServer, $credentials->user);
 
@@ -87,9 +97,21 @@ class RenovationStrategy extends BaseSupportStrategy
         $this->updateCredentials($newNode, $service, $credentials, $params);
     }
 
-    private function changeProfile()
+    private function changeProfile(ServiceInternetModel $credentials, array $params): void
     {
+        $node = $this->getNode((int)$params['node']);
+        $server = $node->auth_server->toArray();
+        $profile = $this->getProfile((int)$params['profile'])->toArray();
 
+        //  Actualizando perfil en credenciales
+        $credentials->update([
+            'internet_profile_id' => (int)$params['profile'],
+        ]);
+
+        //  Actualizando perfil en Mikrotik
+        $this->mikrotikInternetService->updateUser($server, $credentials->user, [
+            'profile' => $profile['mk_profile'],
+        ]);
     }
 
     private function updateCredentials(
