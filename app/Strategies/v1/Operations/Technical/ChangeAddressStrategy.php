@@ -106,6 +106,12 @@ class ChangeAddressStrategy extends BaseSupportStrategy
         ]);
     }
 
+    /***
+     * @param ServiceModel $service
+     * @param ServiceInternetModel $credentials
+     * @param array $params
+     * @return void
+     */
     private function migrateService(
         ServiceModel         $service,
         ServiceInternetModel $credentials,
