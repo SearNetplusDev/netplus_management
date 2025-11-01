@@ -22,9 +22,9 @@ use Throwable;
 class InstallationStrategy extends BaseSupportStrategy
 {
     /***
-     * @param MikrotikInternetService $mikrotikService
+     * @param MikrotikInternetService $mikrotikInternetService
      */
-    public function __construct(private MikrotikInternetService $mikrotikService)
+    public function __construct(private MikrotikInternetService $mikrotikInternetService)
     {
 
     }
@@ -41,11 +41,9 @@ class InstallationStrategy extends BaseSupportStrategy
         if ($model->service_id) return $model;
 
         $this->validateClientStatus($params['client']);
-
         try {
             DB::transaction(function () use ($model, $params) {
-                $service = $this->findOrCreateService($params);
-                $this->handleCredentials($service, $params);
+                $service = $this->checkPreviousService($model->client_id, $params);
                 $this->updateSupport($model, $service->id, $params);
             });
 
@@ -55,7 +53,7 @@ class InstallationStrategy extends BaseSupportStrategy
             ]);
         }
 
-        return $model;
+        return $model->load('service');
     }
 
     /***
@@ -76,33 +74,60 @@ class InstallationStrategy extends BaseSupportStrategy
     }
 
     /***
-     * @param array $params
+     * @param int $clientId
+     * @param array $inputs
      * @return ServiceModel
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
      */
-    private function findOrCreateService(array $params): ServiceModel
+    private function checkPreviousService(int $clientId, array $inputs): ServiceModel
     {
         $service = ServiceModel::query()
-            ->where('client_id', (int)$params['client'])
-            ->where('status_id', CommonStatus::INACTIVE->value)
+            ->where([
+                ['client_id', $clientId],
+                ['status_id', CommonStatus::INACTIVE->value]
+            ])
             ->oldest()
             ->first();
+        if ($service) {
+            $oldNode = $this->getNode($service->node_id);
+            $oldServer = $oldNode->auth_server->toArray();
+            $credentials = $this->checkCredentials($service->id);
+            $nodeChanged = $service->node_id !== (int)$inputs['node'];
+            $profileChanged = $credentials->internet_profile_id !== (int)$inputs['profile'];
 
-        return $service
-            ? tap($service)->update([
-                'status_id' => CommonStatus::ACTIVE->value,
-                'installation_date' => Carbon::today(),
-                'node_id' => $params['node'],
-                'equipment_id' => $params['equipment'],
-                'latitude' => $params['latitude'],
-                'longitude' => $params['longitude'],
-                'state_id' => $params['state'],
-                'municipality_id' => $params['municipality'],
-                'district_id' => $params['district'],
-                'address' => $params['address'],
-                'technician_id' => $params['technician'],
-                'comments' => $params['comments'] ?? null,
-            ])
-            : $this->createService($params);
+            if ($nodeChanged) $this->changeNode($oldServer, $inputs, $credentials);
+
+            if ($profileChanged) $this->changeProfile($credentials, $inputs);
+
+            if (!$nodeChanged && !$profileChanged) $this->enableUser($credentials, (int)$inputs['node']);
+
+            try {
+                DB::transaction(function () use ($service, $inputs) {
+                    $service->update([
+                        'status_id' => CommonStatus::ACTIVE->value,
+                        'installation_date' => Carbon::today(),
+                        'node_id' => $inputs['node'],
+                        'equipment_id' => $inputs['equipment'],
+                        'latitude' => $inputs['latitude'],
+                        'longitude' => $inputs['longitude'],
+                        'state_id' => $inputs['state'],
+                        'municipality_id' => $inputs['municipality'],
+                        'district_id' => $inputs['district'],
+                        'address' => $inputs['address'],
+                        'technician_id' => $inputs['technician'],
+                        'comments' => $inputs['comments'] ?? null,
+                    ]);
+                });
+            } catch (Throwable $e) {
+                throw ValidationException::withMessages([
+                    'service' => "No se pudo actualizar el servicio: {$e->getMessage()}"
+                ]);
+            }
+
+            return $service->refresh();
+        }
+        return $this->createService($inputs);
     }
 
     /***
@@ -112,153 +137,195 @@ class InstallationStrategy extends BaseSupportStrategy
     private function createService(array $params): ServiceModel
     {
         $dto = new ServiceDTO(
-            client_id: $params['client'],
+            client_id: (int)$params['client'],
             code: null,
             name: null,
-            node_id: $params['node'],
-            equipment_id: $params['equipment'],
+            node_id: (int)$params['node'],
+            equipment_id: (int)$params['equipment'],
             installation_date: Carbon::today(),
-            technician_id: $params['technician'],
+            technician_id: (int)$params['technician'],
             latitude: $params['latitude'],
             longitude: $params['longitude'],
-            state_id: $params['state'],
-            municipality_id: $params['municipality'],
-            district_id: $params['district'],
+            state_id: (int)$params['state'],
+            municipality_id: (int)$params['municipality'],
+            district_id: (int)$params['district'],
             address: $params['address'],
             separate_billing: CommonStatus::ACTIVE->value,
             status_id: CommonStatus::ACTIVE->value,
             comments: $params['comments'] ?? null,
         );
-
-        return ServiceModel::query()->create($dto->toArray());
+        $service = ServiceModel::query()->create($dto->toArray());
+        $this->createCredentials($service, $params);
+        return $service->refresh();
     }
 
     /***
      * @param ServiceModel $service
      * @param array $params
-     * @return ServiceInternetModel
+     * @return void
      */
-    private function handleCredentials(ServiceModel $service, array $params): ServiceInternetModel
+    private function createCredentials(ServiceModel $service, array $params): void
     {
-        $credentials = ServiceInternetModel::query()
-            ->where('service_id', $service->id)
-            ->first();
-
-        $node = NodeModel::query()->with('auth_server')->findOrFail((int)$params['node']);
+        $node = $this->getNode($service->node_id);
         $server = $node->auth_server->toArray();
-        $profile = InternetModel::query()->findOrFail((int)$params['profile']);
-        $client = ClientModel::query()->select(['name', 'surname'])->findOrFail((int)$params['client']);
-        $comment = "{$client->name} {$client->surname}";
-
-        //  No encuentra credenciales, crearlas
-        if (!$credentials) return $this->createInternetCredentials($service, $params);
-
-        $nodeChanged = $service->node_id !== (int)$params['node'];
-        $profileChanged = $credentials->internet_profile_id !== (int)$params['profile'];
-
-        //  Hay credenciales, pero los nodos no coinciden eliminar credenciales y crear nuevas
-        if ($nodeChanged) {
-            try {
-                //  Eliminando usuario de nodo antiguo.
-                $oldNode = NodeModel::query()->with('auth_server')->findOrFail($service->node_id);
-                $oldServer = $oldNode->auth_server->toArray();
-
-                $this->mikrotikService->deleteUser($oldServer, $credentials->user);
-            } catch (Throwable $e) {
-                throw ValidationException::withMessages([
-                    'mikrotik' => "Error al eliminar el usuario PPPoe: {$e->getMessage()}"
-                ]);
-            }
-            $credentials->delete();
-
-            return $this->createInternetCredentials($service, $params);
-        }
-
-        //  Hay credenciales, pero los perfiles no coinciden
-        if ($profileChanged) {
-            try {
-                $this->mikrotikService->updateUser($server, $credentials->user, [
-                    'profile' => $profile->mk_profile,
-                    'comment' => $comment,
-                ]);
-
-                $credentials->update([
-                    'internet_profile_id' => (int)$params['profile'],
-                    'status_id' => CommonStatus::ACTIVE->value,
-                ]);
-            } catch (Throwable $e) {
-                throw ValidationException::withMessages([
-                    'mikrotik' => "Error al actualizar el usuario PPPoe: {$e->getMessage()}",
-                ]);
-            }
-        }
-
-        //  Credenciales inactivas
-        if ($credentials->status_id === CommonStatus::INACTIVE->value) {
-            try {
-                //  Habilitar usuario
-                $this->mikrotikService->enableUser($server, $credentials->user);
-                $credentials->update([
-                    'status_id' => CommonStatus::ACTIVE->value,
-                ]);
-
-            } catch (Throwable $e) {
-                throw ValidationException::withMessages([
-                    'mikrotik' => "Error al reactivar el usuario PPPoe: {$e->getMessage()}"
-                ]);
-            }
-        }
-
-        return $credentials->refresh();
-    }
-
-    /***
-     * @param ServiceModel $service
-     * @param array $params
-     * @return ServiceInternetModel
-     */
-    private function createInternetCredentials(ServiceModel $service, array $params): ServiceInternetModel
-    {
-        $node = NodeModel::query()->with('auth_server')->findOrFail((int)$params['node']);
-        $client = ClientModel::query()->select(['name', 'surname'])->findOrFail((int)$params['client']);
-
-        $username = $this->generateUser($node->prefix, $node->id);
+        $profile = $this->getProfile((int)$params['profile'])->toArray();
+        $client = $this->getClient((int)$params['client']);
+        $user = $this->generateUser($node->prefix, $node->id);
         $password = $this->generateSecret($client);
+        $comment = "{$client->name} {$client->surname}";
 
         $dto = new ServiceInternetDTO(
             internet_profile_id: (int)$params['profile'],
             service_id: $service->id,
-            user: $username,
+            user: $user,
             secret: $password,
             status_id: CommonStatus::ACTIVE->value,
         );
 
+        ServiceInternetModel::query()->create($dto->toArray());
+
+        $this->mikrotikInternetService->createUser($server, $profile, $user, $password, $comment);
+    }
+
+    /***
+     * @param int $nodeId
+     * @return NodeModel
+     */
+    private
+    function getNode(int $nodeId): NodeModel
+    {
+        return NodeModel::query()->with('auth_server')->findOrFail($nodeId);
+    }
+
+    /***
+     * @param int $service
+     * @return ServiceInternetModel
+     */
+    private
+    function checkCredentials(int $service): ServiceInternetModel
+    {
+        return ServiceInternetModel::query()->where('service_id', $service)->firstOrFail();
+    }
+
+    /***
+     * @param array $oldServer
+     * @param array $inputs
+     * @param ServiceInternetModel $credentials
+     * @return void
+     */
+    private
+    function changeNode(array $oldServer, array $inputs, ServiceInternetModel $credentials): void
+    {
+        //  Eliminando credenciales de servidor anterior
+        $this->mikrotikInternetService->deleteUser($oldServer, $credentials->user);
+
+        //  Obteniendo datos necesarios
+        $client = $this->getClient((int)$inputs['client']);
+        $node = $this->getNode((int)$inputs['node']);
         $server = $node->auth_server->toArray();
-        $profile = InternetModel::query()->findOrFail((int)$params['profile'])->toArray();
+        $user = $this->generateUser($node->prefix, $node->id);
+        $password = $this->generateSecret($client);
         $comment = "{$client->name} {$client->surname}";
+        $profile = $this->getProfile((int)$inputs['profile'])->toArray();
 
-        $this->mikrotikService->createUser($server, $profile, $username, $password, $comment);
+        try {
+            DB::transaction(function () use ($credentials, $inputs, $server, $user, $password, $profile, $comment) {
+                //  Actualizando credenciales
+                $credentials->update([
+                    'internet_profile_id' => (int)$inputs['profile'],
+                    'user' => $user,
+                    'secret' => $password,
+                    'status_id' => CommonStatus::ACTIVE->value
+                ]);
 
-        return ServiceInternetModel::query()->create($dto->toArray());
+                //  Crear credenciales en nuevo server
+                $this->mikrotikInternetService->createUser($server, $profile, $user, $password, $comment);
+            });
+        } catch (Throwable $e) {
+            throw ValidationException::withMessages([
+                'credentials' => "No se pudieron actualizar las credenciales: {$e->getMessage()}"
+            ]);
+        }
+
+    }
+
+    /***
+     * @param ServiceInternetModel $credentials
+     * @param array $inputs
+     * @return void
+     */
+    private function changeProfile(ServiceInternetModel $credentials, array $inputs): void
+    {
+        // Actualizando credenciales en la base de datos
+        $credentials->update([
+            'internet_profile_id' => (int)$inputs['profile'],
+            'status_id' => CommonStatus::ACTIVE->value
+        ]);
+
+        $node = $this->getNode((int)$inputs['node']);
+        $server = $node->auth_server->toArray();
+        $profile = $this->getProfile((int)$inputs['profile'])->toArray();
+
+        //  Habilitando usuario en servidor
+        $this->mikrotikInternetService->updateUser($server, $credentials->user, [
+            'profile' => $profile['mk_profile'],
+            'disabled' => 'no'
+        ]);
+    }
+
+    /***
+     * @param ServiceInternetModel $credentials
+     * @param int $nodeId
+     * @return void
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
+     */
+    private function enableUser(ServiceInternetModel $credentials, int $nodeId): void
+    {
+        $node = $this->getNode((int)$nodeId);
+        $server = $node->auth_server->toArray();
+
+        try {
+            DB::transaction(function () use ($credentials, $server) {
+                $credentials->update(['status_id' => CommonStatus::ACTIVE->value]);
+            });
+        } catch (Throwable $e) {
+            throw ValidationException::withMessages([
+                'credentials' => "No fue posible activar credenciales: {$e->getMessage()}"
+            ]);
+        }
+
+        $this->mikrotikInternetService->enableUser($server, $credentials->user);
+    }
+
+    /***
+     * @param int $id
+     * @return ClientModel
+     */
+    private function getClient(int $id): ClientModel
+    {
+        return ClientModel::query()->select(['name', 'surname'])->findOrFail($id);
+    }
+
+    /***
+     * @param int $profileId
+     * @return InternetModel
+     */
+    public function getProfile(int $profileId): InternetModel
+    {
+        return InternetModel::query()->findOrFail($profileId);
     }
 
     /***
      * @param string $prefix
-     * @param int $node
+     * @param int $nodeId
      * @return string
      */
-    private function generateUser(string $prefix, int $node): string
+    private function generateUser(string $prefix, int $nodeId): string
     {
         $prefix = 'NetPlus' . $prefix;
-        $services = ServiceModel::query()
-            ->where('node_id', $node)
-            ->withTrashed()
-            ->count();
-        $maxLength = 5;
-        $zeroFill = max(0, $maxLength - strlen($services));
-        $filling = str_repeat('0', $zeroFill);
-        $prefix .= $filling . $services;
-        return $prefix;
+        $count = ServiceModel::query()->where('node_id', $nodeId)->withTrashed()->count();
+        return sprintf("%s%05d", $prefix, $count);
     }
 
     /***
