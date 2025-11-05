@@ -7,13 +7,13 @@ use App\Http\Requests\v1\Management\Configuration\MenuRequest;
 use App\Http\Resources\v1\management\configuration\menu\MenuResource;
 use App\Models\Configuration\MenuModel;
 use App\Services\v1\management\configuration\menu\MenuService;
-use App\Services\v1\management\DataviewerService;
+use App\Services\v1\management\DataViewerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
-    public function data(Request $request, DataviewerService $dataViewerService): JsonResponse
+    public function data(Request $request, DataViewerService $dataViewerService): JsonResponse
     {
         $query = MenuModel::query();
 
