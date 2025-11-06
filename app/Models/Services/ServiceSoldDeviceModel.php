@@ -3,10 +3,13 @@
 namespace App\Models\Services;
 
 use App\Models\Infrastructure\Equipment\InventoryModel;
+use App\Observers\Services\ServiceSoldDeviceObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy(ServiceSoldDeviceObserver::class)]
 class ServiceSoldDeviceModel extends Model
 {
     use SoftDeletes;

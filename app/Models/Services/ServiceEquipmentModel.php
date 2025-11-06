@@ -3,12 +3,15 @@
 namespace App\Models\Services;
 
 use App\Models\Infrastructure\Equipment\InventoryModel;
+use App\Observers\Services\ServiceEquipmentObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
+#[ObservedBy(ServiceEquipmentObserver::class)]
 class ServiceEquipmentModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

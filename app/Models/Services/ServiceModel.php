@@ -6,10 +6,11 @@ use App\Models\Clients\ClientModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
-use App\Models\Infrastructure\Equipment\InventoryModel;
 use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\TechnicianModel;
+use App\Observers\Services\ServiceObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy([ServiceObserver::class])]
 class ServiceModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;
