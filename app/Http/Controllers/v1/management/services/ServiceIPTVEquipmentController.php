@@ -61,4 +61,13 @@ class ServiceIPTVEquipmentController extends Controller
             'deleted' => (bool)$item,
         ]);
     }
+
+    public function suggestedEmail(IPTVEquipmentService $service): JsonResponse
+    {
+        $suggestedEmail = $service->getSuggestedEmail();
+
+        return response()->json([
+            'suggested_email' => $suggestedEmail,
+        ]);
+    }
 }

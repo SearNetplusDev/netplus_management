@@ -42,6 +42,7 @@ Route::prefix('v1/services')
                 Route::post('edit', [ServiceIPTVEquipmentController::class, 'edit']);
                 Route::put('{id}', [ServiceIPTVEquipmentController::class, 'update']);
                 Route::delete('/', [ServiceIPTVEquipmentController::class, 'remove']);
+                Route::post('suggested-email', [ServiceIPTVEquipmentController::class, 'suggestedEmail']);
             });
         });
 

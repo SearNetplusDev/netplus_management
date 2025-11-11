@@ -21,6 +21,9 @@ class ServiceIptvEquipmentDTO extends Data
         #[Required, Email]
         public readonly string  $email,
 
+//        #[Nullable]
+//        public readonly ?int    $email_correlative,
+
         #[Required, StringType]
         public readonly string  $email_password,
 
