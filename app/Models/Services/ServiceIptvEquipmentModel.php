@@ -24,12 +24,11 @@ class ServiceIptvEquipmentModel extends Model
         'service_id',
         'email',
         'email_password',
-        'email_correlative',
         'iptv_password',
         'comments',
         'status_id',
     ];
-    protected $hidden = ['created_at', 'updated_at'/*, 'deleted_at'*/];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = [
         'id',
         'equipment_id',
@@ -43,7 +42,6 @@ class ServiceIptvEquipmentModel extends Model
         'service_id',
         'status_id',
         'email',
-        'email_correlative',
     ];
     protected $appends = ['status'];
 
