@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\v1\management\billing\options\DocumentController;
 use App\Http\Controllers\v1\management\billing\options\ActivitiesController;
+use App\Http\Controllers\v1\management\billing\options\DocumentController;
+use App\Http\Controllers\v1\management\billing\options\StatusesController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/billing')
     ->middleware(['auth:sanctum'])
@@ -22,9 +23,17 @@ Route::prefix('v1/billing')
             //      Activities
             Route::group(['prefix' => 'activities'], function () {
                 Route::post('/', [ActivitiesController::class, 'store']);
-                Route::post('/data', [ActivitiesController::class, 'data']);
-                Route::post('/edit', [ActivitiesController::class, 'edit']);
+                Route::post('data', [ActivitiesController::class, 'data']);
+                Route::post('edit', [ActivitiesController::class, 'edit']);
                 Route::put('{id}', [ActivitiesController::class, 'update']);
+            });
+
+            //      Statuses
+            Route::group(['prefix' => 'statuses'], function () {
+                Route::post('/', [StatusesController::class, 'store']);
+                Route::post('data', [StatusesController::class, 'data']);
+                Route::post('edit', [StatusesController::class, 'edit']);
+                Route::put('{id}', [StatusesController::class, 'update']);
             });
         });
     });
