@@ -41,8 +41,8 @@ class DiscountModel extends Model
         'status_id',
     ];
     protected $casts = [
-        'percentage' => 'decimal:8',
-        'amount' => 'decimal:8'
+        'percentage' => 'decimal:2',
+        'amount' => 'decimal:2'
     ];
     protected $appends = ['status'];
 
