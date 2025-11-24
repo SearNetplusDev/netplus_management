@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('billing:generate-periods')->monthlyOn(24, '13:30');
+Schedule::command('billing:generate-periods')->monthlyOn(24, '15:15');
