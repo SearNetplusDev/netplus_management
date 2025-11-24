@@ -18,6 +18,7 @@ class PeriodModel extends Model
         'period_start',     //  Inicio de período
         'period_end',       //  Fin del período
         'issue_date',       //  Fecha de emisión
+        'due_date',         //  Fecha de vencimiento
         'cutoff_date',      //  Fecha de corte
         'is_active',        //  Período activo
         'is_closed',        //  Período procesado
@@ -30,6 +31,7 @@ class PeriodModel extends Model
         'period_start' => 'date',
         'period_end' => 'date',
         'issue_date' => 'date',
+        'due_date' => 'date',
         'cutoff_date' => 'date',
         'closed_at' => 'datetime',
         'is_active' => 'boolean',
