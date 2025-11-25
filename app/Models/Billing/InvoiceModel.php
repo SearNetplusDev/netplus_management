@@ -58,6 +58,11 @@ class InvoiceModel extends Model
         return $this->belongsTo(PeriodModel::class, 'billing_period_id', 'id');
     }
 
+    public function items(): BelongsTo
+    {
+        return $this->belongsTo(InvoiceDetailModel::class, 'invoice_id', 'id');
+    }
+
     public function financial_status(): BelongsTo
     {
         return $this->belongsTo(StatusModel::class, 'status_id', 'id');
