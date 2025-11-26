@@ -44,6 +44,7 @@ class BillingService
                     foreach ($separateServices as $service) {
                         if ($service->status_id != CommonStatus::ACTIVE->value) continue;
 
+                        //  Verifica si ya existe factura de este servicio específico
                         if ($this->invoiceExistsForService($client, $period, $service)) continue;
 
                         $invoiceData = $this->calculateInvoiceDataForService($client, $period, $service);
@@ -56,6 +57,7 @@ class BillingService
 
                     // Generar factura consolidada para servicios que lo requieran
                     if ($consolidatedServices->isNotEmpty()) {
+                        //  Verifica si ya existe factura consolidada para este cliente
                         if (!$this->invoiceExists($client, $period)) {
                             $invoiceData = $this->calculateInvoiceData($client, $period, $consolidatedServices);
 
@@ -118,7 +120,7 @@ class BillingService
             ->where([
                 ['client_id', $client->id],
                 ['billing_period_id', $period->id],
-                ['invoice_type', 2] // Consolidada
+                ['invoice_type', InvoiceType::CONSOLIDATED->value]
             ])
             ->exists();
     }
@@ -138,6 +140,9 @@ class BillingService
                 ['billing_period_id', $period->id],
                 ['invoice_type', InvoiceType::INDIVIDUAL->value]
             ])
+            ->whereHas('items', function ($q) use ($service) {
+                $q->where('service_id', $service->id);
+            })
             ->exists();
     }
 
@@ -263,7 +268,6 @@ class BillingService
         }
 
         // Calcular el porcentaje de IVA basado en net_value
-        // IVA = (serviceAmount * 13%) ajustado proporcionalmente
         return round($serviceAmount * 0.13, 8);
     }
 
