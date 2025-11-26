@@ -166,6 +166,11 @@ class ClientModel extends Model
             ->latest();
     }
 
+    public function corporate_info(): HasOne
+    {
+        return $this->hasOne(FinancialInformationModel::class, 'client_id', 'id');
+    }
+
     public function services(): HasMany
     {
         return $this->hasMany(ServiceModel::class, 'client_id', 'id');

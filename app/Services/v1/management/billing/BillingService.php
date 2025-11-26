@@ -2,6 +2,7 @@
 
 namespace App\Services\v1\management\billing;
 
+use App\Enums\v1\Billing\InvoiceType;
 use App\Enums\v1\Clients\ClientTypes;
 use App\Enums\v1\General\BillingStatus;
 use App\Enums\v1\General\CommonStatus;
@@ -35,12 +36,34 @@ class BillingService
         foreach ($clients as $client) {
             try {
                 DB::transaction(function () use ($client, $period, &$results) {
-                    if ($this->invoiceExists($client, $period)) return;
-                    $invoiceData = $this->calculateInvoiceData($client, $period);
+                    // Verificar si el cliente requiere facturación separada
+                    $separateServices = $client->services->where('separate_billing', true);
+                    $consolidatedServices = $client->services->where('separate_billing', false);
 
-                    if ($invoiceData['total_amount'] > 0) {
-                        $this->createInvoice($client, $period, $invoiceData);
-                        $results['generated']++;
+                    // Generar facturas separadas para servicios con facturación independiente
+                    foreach ($separateServices as $service) {
+                        if ($service->status_id != CommonStatus::ACTIVE->value) continue;
+
+                        if ($this->invoiceExistsForService($client, $period, $service)) continue;
+
+                        $invoiceData = $this->calculateInvoiceDataForService($client, $period, $service);
+
+                        if ($invoiceData['total_amount'] > 0) {
+                            $this->createInvoice($client, $period, $invoiceData, InvoiceType::INDIVIDUAL->value);
+                            $results['generated']++;
+                        }
+                    }
+
+                    // Generar factura consolidada para servicios que lo requieran
+                    if ($consolidatedServices->isNotEmpty()) {
+                        if (!$this->invoiceExists($client, $period)) {
+                            $invoiceData = $this->calculateInvoiceData($client, $period, $consolidatedServices);
+
+                            if ($invoiceData['total_amount'] > 0) {
+                                $this->createInvoice($client, $period, $invoiceData, InvoiceType::CONSOLIDATED->value);
+                                $results['generated']++;
+                            }
+                        }
                     }
                 });
             } catch (\Exception $e) {
@@ -59,7 +82,12 @@ class BillingService
      */
     private function getBillableClients(PeriodModel $period, bool $allClients = false): Collection
     {
-        $query = ClientModel::query()->with(['active_services.internet.profile'])
+        $query = ClientModel::query()
+            ->with([
+                'services.internet.profile',
+                'client_type',
+                'corporate_info'
+            ])
             ->where([
                 ['status_id', CommonStatus::ACTIVE->value],
                 ['client_type_id', '!=', ClientTypes::FREE->value]
@@ -89,40 +117,154 @@ class BillingService
         return InvoiceModel::query()
             ->where([
                 ['client_id', $client->id],
-                ['billing_period_id', $period->id]
+                ['billing_period_id', $period->id],
+                ['invoice_type', 2] // Consolidada
             ])
             ->exists();
+    }
+
+    /***
+     * Verificando que exista una factura para un servicio específico
+     * @param ClientModel $client
+     * @param PeriodModel $period
+     * @param ServiceModel $service
+     * @return bool
+     */
+    private function invoiceExistsForService(ClientModel $client, PeriodModel $period, ServiceModel $service): bool
+    {
+        return InvoiceModel::query()
+            ->where([
+                ['client_id', $client->id],
+                ['billing_period_id', $period->id],
+                ['invoice_type', InvoiceType::INDIVIDUAL->value]
+            ])
+            ->exists();
+    }
+
+    /***
+     * Calcula los datos de factura para un servicio específico
+     * @param ClientModel $client
+     * @param PeriodModel $period
+     * @param ServiceModel $service
+     * @return array
+     */
+    private function calculateInvoiceDataForService(
+        ClientModel  $client,
+        PeriodModel  $period,
+        ServiceModel $service
+    ): array
+    {
+        $items = [];
+        $serviceAmount = $this->calculateServiceAmount($service, $period);
+
+        if ($serviceAmount > 0) {
+            $profile = $service->internet->profile ?? null;
+            $netValue = $profile ? (float)$profile->net_value : 0;
+            $iva = $this->calculateIvaFromNetValue($netValue, $serviceAmount);
+
+            $items[] = [
+                'service' => $service,
+                'amount' => $serviceAmount,
+                'net_value' => $netValue,
+                'iva' => $iva,
+                'description' => $this->getServiceDescription($service, $period),
+            ];
+        }
+
+        $subtotal = collect($items)->sum('amount');
+        $totalIva = collect($items)->sum('iva');
+        $ivaRetenido = $this->calculateIvaRetenido($client, $subtotal);
+
+        return [
+            'total_amount' => $subtotal,
+            'total_iva' => $totalIva,
+            'iva_retenido' => $ivaRetenido,
+            'items' => $items,
+        ];
     }
 
     /***
      * Obtiene los items que se muestran en la factura
      * @param ClientModel $client
      * @param PeriodModel $period
+     * @param Collection|null $services
      * @return array
      */
-    private function calculateInvoiceData(ClientModel $client, PeriodModel $period): array
+    private function calculateInvoiceData(ClientModel $client, PeriodModel $period, ?Collection $services = null): array
     {
-        $totalAmount = 0;
+        $services = $services ?? $client->services;
         $items = [];
 
-        foreach ($client->services as $service) {
+        foreach ($services as $service) {
             if ($service->status_id != CommonStatus::ACTIVE->value) continue;
 
             $serviceAmount = $this->calculateServiceAmount($service, $period);
 
             if ($serviceAmount > 0) {
-                $totalAmount += $serviceAmount;
+                $profile = $service->internet->profile ?? null;
+                $netValue = $profile ? (float)$profile->net_value : 0;
+                $iva = $this->calculateIvaFromNetValue($netValue, $serviceAmount);
+
                 $items[] = [
                     'service' => $service,
                     'amount' => $serviceAmount,
+                    'net_value' => $netValue,
+                    'iva' => $iva,
                     'description' => $this->getServiceDescription($service, $period),
                 ];
             }
         }
+
+        $subtotal = collect($items)->sum('amount');
+        $totalIva = collect($items)->sum('iva');
+        $ivaRetenido = $this->calculateIvaRetenido($client, $subtotal);
+
         return [
-            'total_amount' => $totalAmount,
+            'total_amount' => $subtotal,
+            'total_iva' => $totalIva,
+            'iva_retenido' => $ivaRetenido,
             'items' => $items,
         ];
+    }
+
+    /***
+     * Calcula el IVA retenido para clientes corporativos
+     * @param ClientModel $client
+     * @param float $subtotal
+     * @return float
+     */
+    private function calculateIvaRetenido(ClientModel $client, float $subtotal): float
+    {
+        // Verificar si es cliente corporativo
+        if ($client->client_type_id != ClientTypes::CORPORATE->value) {
+            return 0;
+        }
+
+        // Verificar si tiene información financiera y retained_iva es true
+        $corporateInfo = $client->corporate_info;
+        if (!$corporateInfo || !$corporateInfo->retained_iva) {
+            return 0;
+        }
+
+        // Calcular 1% del subtotal
+        return round($subtotal * 0.01, 8);
+    }
+
+    /***
+     * Calcula el IVA basado en el net_value del perfil
+     * @param float $netValue
+     * @param float $serviceAmount
+     * @return float
+     */
+    private function calculateIvaFromNetValue(float $netValue, float $serviceAmount): float
+    {
+        if ($netValue <= 0) {
+            return 0;
+        }
+
+        // Calcular el porcentaje de IVA basado en net_value
+        // IVA = (serviceAmount * 13%) ajustado proporcionalmente
+        return round($serviceAmount * 0.13, 8);
     }
 
     /***
@@ -136,7 +278,7 @@ class BillingService
         $profile = $service->internet->profile ?? null;
         if (!$profile || $profile->price <= 0) return 0;
 
-        $monthlyPrice = (float)$profile->price;
+        $monthlyPrice = (float)$profile->net_value;
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
 
@@ -169,7 +311,6 @@ class BillingService
         if ($planChanges->isNotEmpty()) {
             return $this->calculateAmountWithPlanChanges($service, $period, $planChanges, $monthlyPrice);
         }
-
         return $monthlyPrice;
     }
 
@@ -249,25 +390,25 @@ class BillingService
 
             if ($installationDate->gt($periodStart)) {
                 $days = $installationDate->diffInDays($period->period_end) + 1;
-                $description .= "({$days} días)";
+                $description .= " ({$days} días)";
             }
         }
         return $description;
     }
 
-    private function createInvoice(ClientModel $client, PeriodModel $period, array $invoiceData): InvoiceModel
+    private function createInvoice(ClientModel $client, PeriodModel $period, array $invoiceData, int $invoiceType): InvoiceModel
     {
         $invoice = InvoiceModel::query()
             ->create([
                 'client_id' => $client->id,
                 'billing_period_id' => $period->id,
-                'invoice_type' => 1,
+                'invoice_type' => $invoiceType,
                 'subtotal' => $invoiceData['total_amount'],
-                'iva' => $this->calculateIva($invoiceData['total_amount']),
-                'iva_retenido' => 0,
-                'total_amount' => $invoiceData['total_amount'] + $this->calculateIva($invoiceData['total_amount']),
+                'iva' => $invoiceData['total_iva'],
+                'iva_retenido' => $invoiceData['iva_retenido'],
+                'total_amount' => $invoiceData['total_amount'] + $invoiceData['total_iva'] - $invoiceData['iva_retenido'],
                 'paid_amount' => 0,
-                'balance_due' => 0,
+                'balance_due' => $invoiceData['total_amount'] + $invoiceData['total_iva'] - $invoiceData['iva_retenido'],
                 'billing_status_id' => BillingStatus::ISSUED->value,
                 'comments' => "Factura generada para el período {$period->name}"
             ]);
@@ -280,9 +421,9 @@ class BillingService
                 'quantity' => 1,
                 'unit_price' => $item['amount'],
                 'subtotal' => $item['amount'],
-                'iva' => $this->calculateIva($item['amount']),
+                'iva' => $item['iva'],
                 'iva_retenido' => 0,
-                'total' => $item['amount'] + $this->calculateIva($item['amount']),
+                'total' => $item['amount'] + $item['iva'],
                 'status_id' => CommonStatus::ACTIVE->value,
             ]);
         }
