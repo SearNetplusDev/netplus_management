@@ -400,7 +400,12 @@ class BillingService
         return $description;
     }
 
-    private function createInvoice(ClientModel $client, PeriodModel $period, array $invoiceData, int $invoiceType): InvoiceModel
+    private function createInvoice(
+        ClientModel $client,
+        PeriodModel $period,
+        array       $invoiceData,
+        int         $invoiceType
+    ): InvoiceModel
     {
         $invoice = InvoiceModel::query()
             ->create([

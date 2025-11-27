@@ -9,8 +9,10 @@ use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\Profiles\InternetModel;
 use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
+use App\Models\Services\ServicePlanChangeModel;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\network\MikrotikInternetService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -93,6 +95,9 @@ class RenovationStrategy extends BaseSupportStrategy
         //  Eliminando credenciales en old server
         $this->mikrotikInternetService->deleteUser($oldServer, $credentials->user);
 
+        //  Almacenando registro para facturación
+        $this->registerChanges($service->id, $credentials->internet_profile_id, $params['profile']);
+
         //  Actualizando credenciales y creando nuevas
         $this->updateCredentials($newNode, $service, $credentials, $params);
     }
@@ -108,10 +113,31 @@ class RenovationStrategy extends BaseSupportStrategy
             'internet_profile_id' => (int)$params['profile'],
         ]);
 
+        //  Almacenando registro para facturación
+        $this->registerChanges($credentials->service_id, $credentials->internet_profile_id, $params['profile']);
+
         //  Actualizando perfil en Mikrotik
         $this->mikrotikInternetService->updateUser($server, $credentials->user, [
             'profile' => $profile['mk_profile'],
         ]);
+    }
+
+    /***
+     * Registra los cambios de plan para calculo de facturación
+     * @param int $serviceId
+     * @param int $oldProfile
+     * @param int $newProfile
+     * @return void
+     */
+    private function registerChanges(int $serviceId, int $oldProfile, int $newProfile): void
+    {
+        ServicePlanChangeModel::query()
+            ->create([
+                'service_id' => $serviceId,
+                'old_internet_profile_id' => $oldProfile,
+                'new_internet_profile_id' => $newProfile,
+                'change_date' => Carbon::now()->toDateString(),
+            ]);
     }
 
     private function updateCredentials(
