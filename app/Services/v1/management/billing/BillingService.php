@@ -313,7 +313,7 @@ class BillingService
             ->orderBy('change_date')
             ->get();
         if ($planChanges->isNotEmpty()) {
-            return $this->calculateAmountWithPlanChanges($service, $period, $planChanges, $monthlyPrice);
+            return $this->calculateAmountWithPlanChanges($service, $period, $planChanges);
         }
         return $monthlyPrice;
     }
@@ -346,32 +346,45 @@ class BillingService
         ServiceModel $service,
         PeriodModel  $period,
         Collection   $planChanges,
-        float        $currentPrice
     ): float
     {
         $totalAmount = 0;
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
         $currentDate = $periodStart->copy();
-        $currentProfilePrice = $currentPrice;
+
+        //  Obteniendo el perfil inicial
+        $firstChange = $planChanges->first();
+        $initialProfile = $firstChange->old_internet_profile ?? $service->internet->profile;
+        $currentProfilePrice = $initialProfile ? (float)$initialProfile->net_value : 0;
 
         foreach ($planChanges as $change) {
             $changeDate = Carbon::parse($change->change_date);
 
-            //  Calculando días con el perfil anterior
+            //  Calcular días con el perfil actual hasta el día anterior al cambio
             if ($currentDate->lt($changeDate)) {
-                $daysAmount = $this->calculateProportionalAmount($currentDate, $changeDate->copy()->subDay(), $currentProfilePrice);
-                $totalAmount += $daysAmount;
+                $endDate = $changeDate->copy()->subDay();
+                if ($endDate->gt($periodEnd)) {
+                    $endDate = $periodEnd;
+                }
+
+                if ($currentDate->lte($endDate)) {
+                    $daysAmount = $this->calculateProportionalAmount($currentDate, $endDate, $currentProfilePrice);
+                    $totalAmount += $daysAmount;
+                }
             }
+
+            //  Actualiza fecha y precio para el siguiente segmento
             $currentDate = $changeDate;
-            $currentProfilePrice = (float)($change->new_internet_profile->price ?? 0);
+            $currentProfilePrice = $change->new_internet_profile ? (float)$change->new_internet_profile->net_value : 0;
         }
 
-        //  Calculando días restantes
-        if ($currentDate->lt($periodEnd)) {
+        // Calcula los días restantes después del último cambio
+        if ($currentDate->lte($periodEnd)) {
             $daysAmount = $this->calculateProportionalAmount($currentDate, $periodEnd, $currentProfilePrice);
             $totalAmount += $daysAmount;
         }
+
         return $totalAmount;
     }
 
@@ -387,15 +400,29 @@ class BillingService
         $profileName = $profile ? $profile->name : 'Servicio de internet';
         $description = "{$profileName}";
 
-        //  Agregando información de los días de consumo cuando aplique
+        $periodStart = Carbon::parse($period->period_start);
+        $periodEnd = Carbon::parse($period->period_end);
+
+        //  Instalación durante el período
         if ($service->installation_date) {
             $installationDate = Carbon::parse($service->installation_date);
-            $periodStart = Carbon::parse($period->period_start);
-
             if ($installationDate->gt($periodStart)) {
-                $days = $installationDate->diffInDays($period->period_end) + 1;
-                $description .= " ({$days} días)";
+                $days = $installationDate->diffInDays($periodEnd) + 1;
+                $description .= " ({$days} días de consumo)";
+                return $description;
             }
+        }
+
+        //  TO DO: Desinstalación
+
+        //  Cambio de plan durante el período
+        $planChanges = ServicePlanChangeModel::query()
+            ->where('service_id', $service->id)
+            ->whereBetween('change_date', [$periodStart, $periodEnd])
+            ->exists();
+
+        if ($planChanges) {
+            $description .= " (Cambio de plan)";
         }
         return $description;
     }
