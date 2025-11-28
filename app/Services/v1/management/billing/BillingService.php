@@ -36,15 +36,12 @@ class BillingService
         foreach ($clients as $client) {
             try {
                 DB::transaction(function () use ($client, $period, &$results) {
-                    // Verificar si el cliente requiere facturación separada
                     $separateServices = $client->services->where('separate_billing', true);
                     $consolidatedServices = $client->services->where('separate_billing', false);
 
-                    // Generar facturas separadas para servicios con facturación independiente
                     foreach ($separateServices as $service) {
                         if ($service->status_id != CommonStatus::ACTIVE->value) continue;
 
-                        //  Verifica si ya existe factura de este servicio específico
                         if ($this->invoiceExistsForService($client, $period, $service)) continue;
 
                         $invoiceData = $this->calculateInvoiceDataForService($client, $period, $service);
@@ -55,9 +52,7 @@ class BillingService
                         }
                     }
 
-                    // Generar factura consolidada para servicios que lo requieran
                     if ($consolidatedServices->isNotEmpty()) {
-                        //  Verifica si ya existe factura consolidada para este cliente
                         if (!$this->invoiceExists($client, $period)) {
                             $invoiceData = $this->calculateInvoiceData($client, $period, $consolidatedServices);
 
@@ -159,22 +154,7 @@ class BillingService
         ServiceModel $service
     ): array
     {
-        $items = [];
-        $serviceAmount = $this->calculateServiceAmount($service, $period);
-
-        if ($serviceAmount > 0) {
-            $profile = $service->internet->profile ?? null;
-            $netValue = $profile ? (float)$profile->net_value : 0;
-            $iva = $this->calculateIvaFromNetValue($netValue, $serviceAmount);
-
-            $items[] = [
-                'service' => $service,
-                'amount' => $serviceAmount,
-                'net_value' => $netValue,
-                'iva' => $iva,
-                'description' => $this->getServiceDescription($service, $period),
-            ];
-        }
+        $items = $this->getServiceItems($service, $period);
 
         $subtotal = collect($items)->sum('amount');
         $totalIva = collect($items)->sum('iva');
@@ -203,21 +183,8 @@ class BillingService
         foreach ($services as $service) {
             if ($service->status_id != CommonStatus::ACTIVE->value) continue;
 
-            $serviceAmount = $this->calculateServiceAmount($service, $period);
-
-            if ($serviceAmount > 0) {
-                $profile = $service->internet->profile ?? null;
-                $netValue = $profile ? (float)$profile->net_value : 0;
-                $iva = $this->calculateIvaFromNetValue($netValue, $serviceAmount);
-
-                $items[] = [
-                    'service' => $service,
-                    'amount' => $serviceAmount,
-                    'net_value' => $netValue,
-                    'iva' => $iva,
-                    'description' => $this->getServiceDescription($service, $period),
-                ];
-            }
+            $serviceItems = $this->getServiceItems($service, $period);
+            $items = array_merge($items, $serviceItems);
         }
 
         $subtotal = collect($items)->sum('amount');
@@ -233,6 +200,150 @@ class BillingService
     }
 
     /***
+     * Obtiene los ítems de facturación para un servicio
+     * Genera múltiples ítems si hay cambios de plan
+     * @param ServiceModel $service
+     * @param PeriodModel $period
+     * @return array
+     */
+    private function getServiceItems(ServiceModel $service, PeriodModel $period): array
+    {
+        $periodStart = Carbon::parse($period->period_start);
+        $periodEnd = Carbon::parse($period->period_end);
+
+        // Verificar cambios de plan
+        $planChanges = $this->checkPlanChanges($service->id, $periodStart, $periodEnd);
+
+        if ($planChanges->isNotEmpty()) {
+            return $this->getItemsWithPlanChanges($service, $period, $planChanges);
+        }
+
+        // Sin cambios de plan, generar un solo ítem
+        $serviceAmount = $this->calculateServiceAmount($service, $period);
+
+        if ($serviceAmount <= 0) {
+            return [];
+        }
+
+        $profile = $service->internet->profile ?? null;
+        $netValue = $profile ? (float)$profile->net_value : 0;
+        $iva = $this->calculateIvaFromNetValue($netValue, $serviceAmount);
+
+        return [[
+            'service' => $service,
+            'amount' => $serviceAmount,
+            'net_value' => $netValue,
+            'iva' => $iva,
+            'description' => $this->getServiceDescription($service, $period),
+        ]];
+    }
+
+    /***
+     * Genera múltiples ítems cuando hay cambios de plan
+     * @param ServiceModel $service
+     * @param PeriodModel $period
+     * @param Collection $planChanges
+     * @return array
+     */
+    private function getItemsWithPlanChanges(
+        ServiceModel $service,
+        PeriodModel  $period,
+        Collection   $planChanges
+    ): array
+    {
+        $items = [];
+        $periodStart = Carbon::parse($period->period_start);
+        $periodEnd = Carbon::parse($period->period_end);
+        $currentDate = $periodStart->copy();
+
+        // Obtener el perfil inicial
+        $firstChange = $planChanges->first();
+        $currentProfile = $firstChange->old_internet_profile ?? $service->internet->profile;
+
+        foreach ($planChanges as $change) {
+            $changeDate = Carbon::parse($change->change_date);
+
+            // Calcular días con el perfil actual hasta el día anterior al cambio
+            if ($currentDate->lt($changeDate)) {
+                $endDate = $changeDate->copy()->subDay();
+                if ($endDate->gt($periodEnd)) {
+                    $endDate = $periodEnd;
+                }
+
+                if ($currentDate->lte($endDate)) {
+                    $profilePrice = $currentProfile ? (float)$currentProfile->net_value : 0;
+                    $amount = $this->calculateProportionalAmount($currentDate, $endDate, $profilePrice);
+                    $days = $currentDate->diffInDays($endDate) + 1;
+
+                    if ($amount > 0) {
+                        $iva = $this->calculateIvaFromNetValue($profilePrice, $amount);
+
+                        $items[] = [
+                            'service' => $service,
+                            'amount' => $amount,
+                            'net_value' => $profilePrice,
+                            'iva' => $iva,
+                            'description' => $this->getPlanChangeDescription(
+                                $currentProfile,
+                                $currentDate,
+                                $endDate,
+                                $days
+                            ),
+                        ];
+                    }
+                }
+            }
+
+            // Actualizar al nuevo perfil
+            $currentDate = $changeDate;
+            $currentProfile = $change->new_internet_profile;
+        }
+
+        // Calcular los días restantes después del último cambio
+        if ($currentDate->lte($periodEnd)) {
+            $profilePrice = $currentProfile ? (float)$currentProfile->net_value : 0;
+            $amount = $this->calculateProportionalAmount($currentDate, $periodEnd, $profilePrice);
+            $days = $currentDate->diffInDays($periodEnd) + 1;
+
+            if ($amount > 0) {
+                $iva = $this->calculateIvaFromNetValue($profilePrice, $amount);
+
+                $items[] = [
+                    'service' => $service,
+                    'amount' => $amount,
+                    'net_value' => $profilePrice,
+                    'iva' => $iva,
+                    'description' => $this->getPlanChangeDescription(
+                        $currentProfile,
+                        $currentDate,
+                        $periodEnd,
+                        $days
+                    ),
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    /***
+     * Genera la descripción para un ítem con cambio de plan
+     * @param $profile
+     * @param Carbon $startDate
+     * @param Carbon $endDate
+     * @param int $days
+     * @return string
+     */
+    private function getPlanChangeDescription($profile, Carbon $startDate, Carbon $endDate, int $days): string
+    {
+        $profileName = $profile ? $profile->name : 'Servicio de internet';
+        $startFormatted = $startDate->format('d/m/Y');
+        $endFormatted = $endDate->format('d/m/Y');
+
+        return "{$profileName} ({$days} días - del {$startFormatted} al {$endFormatted})";
+    }
+
+    /***
      * Calcula el IVA retenido para clientes corporativos
      * @param ClientModel $client
      * @param float $subtotal
@@ -240,18 +351,15 @@ class BillingService
      */
     private function calculateIvaRetenido(ClientModel $client, float $subtotal): float
     {
-        // Verificar si es cliente corporativo
         if ($client->client_type_id != ClientTypes::CORPORATE->value) {
             return 0;
         }
 
-        // Verificar si tiene información financiera y retained_iva es true
         $corporateInfo = $client->corporate_info;
         if (!$corporateInfo || !$corporateInfo->retained_iva) {
             return 0;
         }
 
-        // Calcular 1% del subtotal
         return round($subtotal * 0.01, 8);
     }
 
@@ -267,7 +375,6 @@ class BillingService
             return 0;
         }
 
-        // Calcular el porcentaje de IVA basado en net_value
         return round($serviceAmount * 0.13, 8);
     }
 
@@ -286,7 +393,7 @@ class BillingService
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
 
-        //  Días de consumo por instalación
+        // Días de consumo por instalación
         if ($service->installation_date) {
             $installationDate = Carbon::parse($service->installation_date);
 
@@ -295,7 +402,7 @@ class BillingService
             }
         }
 
-        //  Días de consumo por desinstalación
+        // Días de consumo por desinstalación
         if ($service->deleted_at || $service->status_id == CommonStatus::INACTIVE->value) {
             $uninstallationDate = Carbon::parse($service->updated_at);
 
@@ -306,16 +413,23 @@ class BillingService
             if ($uninstallationDate->lt($periodStart)) return 0;
         }
 
-        //  Cambio de perfil durante el período
-        $planChanges = ServicePlanChangeModel::query()
-            ->where('service_id', $service->id)
-            ->whereBetween('change_date', [$periodStart, $periodEnd])
-            ->orderBy('change_date')
-            ->get();
+        // Cambio de perfil durante el período
+        $planChanges = $this->checkPlanChanges($service->id, $periodStart, $periodEnd);
         if ($planChanges->isNotEmpty()) {
             return $this->calculateAmountWithPlanChanges($service, $period, $planChanges);
         }
+
         return $monthlyPrice;
+    }
+
+    private function checkPlanChanges(int $serviceId, Carbon $start, Carbon $end): Collection
+    {
+        return ServicePlanChangeModel::query()
+            ->with(['old_internet_profile', 'new_internet_profile'])
+            ->where('service_id', $serviceId)
+            ->whereBetween('change_date', [$start, $end])
+            ->orderBy('change_date')
+            ->get();
     }
 
     /***
@@ -339,7 +453,6 @@ class BillingService
      * @param ServiceModel $service
      * @param PeriodModel $period
      * @param Collection $planChanges
-     * @param float $currentPrice
      * @return float
      */
     private function calculateAmountWithPlanChanges(
@@ -353,7 +466,6 @@ class BillingService
         $periodEnd = Carbon::parse($period->period_end);
         $currentDate = $periodStart->copy();
 
-        //  Obteniendo el perfil inicial
         $firstChange = $planChanges->first();
         $initialProfile = $firstChange->old_internet_profile ?? $service->internet->profile;
         $currentProfilePrice = $initialProfile ? (float)$initialProfile->net_value : 0;
@@ -361,7 +473,6 @@ class BillingService
         foreach ($planChanges as $change) {
             $changeDate = Carbon::parse($change->change_date);
 
-            //  Calcular días con el perfil actual hasta el día anterior al cambio
             if ($currentDate->lt($changeDate)) {
                 $endDate = $changeDate->copy()->subDay();
                 if ($endDate->gt($periodEnd)) {
@@ -374,12 +485,10 @@ class BillingService
                 }
             }
 
-            //  Actualiza fecha y precio para el siguiente segmento
             $currentDate = $changeDate;
             $currentProfilePrice = $change->new_internet_profile ? (float)$change->new_internet_profile->net_value : 0;
         }
 
-        // Calcula los días restantes después del último cambio
         if ($currentDate->lte($periodEnd)) {
             $daysAmount = $this->calculateProportionalAmount($currentDate, $periodEnd, $currentProfilePrice);
             $totalAmount += $daysAmount;
@@ -403,7 +512,7 @@ class BillingService
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
 
-        //  Instalación durante el período
+        // Instalación durante el período
         if ($service->installation_date) {
             $installationDate = Carbon::parse($service->installation_date);
             if ($installationDate->gt($periodStart)) {
@@ -413,17 +522,6 @@ class BillingService
             }
         }
 
-        //  TO DO: Desinstalación
-
-        //  Cambio de plan durante el período
-        $planChanges = ServicePlanChangeModel::query()
-            ->where('service_id', $service->id)
-            ->whereBetween('change_date', [$periodStart, $periodEnd])
-            ->exists();
-
-        if ($planChanges) {
-            $description .= " (Cambio de plan)";
-        }
         return $description;
     }
 
@@ -465,16 +563,6 @@ class BillingService
         }
 
         return $invoice;
-    }
-
-    /***
-     * Calcula el IVA
-     * @param float $amount
-     * @return float
-     */
-    private function calculateIva(float $amount): float
-    {
-        return round($amount * 0.13, 8);
     }
 
     /***
