@@ -371,9 +371,7 @@ class BillingService
      */
     private function calculateIvaFromNetValue(float $netValue, float $serviceAmount): float
     {
-        if ($netValue <= 0) {
-            return 0;
-        }
+        if ($netValue <= 0) return 0;
 
         return round($serviceAmount * 0.13, 8);
     }
@@ -422,6 +420,13 @@ class BillingService
         return $monthlyPrice;
     }
 
+    /***
+     * Verifica si un servicio ha tenido renovaciones en un período
+     * @param int $serviceId
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return Collection
+     */
     private function checkPlanChanges(int $serviceId, Carbon $start, Carbon $end): Collection
     {
         return ServicePlanChangeModel::query()
@@ -548,6 +553,8 @@ class BillingService
             ]);
 
         foreach ($invoiceData['items'] as $item) {
+            $iva_retenido = $this->calculateIvaRetenido($client, $item['amount']);
+
             $invoice->items()->create([
                 'invoice_id' => $invoice->id,
                 'service_id' => $item['service']->id,
@@ -556,8 +563,8 @@ class BillingService
                 'unit_price' => $item['amount'],
                 'subtotal' => $item['amount'],
                 'iva' => $item['iva'],
-                'iva_retenido' => 0,
-                'total' => $item['amount'] + $item['iva'],
+                'iva_retenido' => $iva_retenido,
+                'total' => $item['amount'] + $item['iva'] - $iva_retenido,
                 'status_id' => CommonStatus::ACTIVE->value,
             ]);
         }
