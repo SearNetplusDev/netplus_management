@@ -11,6 +11,7 @@ use App\Models\Billing\PeriodModel;
 use App\Models\Clients\ClientModel;
 use App\Models\Services\ServiceModel;
 use App\Models\Services\ServicePlanChangeModel;
+use App\Models\Services\ServiceUninstallationModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +41,13 @@ class BillingService
                     $consolidatedServices = $client->services->where('separate_billing', false);
 
                     foreach ($separateServices as $service) {
-                        if ($service->status_id != CommonStatus::ACTIVE->value) continue;
+                        // Verificar si el servicio fue desinstalado en este período
+                        $uninstallationDate = $this->getServiceUninstallationDate($service, $period);
+
+                        // Omitir si no está activo Y no fue desinstalado en este período
+                        if ($service->status_id != CommonStatus::ACTIVE->value && !$uninstallationDate) {
+                            continue;
+                        }
 
                         if ($this->invoiceExistsForService($client, $period, $service)) continue;
 
@@ -82,6 +89,18 @@ class BillingService
         $query = ClientModel::query()
             ->with([
                 'services.internet.profile',
+                'services' => function ($q) use ($period) {
+                    // Incluir servicios activos Y servicios desinstalados en este período
+                    $q->where(function ($query) use ($period) {
+                        $query->where('status_id', CommonStatus::ACTIVE->value)
+                            ->orWhereHas('uninstallation', function ($q) use ($period) {
+                                $q->whereBetween('uninstallation_date', [
+                                    $period->period_start,
+                                    $period->period_end
+                                ]);
+                            });
+                    });
+                },
                 'client_type',
                 'corporate_info'
             ])
@@ -92,11 +111,20 @@ class BillingService
 
         if (!$allClients) {
             $query->whereHas('services', function ($q) use ($period) {
-                $q->where('status_id', CommonStatus::ACTIVE->value)
-                    ->where(function ($q) use ($period) {
-                        $q->where('installation_date', '<=', $period->period_end)
-                            ->orWhereNull('installation_date');
-                    });
+                $q->where(function ($query) use ($period) {
+                    // Servicios activos
+                    $query->where('status_id', CommonStatus::ACTIVE->value)
+                        ->where(function ($q) use ($period) {
+                            $q->where('installation_date', '<=', $period->period_end)
+                                ->orWhereNull('installation_date');
+                        });
+                })->orWhereHas('uninstallation', function ($q) use ($period) {
+                    // O servicios desinstalados en este período
+                    $q->whereBetween('uninstallation_date', [
+                        $period->period_start,
+                        $period->period_end
+                    ]);
+                });
             });
         }
 
@@ -175,13 +203,22 @@ class BillingService
      * @param Collection|null $services
      * @return array
      */
-    private function calculateInvoiceData(ClientModel $client, PeriodModel $period, ?Collection $services = null): array
+    private function calculateInvoiceData(
+        ClientModel $client,
+        PeriodModel $period,
+        ?Collection $services = null): array
     {
         $services = $services ?? $client->services;
         $items = [];
 
         foreach ($services as $service) {
-            if ($service->status_id != CommonStatus::ACTIVE->value) continue;
+            // Verificar si el servicio fue desinstalado en este período
+            $uninstallationDate = $this->getServiceUninstallationDate($service, $period);
+
+            // Incluir si está activo O si fue desinstalado en este período
+            if ($service->status_id != CommonStatus::ACTIVE->value && !$uninstallationDate) {
+                continue;
+            }
 
             $serviceItems = $this->getServiceItems($service, $period);
             $items = array_merge($items, $serviceItems);
@@ -391,32 +428,32 @@ class BillingService
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
 
-        // Días de consumo por instalación
+        // Obtener fecha de desinstalación si existe
+        $uninstallationDate = $this->getServiceUninstallationDate($service, $period);
+
+        // Caso 1: Instalación DURANTE el período (después del inicio)
         if ($service->installation_date) {
             $installationDate = Carbon::parse($service->installation_date);
 
-            if ($installationDate->between($periodStart, $periodEnd)) {
-                return $this->calculateProportionalAmount($installationDate, $periodEnd, $monthlyPrice);
+            // Solo si la instalación es DESPUÉS del inicio del período
+            if ($installationDate->gt($periodStart) && $installationDate->lte($periodEnd)) {
+                $endDate = $uninstallationDate ?? $periodEnd;
+                return $this->calculateProportionalAmount($installationDate, $endDate, $monthlyPrice);
             }
         }
 
-        // Días de consumo por desinstalación
-        if ($service->deleted_at || $service->status_id == CommonStatus::INACTIVE->value) {
-            $uninstallationDate = Carbon::parse($service->updated_at);
-
-            if ($uninstallationDate->between($periodStart, $periodEnd)) {
-                return $this->calculateProportionalAmount($periodStart, $uninstallationDate, $monthlyPrice);
-            }
-
-            if ($uninstallationDate->lt($periodStart)) return 0;
+        // Caso 2: Desinstalación durante el período (pero instalado antes)
+        if ($uninstallationDate) {
+            return $this->calculateProportionalAmount($periodStart, $uninstallationDate, $monthlyPrice);
         }
 
-        // Cambio de perfil durante el período
+        // Caso 3: Cambios de perfil durante el período
         $planChanges = $this->checkPlanChanges($service->id, $periodStart, $periodEnd);
         if ($planChanges->isNotEmpty()) {
             return $this->calculateAmountWithPlanChanges($service, $period, $planChanges);
         }
 
+        // Caso 4: Mes completo sin cambios
         return $monthlyPrice;
     }
 
@@ -435,6 +472,26 @@ class BillingService
             ->whereBetween('change_date', [$start, $end])
             ->orderBy('change_date')
             ->get();
+    }
+
+
+    /***
+     * Obtiene la fecha de desinstalación si existe en el período
+     * @param ServiceModel $service
+     * @param PeriodModel $period
+     * @return Carbon|null
+     */
+    private function getServiceUninstallationDate(ServiceModel $service, PeriodModel $period): ?Carbon
+    {
+        $periodStart = Carbon::parse($period->period_start);
+        $periodEnd = Carbon::parse($period->period_end);
+
+        $uninstallation = ServiceUninstallationModel::query()
+            ->where('service_id', $service->id)
+            ->whereBetween('uninstallation_date', [$periodStart, $periodEnd])
+            ->first();
+
+        return $uninstallation ? Carbon::parse($uninstallation->uninstallation_date) : null;
     }
 
     /***
@@ -512,22 +569,39 @@ class BillingService
     {
         $profile = $service->internet->profile ?? null;
         $profileName = $profile ? $profile->name : 'Servicio de internet';
-        $description = "{$profileName}";
 
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
 
-        // Instalación durante el período
+        // Verificar desinstalación en este período
+        $uninstallationDate = $this->getServiceUninstallationDate($service, $period);
+
+        // Caso 1: Instalación DENTRO del período actual
         if ($service->installation_date) {
             $installationDate = Carbon::parse($service->installation_date);
-            if ($installationDate->gt($periodStart)) {
+
+            // IMPORTANTE: Solo si la instalación es DESPUÉS del inicio del período
+            if ($installationDate->gt($periodStart) && $installationDate->lte($periodEnd)) {
+                if ($uninstallationDate) {
+                    // Instalado y desinstalado en el mismo período
+                    $days = $installationDate->diffInDays($uninstallationDate) + 1;
+                    return "{$profileName} ({$days} días - del {$installationDate->format('d/m/Y')} al {$uninstallationDate->format('d/m/Y')})";
+                }
+
+                // Solo instalado en este período
                 $days = $installationDate->diffInDays($periodEnd) + 1;
-                $description .= " ({$days} días de consumo)";
-                return $description;
+                return "{$profileName} ({$days} días de consumo - desde {$installationDate->format('d/m/Y')})";
             }
         }
 
-        return $description;
+        // Caso 2: Solo desinstalación en el período (instalación fue antes)
+        if ($uninstallationDate) {
+            $days = $periodStart->diffInDays($uninstallationDate) + 1;
+            return "{$profileName} ({$days} días - hasta {$uninstallationDate->format('d/m/Y')})";
+        }
+
+        // Caso 3: Servicio normal - instalado antes del período y sin desinstalación
+        return $profileName;
     }
 
     private function createInvoice(

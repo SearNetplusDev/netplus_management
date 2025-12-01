@@ -8,8 +8,10 @@ use App\Models\Clients\ClientModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
+use App\Models\Services\ServiceUninstallationModel;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\network\MikrotikInternetService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -65,6 +67,13 @@ class UninstallationStrategy extends BaseSupportStrategy
             ->first();
         $node = NodeModel::query()->with('auth_server')->findOrFail($service->node_id);
         $server = $node->auth_server->toArray();
+
+        ServiceUninstallationModel::query()
+            ->create([
+                'service_id' => $service->id,
+                'internet_profile_id' => $credentials->internet_profile_id,
+                'uninstallation_date' => Carbon::now()->toDateString(),
+            ]);
 
         $this->mikrotikInternetService->disableUser($server, $credentials->user);
 

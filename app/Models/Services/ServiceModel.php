@@ -126,4 +126,9 @@ class ServiceModel extends Model
     {
         return $this->hasMany(ServiceSoldDeviceModel::class, 'service_id', 'id');
     }
+
+    public function uninstallation(): HasOne
+    {
+        return $this->hasOne(ServiceUninstallationModel::class, 'service_id', 'id');
+    }
 }
