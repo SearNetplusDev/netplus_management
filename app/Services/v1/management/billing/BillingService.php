@@ -597,7 +597,7 @@ class BillingService
         // Caso 2: Solo desinstalación en el período (instalación fue antes)
         if ($uninstallationDate) {
             $days = $periodStart->diffInDays($uninstallationDate) + 1;
-            return "{$profileName} ({$days} días - hasta {$uninstallationDate->format('d/m/Y')})";
+            return "{$profileName} ({$days} días - del {$periodStart->format('d/m/Y')} hasta {$uninstallationDate->format('d/m/Y')})";
         }
 
         // Caso 3: Servicio normal - instalado antes del período y sin desinstalación

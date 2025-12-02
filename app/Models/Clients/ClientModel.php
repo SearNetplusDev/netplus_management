@@ -3,6 +3,7 @@
 namespace App\Models\Clients;
 
 use App\Enums\v1\General\CommonStatus;
+use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\Options\DocumentTypeModel;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
@@ -180,5 +181,10 @@ class ClientModel extends Model
     {
         return $this->hasMany(ServiceModel::class, 'client_id', 'id')
             ->where('status_id', CommonStatus::ACTIVE->value);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(InvoiceModel::class, 'client_id', 'id');
     }
 }

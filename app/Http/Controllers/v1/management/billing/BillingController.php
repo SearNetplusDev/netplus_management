@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Http\Controllers\v1\management\billing;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\v1\management\general\GeneralResource;
+use App\Models\Clients\ClientModel;
+use App\Services\v1\management\billing\InvoicesService;
+use App\Services\v1\management\DataViewerService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class BillingController extends Controller
+{
+    /***
+     * @param Request $request
+     * @param DataViewerService $dataViewerService
+     * @return JsonResponse
+     */
+    public function data(Request $request, DataViewerService $dataViewerService): JsonResponse
+    {
+        $query = ClientModel::query()
+            ->with([
+                'branch:id,name,badge_color',
+                'client_type:id,name',
+                'dui',
+                'mobile',
+                'address.state',
+                'address.district',
+            ]);
+
+        return $dataViewerService->handle($request, $query, [
+            'status' => fn($q, $data) => $q->whereIn('status_id', $data),
+            'branch' => fn($q, $data) => $q->whereIn('branch_id', $data),
+            'type' => fn($q, $data) => $q->whereIn('client_type_id', $data),
+            'state' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
+                return $q->where('state_id', $data);
+            }),
+            'district' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
+                return $q->where('district_id', $data);
+            })
+        ]);
+    }
+
+    /***
+     * @param Request $request
+     * @param InvoicesService $service
+     * @return JsonResponse
+     */
+    public function clientInvoices(Request $request, InvoicesService $service): JsonResponse
+    {
+        $invoices = $service->getClientInvoices($request->input('client_id'));
+
+        return response()->json([
+            'invoices' => new GeneralResource($invoices),
+        ]);
+    }
+}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\v1\management\billing\BillingController;
 use App\Http\Controllers\v1\management\billing\options\ActivitiesController;
 use App\Http\Controllers\v1\management\billing\options\DiscountController;
 use App\Http\Controllers\v1\management\billing\options\DocumentController;
@@ -10,6 +11,12 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1/billing')
     ->middleware(['auth:sanctum'])
     ->group(function () {
+
+        Route::post('data', [BillingController::class, 'data']);
+
+        Route::group(['prefix' => 'invoices'], function () {
+            Route::post('client', [BillingController::class, 'clientInvoices']);
+        });
 
         //      Options
         Route::group(['prefix' => 'options'], function () {
@@ -54,4 +61,5 @@ Route::prefix('v1/billing')
                 Route::put('{id}', [PaymentMethodsController::class, 'update']);
             });
         });
+
     });
