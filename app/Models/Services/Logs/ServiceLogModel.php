@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $service_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ClientModel $client
+ * @property-read ServiceModel $service
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class ServiceLogModel extends Model
 {
     protected $connection = 'pgsql';

@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $internet_service_id
+ * @property int $service_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ServiceInternetModel $internet_service
+ * @property-read ServiceModel $service
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereInternetServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class InternetServiceLogModel extends Model
 {
     protected $connection = 'pgsql';

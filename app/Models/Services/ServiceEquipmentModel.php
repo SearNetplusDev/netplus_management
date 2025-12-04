@@ -12,6 +12,33 @@ use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
 #[ObservedBy(ServiceEquipmentObserver::class)]
+/**
+ * @property int $id
+ * @property int $equipment_id
+ * @property int $service_id
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read InventoryModel $equipment
+ * @property-read array $status
+ * @property-read \App\Models\Services\ServiceModel $service
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class ServiceEquipmentModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

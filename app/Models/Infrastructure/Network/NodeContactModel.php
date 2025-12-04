@@ -9,6 +9,39 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
+/**
+ * @property int $id
+ * @property int $node_id
+ * @property string $name
+ * @property string $phone_number
+ * @property string $initial_contract_date
+ * @property string $final_contract_date
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read int|null $diff_days
+ * @property-read array $status
+ * @property-read \App\Models\Infrastructure\Network\NodeModel|null $node
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereFinalContractDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereInitialContractDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereNodeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel wherePhoneNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeContactModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class NodeContactModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

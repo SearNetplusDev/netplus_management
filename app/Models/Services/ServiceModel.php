@@ -20,6 +20,72 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy([ServiceObserver::class])]
+/**
+ * @property int $id
+ * @property int $client_id
+ * @property string|null $code
+ * @property string|null $name
+ * @property int $node_id
+ * @property int $equipment_id
+ * @property string $installation_date
+ * @property int $technician_id
+ * @property string $latitude
+ * @property string $longitude
+ * @property int $state_id
+ * @property int $municipality_id
+ * @property int $district_id
+ * @property string $address
+ * @property bool $separate_billing
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $comments
+ * @property-read ClientModel|null $client
+ * @property-read DistrictModel|null $district
+ * @property-read EquipmentModel|null $equipment
+ * @property-read array $status
+ * @property-read \App\Models\Services\ServiceInternetModel|null $internet
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Services\ServiceEquipmentModel> $internet_devices
+ * @property-read int|null $internet_devices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Services\ServiceIptvEquipmentModel> $iptv_devices
+ * @property-read int|null $iptv_devices_count
+ * @property-read MunicipalityModel|null $municipality
+ * @property-read NodeModel|null $node
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Services\ServiceSoldDeviceModel> $sold_devices
+ * @property-read int|null $sold_devices_count
+ * @property-read StateModel|null $state
+ * @property-read TechnicianModel|null $technician
+ * @property-read \App\Models\Services\ServiceUninstallationModel|null $uninstallation
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereDistrictId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereInstallationDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereMunicipalityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereNodeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereSeparateBilling($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereStateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereTechnicianId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class ServiceModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

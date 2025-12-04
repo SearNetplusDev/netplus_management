@@ -9,6 +9,36 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $service_iptv_equipment_id
+ * @property int $service_id
+ * @property int $equipment_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read InventoryModel $equipment
+ * @property-read ServiceModel $service
+ * @property-read ServiceIptvEquipmentModel $service_iptv
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereServiceIptvEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog whereUserId($value)
+ * @mixin \Eloquent
+ */
 class ServiceIPTVEquipmentLog extends Model
 {
     protected $connection = 'pgsql';

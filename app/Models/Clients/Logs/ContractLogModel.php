@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $contract_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ClientModel $client
+ * @property-read ContractModel $contract
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereContractId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ContractLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class ContractLogModel extends Model
 {
     protected $connection = 'pgsql';

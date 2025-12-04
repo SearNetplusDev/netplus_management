@@ -10,6 +10,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy(ServiceSoldDeviceObserver::class)]
+/**
+ * @property int $id
+ * @property int $equipment_id
+ * @property int $service_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read InventoryModel $equipment
+ * @property-read \App\Models\Services\ServiceModel $service
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class ServiceSoldDeviceModel extends Model
 {
     use SoftDeletes;

@@ -14,6 +14,57 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $server_id
+ * @property string $latitude
+ * @property string $longitude
+ * @property int $state_id
+ * @property int $municipality_id
+ * @property int $district_id
+ * @property string $address
+ * @property string $nc
+ * @property string $nc_owner
+ * @property string|null $comments
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string $prefix
+ * @property-read \App\Models\Infrastructure\Network\AuthServerModel|null $auth_server
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Infrastructure\Network\NodeContactModel> $contacts
+ * @property-read int|null $contacts_count
+ * @property-read DistrictModel|null $district
+ * @property-read array $status
+ * @property-read MunicipalityModel|null $municipality
+ * @property-read StateModel|null $state
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereDistrictId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereMunicipalityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereNc($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereNcOwner($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel wherePrefix($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereServerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereStateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NodeModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class NodeModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

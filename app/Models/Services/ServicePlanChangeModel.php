@@ -7,6 +7,34 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $service_id
+ * @property int $old_internet_profile_id
+ * @property int $new_internet_profile_id
+ * @property \Illuminate\Support\Carbon $change_date
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read InternetModel $new_internet_profile
+ * @property-read InternetModel $old_internet_profile
+ * @property-read \App\Models\Services\ServiceModel $service
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereChangeDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereNewInternetProfileId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereOldInternetProfileId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class ServicePlanChangeModel extends Model
 {
     use SoftDeletes;

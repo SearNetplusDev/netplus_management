@@ -15,6 +15,45 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy(AddressObserver::class)]
+/**
+ * @property int $id
+ * @property int $client_id
+ * @property string $neighborhood
+ * @property string $address
+ * @property int $state_id
+ * @property int $municipality_id
+ * @property int $district_id
+ * @property int $country_id
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Clients\ClientModel|null $client
+ * @property-read DistrictModel|null $district
+ * @property-read array $status
+ * @property-read MunicipalityModel|null $municipality
+ * @property-read StateModel|null $state
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereCountryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereDistrictId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereMunicipalityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereNeighborhood($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereStateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class AddressModel extends Model
 {
     use DataViewer, HasStatusTrait, SoftDeletes;

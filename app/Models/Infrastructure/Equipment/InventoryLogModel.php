@@ -12,6 +12,43 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 
+/**
+ * @property int $id
+ * @property int $equipment_id
+ * @property int $user_id
+ * @property int|null $technician_id
+ * @property string $execution_date
+ * @property int|null $service_id
+ * @property string $description
+ * @property int $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Infrastructure\Equipment\InventoryModel $equipment
+ * @property-read ServiceModel|null $service
+ * @property-read EquipmentStatusModel $status
+ * @property-read TechnicianModel|null $technician
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereExecutionDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereTechnicianId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class InventoryLogModel extends Model
 {
     use SoftDeletes, DataViewer;

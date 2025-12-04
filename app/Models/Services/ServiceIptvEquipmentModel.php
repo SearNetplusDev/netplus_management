@@ -12,6 +12,43 @@ use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
 #[ObservedBy(ServiceIptvEquipmentObserver::class)]
+/**
+ * @property int $id
+ * @property int $equipment_id
+ * @property int $service_id
+ * @property string $email
+ * @property string $email_password
+ * @property string $iptv_password
+ * @property string|null $comments
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int $email_correlative
+ * @property-read InventoryModel $equipment
+ * @property-read array $status
+ * @property-read \App\Models\Services\ServiceModel $service
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereEmailCorrelative($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereEmailPassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereIptvPassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class ServiceIptvEquipmentModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

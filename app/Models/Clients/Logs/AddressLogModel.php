@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $address_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read AddressModel $address
+ * @property-read ClientModel $client
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereAddressId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class AddressLogModel extends Model
 {
     protected $connection = 'pgsql';

@@ -15,6 +15,56 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasCompanyTrait;
 
+/**
+ * @property int $id
+ * @property int $brand_id
+ * @property int $type_id
+ * @property int $model_id
+ * @property int $branch_id
+ * @property string $mac_address
+ * @property string $serial_number
+ * @property string $registration_date
+ * @property int $status_id
+ * @property string|null $comments
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int $company_id
+ * @property-read BranchModel $branch
+ * @property-read \App\Models\Infrastructure\Equipment\BrandModel $brand
+ * @property-read array $company
+ * @property-read \App\Models\Infrastructure\Equipment\InventoryLogModel|null $last_technician
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Infrastructure\Equipment\InventoryLogModel> $logs
+ * @property-read int|null $logs_count
+ * @property-read \App\Models\Infrastructure\Equipment\ModelModel $model
+ * @property-read ServiceEquipmentModel|null $on_internet_service
+ * @property-read ServiceIptvEquipmentModel|null $on_iptv_service
+ * @property-read ServiceSoldDeviceModel|null $on_sold_devices
+ * @property-read EquipmentStatusModel $status
+ * @property-read \App\Models\Infrastructure\Equipment\TypeModel $type
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereBranchId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereBrandId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereCompanyId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereMacAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereModelId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereRegistrationDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereSerialNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class InventoryModel extends Model
 {
     use SoftDeletes, DataViewer, HasCompanyTrait;

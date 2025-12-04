@@ -13,6 +13,37 @@ use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
 #[ObservedBy(InternetServiceObserver::class)]
+/**
+ * @property int $id
+ * @property int $internet_profile_id
+ * @property int $service_id
+ * @property string $user
+ * @property string $secret
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read array $status
+ * @property-read InternetModel $profile
+ * @property-read ServiceModel $service
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereInternetProfileId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereSecret($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel whereUser($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class ServiceInternetModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

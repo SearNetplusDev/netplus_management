@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $finance_information_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ClientModel $client
+ * @property-read FinancialInformationModel $financial_information
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereFinanceInformationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class FinancialInformationLogModel extends Model
 {
     protected $connection = 'pgsql';

@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $email_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ClientModel $client
+ * @property-read EmailModel $email
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereEmailId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class EmailLogModel extends Model
 {
     protected $connection = 'pgsql';

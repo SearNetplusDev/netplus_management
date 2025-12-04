@@ -10,6 +10,44 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $url
+ * @property string|null $icon
+ * @property int|null $parent_id
+ * @property int $order
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $slug
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, MenuModel> $children
+ * @property-read int|null $children_count
+ * @property-read array $status
+ * @property-read MenuModel|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PermissionModel> $permissions
+ * @property-read int|null $permissions_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereIcon($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereParentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel whereUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class MenuModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;

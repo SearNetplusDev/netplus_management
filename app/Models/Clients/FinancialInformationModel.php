@@ -13,6 +13,54 @@ use App\Traits\HasStatusTrait;
 use App\Traits\DataViewer;
 
 #[ObservedBy(FinancialInformationObserver::class)]
+/**
+ * @property int $id
+ * @property int $client_id
+ * @property string $nrc
+ * @property int $activity_id
+ * @property bool $retained_iva
+ * @property string $legal_representative
+ * @property string $dui
+ * @property string $nit
+ * @property string $phone_number
+ * @property string|null $invoice_alias
+ * @property int $state_id
+ * @property int $municipality_id
+ * @property int $district_id
+ * @property string $address
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read ActivityModel|null $activity
+ * @property-read array $status
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereActivityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereDistrictId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereDui($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereInvoiceAlias($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereLegalRepresentative($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereMunicipalityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereNit($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereNrc($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel wherePhoneNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereRetainedIva($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereStateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class FinancialInformationModel extends Model
 {
     use DataViewer, HasStatusTrait, SoftDeletes;

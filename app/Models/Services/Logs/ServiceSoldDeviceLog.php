@@ -9,6 +9,36 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $service_sold_device_id
+ * @property int $service_id
+ * @property int $equipment_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read InventoryModel $equipment
+ * @property-read ServiceModel $service
+ * @property-read ServiceSoldDeviceModel $sold_device
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereServiceSoldDeviceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceLog whereUserId($value)
+ * @mixin \Eloquent
+ */
 class ServiceSoldDeviceLog extends Model
 {
     protected $connection = 'pgsql';

@@ -9,6 +9,36 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $service_equipment_id
+ * @property int $service_id
+ * @property int $equipment_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read InventoryModel $equipment
+ * @property-read ServiceModel $service
+ * @property-read ServiceEquipmentModel $service_equipment
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereServiceEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class ServiceEquipmentLogModel extends Model
 {
     protected $connection = 'pgsql';

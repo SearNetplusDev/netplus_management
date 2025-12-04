@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $phone_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ClientModel $client
+ * @property-read PhoneModel $phone
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel wherePhoneId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PhoneLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class PhoneLogModel extends Model
 {
     protected $connection = 'pgsql';

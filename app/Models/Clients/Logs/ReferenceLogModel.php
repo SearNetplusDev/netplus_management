@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $reference_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ClientModel $client
+ * @property-read ReferenceModel $reference
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereReferenceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReferenceLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class ReferenceLogModel extends Model
 {
     protected $connection = 'pgsql';

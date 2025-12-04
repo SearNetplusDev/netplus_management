@@ -7,6 +7,45 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $invoice_id
+ * @property int $service_id
+ * @property string $description
+ * @property int $quantity
+ * @property numeric $unit_price
+ * @property numeric $subtotal
+ * @property numeric $iva
+ * @property numeric $iva_retenido
+ * @property numeric $total
+ * @property bool $status_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Billing\InvoiceModel $invoice
+ * @property-read ServiceModel $service
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereInvoiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereIva($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereIvaRetenido($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereServiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereSubtotal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereTotal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereUnitPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class InvoiceDetailModel extends Model
 {
     use SoftDeletes;

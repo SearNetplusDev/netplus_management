@@ -3,6 +3,7 @@
 namespace App\Models\Clients;
 
 use App\Enums\v1\General\CommonStatus;
+use App\Models\Billing\ClientFinancialStatusModel;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\Options\DocumentTypeModel;
 use App\Models\Configuration\BranchModel;
@@ -22,6 +23,76 @@ use App\Observers\Clients\ClientObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 #[ObservedBy([ClientObserver::class])]
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $surname
+ * @property int $gender_id
+ * @property string|null $birthdate
+ * @property int $marital_status_id
+ * @property int $branch_id
+ * @property int $client_type_id
+ * @property string|null $profession
+ * @property int $country_id
+ * @property int $document_type_id
+ * @property bool $legal_entity
+ * @property bool $status_id
+ * @property string|null $comments
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ServiceModel> $active_services
+ * @property-read int|null $active_services_count
+ * @property-read \App\Models\Clients\AddressModel|null $address
+ * @property-read BranchModel|null $branch
+ * @property-read ClientTypeModel|null $client_type
+ * @property-read \App\Models\Clients\FinancialInformationModel|null $corporate_info
+ * @property-read CountryModel|null $country
+ * @property-read DocumentTypeModel|null $document_type
+ * @property-read \App\Models\Clients\DocumentModel|null $dui
+ * @property-read \App\Models\Clients\EmailModel|null $email
+ * @property-read ClientFinancialStatusModel|null $financial_status
+ * @property-read GenderModel|null $gender
+ * @property-read mixed $primary_document
+ * @property-read array $status
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceModel> $invoices
+ * @property-read int|null $invoices_count
+ * @property-read \App\Models\Clients\PhoneModel|null $landline
+ * @property-read MaritalStatusModel|null $marital_status
+ * @property-read \App\Models\Clients\PhoneModel|null $mobile
+ * @property-read \App\Models\Clients\DocumentModel|null $nit
+ * @property-read \App\Models\Clients\DocumentModel|null $passport
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Clients\DocumentModel> $personal_documents
+ * @property-read int|null $personal_documents_count
+ * @property-read \App\Models\Clients\DocumentModel|null $residence
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ServiceModel> $services
+ * @property-read int|null $services_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereBirthdate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereBranchId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereClientTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereCountryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereDocumentTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereGenderId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereLegalEntity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereMaritalStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereProfession($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereSurname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class ClientModel extends Model
 {
     use SoftDeletes, DataViewer, HasStatusTrait;
@@ -186,5 +257,10 @@ class ClientModel extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(InvoiceModel::class, 'client_id', 'id');
+    }
+
+    public function financial_status(): HasOne
+    {
+        return $this->hasOne(ClientFinancialStatusModel::class, 'client_id', 'id');
     }
 }

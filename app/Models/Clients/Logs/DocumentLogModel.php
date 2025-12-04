@@ -8,6 +8,33 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $document_id
+ * @property int $client_id
+ * @property int $user_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $before
+ * @property array<array-key, mixed>|null $after
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read ClientModel $client
+ * @property-read DocumentModel $document
+ * @property-read User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereAfter($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereBefore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereDocumentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel whereUserId($value)
+ * @mixin \Eloquent
+ */
 class DocumentLogModel extends Model
 {
     protected $connection = 'pgsql';

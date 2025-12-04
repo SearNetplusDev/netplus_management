@@ -8,6 +8,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 
+/**
+ * @property int $id
+ * @property int $support_id
+ * @property int $type_id
+ * @property int|null $internet_profile_id
+ * @property int|null $node_id
+ * @property int|null $equipment_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read InternetModel|null $profile
+ * @property-read \App\Models\Supports\SupportModel $support
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereInternetProfileId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereNodeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereSupportId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class SupportDetailModel extends Model
 {
     use SoftDeletes, DataViewer;
