@@ -27,6 +27,7 @@ class BillingController extends Controller
                 'mobile',
                 'address.state',
                 'address.district',
+                'financial_status.status',
             ]);
 
         return $dataViewerService->handle($request, $query, [
@@ -38,7 +39,10 @@ class BillingController extends Controller
             }),
             'district' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
                 return $q->where('district_id', $data);
-            })
+            }),
+            'financial_status' => fn($q, $data) => $q->whereHas('financial_status', function ($q) use ($data) {
+                return $q->whereIn('status_id', $data);
+            }),
         ]);
     }
 

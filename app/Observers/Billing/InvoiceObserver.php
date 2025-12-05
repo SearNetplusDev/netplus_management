@@ -4,14 +4,15 @@ namespace App\Observers\Billing;
 
 use App\Models\Billing\InvoiceModel;
 use App\Services\v1\management\billing\ClientFinancialStatusService;
+use App\Services\v1\management\billing\InvoiceStatusService;
 
 class InvoiceObserver
 {
-    protected ClientFinancialStatusService $financialStatusService;
-
-    public function __construct(ClientFinancialStatusService $financialStatusService)
+    public function __construct(
+        private ClientFinancialStatusService $financialStatusService,
+        private InvoiceStatusService         $invoiceStatusService,
+    )
     {
-        $this->financialStatusService = $financialStatusService;
     }
 
     /***
@@ -21,6 +22,7 @@ class InvoiceObserver
      */
     public function created(InvoiceModel $invoice): void
     {
+        $this->invoiceStatusService->updateSingleInvoiceStatus($invoice->id);
         $this->financialStatusService->updateClientFinancialStatus($invoice->client_id);
     }
 
@@ -31,7 +33,9 @@ class InvoiceObserver
      */
     public function updated(InvoiceModel $invoice): void
     {
-        $this->financialStatusService->updateClientFinancialStatus($invoice->client_id);
+        if ($invoice->wasChanged(['paid_amount', 'balance_due', 'billing_status_id'])) {
+            $this->financialStatusService->updateClientFinancialStatus($invoice->client_id);
+        }
     }
 
     /***

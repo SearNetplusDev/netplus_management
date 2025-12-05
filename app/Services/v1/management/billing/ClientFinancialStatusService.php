@@ -27,7 +27,8 @@ class ClientFinancialStatusService
         $currentBalance = $invoices->sum('balance_due');
         $totalPaidAmount = $invoices->sum('paid_amount');
         $totalInvoices = $invoices->count();
-        $pendingInvoices = $invoices->where('billing_status_id', BillingStatus::PENDING->value)->count();
+        $paidInvoices = $invoices->where('billing_status_id', BillingStatus::PAID->value)->count();
+        $pendingInvoices = $invoices->whereIn('billing_status_id', [BillingStatus::ISSUED->value, BillingStatus::PENDING->value])->count();
         $overdueInvoices = $invoices->where('billing_status_id', BillingStatus::OVERDUE->value);
         $overdueInvoiceCount = $overdueInvoices->count();
         $overdueBalance = $overdueInvoices->sum('balance_due');
@@ -41,6 +42,7 @@ class ClientFinancialStatusService
                     'overdue_balance' => $overdueBalance,
                     'total_paid_amount' => $totalPaidAmount,
                     'total_invoices' => $totalInvoices,
+                    'paid_invoices' => $paidInvoices,
                     'pending_invoices' => $pendingInvoices,
                     'overdue_invoices' => $overdueInvoiceCount,
                     'status_id' => $statusId,

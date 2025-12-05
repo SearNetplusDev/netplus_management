@@ -5,25 +5,52 @@ namespace App\Models\Billing;
 use App\Enums\v1\General\BillingStatus;
 use App\Models\Billing\Options\StatusModel;
 use App\Models\Clients\ClientModel;
+use App\Traits\DataViewer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * @property int $id
+ * @property int $client_id
+ * @property numeric $current_balance
+ * @property numeric $overdue_balance
+ * @property numeric $total_paid_amount
+ * @property int $total_invoices
+ * @property int $paid_invoices
+ * @property int $pending_invoices
+ * @property int $overdue_invoices
  * @property BillingStatus $status_id
- * @property-read ClientModel|null $client
- * @property-read StatusModel|null $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read ClientModel $client
+ * @property-read StatusModel $status
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereCurrentBalance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereOverdueBalance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereOverdueInvoices($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel wherePaidInvoices($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel wherePendingInvoices($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereTotalInvoices($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereTotalPaidAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel withoutTrashed()
  * @mixin \Eloquent
  */
 class ClientFinancialStatusModel extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, DataViewer;
 
     protected $connection = 'pgsql';
     protected $table = 'clients_financial_status';
@@ -34,10 +61,17 @@ class ClientFinancialStatusModel extends Model
         'overdue_balance',      //  Saldo vencido
         'total_paid_amount',    //  Cantidad pagada
         'total_invoices',       //  Facturas totales generadas
+        'paid_invoices',        //  Facturas totales pagadas
         'pending_invoices',     //  Facturas pendientes
         'overdue_invoices',     //  Facturas vencidas
         'status_id',            //  Estado financiero
     ];
+    protected $allowedFilters = [
+        'id',
+        'client_id',
+        'status_id',
+    ];
+    protected $orderable = ['id', 'client_id', 'status_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected $casts = [
         'client_id' => 'integer',

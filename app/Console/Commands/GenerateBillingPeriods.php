@@ -49,7 +49,7 @@ class GenerateBillingPeriods extends Command
         $periodStart = $date->copy()->startOfMonth();
         $periodEnd = $date->copy()->endOfMonth();
         $issueDate = $date->copy()->subMonth()->day(20);
-        $cutoffDate = $date->copy()->addDays(9);
+        $cutoffDate = $date->copy()->addMonth()->day(10);
 
         $name = $date->locale('es')->monthName . ' ' . $date->year;
         $code = $date->format('Ym');
