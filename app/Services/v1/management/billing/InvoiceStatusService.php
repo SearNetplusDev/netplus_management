@@ -11,6 +11,61 @@ use Carbon\Carbon;
 class InvoiceStatusService
 {
     /***
+     * Actualiza el estado de una factura basándose en su período y balance
+     * @param InvoiceModel $invoice
+     * @param Carbon|null $referenceDate
+     * @return bool
+     */
+    public function updateInvoiceStatusByPeriod(InvoiceModel $invoice, ?Carbon $referenceDate = null): bool
+    {
+        if ($invoice->billing_status_id === BillingStatus::CANCELED->value) return false;
+
+        $referenceDate = $referenceDate ?? Carbon::today();
+
+        if ($invoice->balance_due <= 0) {
+            if ($invoice->billing_status_id !== BillingStatus::PAID->value) {
+                $invoice->update(['billing_status_id' => BillingStatus::PAID->value]);
+                return true;
+            }
+            return false;
+        }
+
+        $period = $invoice->period;
+
+        if (!$period) return false;
+
+        $newStatus = $this->determineStatusByDate($period, $referenceDate);
+
+        if ($newStatus && $invoice->billing_status_id !== $newStatus) {
+            $invoice->update(['billing_status_id' => $newStatus]);
+            return true;
+        }
+        return false;
+    }
+
+    /***
+     * Determina el estado basándose en las fechas del período
+     * @param PeriodModel $period
+     * @param Carbon $referenceDate
+     * @return int|null
+     */
+    private function determineStatusByDate(PeriodModel $period, Carbon $referenceDate): ?int
+    {
+        $periodStart = Carbon::parse($period->period_start);
+        $dueDate = Carbon::parse($period->due_date);
+
+        if ($referenceDate->lt($periodStart)) {
+            return BillingStatus::ISSUED->value;
+        } elseif ($referenceDate->gte($periodStart) && $referenceDate->lte($dueDate)) {
+            return BillingStatus::PENDING->value;
+        } elseif ($referenceDate->gt($dueDate)) {
+            return BillingStatus::OVERDUE->value;
+        }
+
+        return null;
+    }
+
+    /***
      * Actualiza los estados de las facturas según las fechas del período
      * @param int|null $periodId <<Si se proporciona, solo actualiza el período>>
      * @return array
@@ -40,13 +95,7 @@ class InvoiceStatusService
 
         foreach ($invoices as $invoice) {
             try {
-                $period = $invoice->period;
-                $newStatus = $this->determineInvoiceStatus($invoice, $period, $today);
-
-                if ($newStatus && $invoice->billing_status_id !== $newStatus) {
-                    $invoice->update(['billing_status_id' => $newStatus]);
-                    $results['updated']++;
-                }
+                if ($this->updateInvoiceStatusByPeriod($invoice, $today)) $results['updated']++;
             } catch (\Exception $e) {
                 $results['errors'][] = "Factura {$invoice->id}: {$e->getMessage()}";
             }
@@ -98,15 +147,8 @@ class InvoiceStatusService
     public function updateSingleInvoiceStatus(int $invoiceId): bool
     {
         $invoice = InvoiceModel::query()->with('period')->findOrFail($invoiceId);
-        $today = Carbon::today();
-        $newStatus = $this->determineInvoiceStatus($invoice, $invoice->period, $today);
 
-        if ($newStatus && $invoice->billing_status_id !== $newStatus) {
-            $invoice->update(['billing_status_id' => $newStatus]);
-            return true;
-        }
-
-        return false;
+        return $this->updateInvoiceStatusByPeriod($invoice);
     }
 
     /***
@@ -117,5 +159,33 @@ class InvoiceStatusService
     public function updatePeriodInvoices(int $periodId): array
     {
         return $this->updateInvoiceStatuses($periodId);
+    }
+
+    /***
+     * Actualiza los estados de múltiple facturas
+     * @param array $invoiceIds
+     * @return array
+     */
+    public function updateMultipleInvoices(array $invoiceIds): array
+    {
+        $results = [
+            'updated' => 0,
+            'total' => count($invoiceIds),
+            'errors' => [],
+        ];
+
+        $invoices = InvoiceModel::query()
+            ->with('period')
+            ->whereIn('id', $invoiceIds)
+            ->get();
+
+        foreach ($invoices as $invoice) {
+            try {
+                if ($this->updateInvoiceStatusByPeriod($invoice)) $results['updated']++;
+            } catch (\Exception $e) {
+                $results['errors'][] = "Factura {$invoice->id}: {$e->getMessage()}";
+            }
+        }
+        return $results;
     }
 }

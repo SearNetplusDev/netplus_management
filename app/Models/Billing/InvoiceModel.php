@@ -119,7 +119,7 @@ class InvoiceModel extends Model
 
     public function financial_status(): BelongsTo
     {
-        return $this->belongsTo(StatusModel::class, 'status_id', 'id');
+        return $this->belongsTo(StatusModel::class, 'billing_status_id', 'id');
     }
 
     public function discounts(): BelongsToMany
