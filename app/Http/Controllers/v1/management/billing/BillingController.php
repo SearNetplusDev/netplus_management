@@ -9,6 +9,7 @@ use App\Services\v1\management\billing\InvoicesService;
 use App\Services\v1\management\DataViewerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class BillingController extends Controller
 {
@@ -58,5 +59,18 @@ class BillingController extends Controller
         return response()->json([
             'invoices' => new GeneralResource($invoices),
         ]);
+    }
+
+    /***
+     *  Retorna el pdf con los datos de la factura
+     * @param int $invoiceId
+     * @param InvoicesService $service
+     * @return Response
+     */
+    public function printInvoice(int $invoiceId, InvoicesService $service): Response
+    {
+        $pdf = $service->getInvoiceData($invoiceId);
+
+        return $pdf->stream();
     }
 }

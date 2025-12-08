@@ -240,7 +240,8 @@ class ClientModel extends Model
 
     public function corporate_info(): HasOne
     {
-        return $this->hasOne(FinancialInformationModel::class, 'client_id', 'id');
+        return $this->hasOne(FinancialInformationModel::class, 'client_id', 'id')
+            ->where('status_id', CommonStatus::ACTIVE->value);
     }
 
     public function services(): HasMany

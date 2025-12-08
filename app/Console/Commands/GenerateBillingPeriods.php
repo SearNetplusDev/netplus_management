@@ -13,7 +13,10 @@ class GenerateBillingPeriods extends Command
      *
      * @var string
      */
-    protected $signature = 'billing:generate-periods {months=12 : Number of billing periods} {--start-date= : Start date (YYYY-MM-DD)}';
+    protected $signature = 'billing:generate-periods
+                                {months=12 : Number of billing periods}
+                                {--start-date= : Start date (YYYY-MM-DD)}
+                            ';
 
     /**
      * The console command description.

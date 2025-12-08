@@ -14,7 +14,11 @@ class GenerateInvoices extends Command
      *
      * @var string
      */
-    protected $signature = 'billing:generate-invoices {period? : Period code (YYYYMM)} {--all-clients : Generar para todos los clientes} {--stats : Mostrar estadísticas}';
+    protected $signature = 'billing:generate-invoices
+                                {period? : Period code (YYYYMM)}
+                                {--all-clients : Generar para todos los clientes}
+                                {--stats : Mostrar estadísticas}
+                            ';
 
     /**
      * The console command description.

@@ -16,6 +16,7 @@ Route::prefix('v1/billing')
 
         Route::group(['prefix' => 'invoices'], function () {
             Route::post('client', [BillingController::class, 'clientInvoices']);
+            Route::get('print/{id}', [BillingController::class, 'printInvoice']);
         });
 
         //      Options
