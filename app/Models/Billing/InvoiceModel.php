@@ -35,7 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Billing\InvoiceDiscountModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\DiscountModel> $discounts
  * @property-read int|null $discounts_count
- * @property-read StatusModel|null $financial_status
+ * @property-read StatusModel $financial_status
  * @property-read array $status
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceDetailModel> $items
  * @property-read int|null $items_count
@@ -85,6 +85,7 @@ class InvoiceModel extends Model
         'status_id',            //  Estado (activo, inactivo)
         'comments'              //  Observaciones
     ];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected $casts = [
         'client_id' => 'integer',
         'billing_period_id' => 'integer',

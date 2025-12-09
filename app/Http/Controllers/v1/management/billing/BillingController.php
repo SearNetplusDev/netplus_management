@@ -70,7 +70,6 @@ class BillingController extends Controller
     public function printInvoice(int $invoiceId, InvoicesService $service): Response
     {
         $pdf = $service->getInvoiceData($invoiceId);
-
         return $pdf->stream();
     }
 }

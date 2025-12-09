@@ -2,6 +2,9 @@
 
 namespace App\Services\v1\management\billing;
 
+use App\Enums\v1\Billing\DocumentTypes;
+use App\Enums\v1\Billing\InvoiceType;
+use App\Enums\v1\Clients\ClientTypes;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Clients\ClientModel;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -17,16 +20,23 @@ class InvoicesService
             ->find($clientId);
     }
 
+    /***
+     * Obtiene los datos de la factura y genera el pdf
+     * @param int $invoiceId
+     * @return DomPDF
+     */
     public function getInvoiceData(int $invoiceId): DomPDF
     {
         $invoice = InvoiceModel::query()
             ->with([
-                'client.corporate_info',
                 'client.mobile',
                 'client.email',
                 'client.branch.state',
                 'client.branch.municipality',
                 'client.branch.district',
+                'client.address.state',
+                'client.address.municipality',
+                'client.address.district',
                 'items.service.state',
                 'items.service.municipality',
                 'items.service.district',
@@ -34,48 +44,164 @@ class InvoicesService
             ])
             ->findOrFail($invoiceId);
 
-//        return $invoice;
-        $items = [];
+        $isIndividual = $this->isIndividual($invoice);
 
-        foreach ($invoice->items as $index => $item) {
-            $unitPrice = $item->unit_price + $item->iva;
-            $el = [
-                'index' => $index + 1,
+        $isCCF = $invoice->client->client_type_id == ClientTypes::CORPORATE->value
+            || $invoice->client->document_type_id == DocumentTypes::CREDITO_FISCAL->value;
+
+        if ($isCCF) {
+            $invoice->load('client.corporate_info');
+            $data = $this->ccfData($invoice, $isIndividual);
+            $view = 'v1.management.pdf.billing.invoices.ccf';
+        } else {
+            $data = $this->billData($invoice, $isIndividual);
+            $view = 'v1.management.pdf.billing.invoices.invoice';
+        }
+        return Pdf::loadView($view, ['data' => $data])->setPaper('A4', 'portrait');
+    }
+
+    /***
+     * Checa que la factura sea individual o consolidada
+     * @param InvoiceModel $invoice
+     * @return bool
+     */
+    private function isIndividual(InvoiceModel $invoice): bool
+    {
+        return $invoice->invoice_type == InvoiceType::INDIVIDUAL->value;
+    }
+
+    /***
+     * Redondea números a 2 decimales
+     * @param $v
+     * @return string
+     */
+    private function money($v): string
+    {
+        return number_format($v ?? 0, 2);
+    }
+
+    /***
+     * Recorre los items de la factura para extraer valor neto e iva
+     * @param InvoiceModel $invoice
+     * @param bool $includeIva
+     * @return array
+     */
+    private function formatItems(InvoiceModel $invoice, bool $includeIva = false): array
+    {
+        return $invoice->items->map(function ($item, $i) use ($includeIva) {
+            $price = $item->unit_price + ($includeIva ? ($item->iva ?? 0) : 0);
+
+            return [
+                'index' => $i + 1,
                 'quantity' => $item->quantity,
                 'description' => $item->description,
-                'unit_price' => number_format($unitPrice, 2) ?? 0,
+                'unit_price' => $this->money($price),
                 'discount' => 0,
-                'total' => number_format($unitPrice * $item->quantity, 2) ?? 0,
+                'total' => $this->money($price * $item->quantity),
             ];
-            $items[] = $el;
-        }
-        $data = [
+        })->toArray();
+    }
+
+    /***
+     * Obtiene los datos que se repiten en todos los tipos de factura
+     * @param InvoiceModel $invoice
+     * @return array
+     */
+    private function commonData(InvoiceModel $invoice): array
+    {
+        return [
             'branch_name' => $invoice->client?->branch?->name,
             'branch_address' => $invoice->client?->branch?->address,
             'branch_state' => $invoice->client?->branch?->state?->name,
             'branch_district' => $invoice->client?->branch?->district?->name,
-            'branch_phone' => $invoice->client?->branch?->mobile,
-            'client_name' => ucwords("{$invoice->client?->name} {$invoice->client?->surname}"),
-            'client_address' => $invoice->items->first()?->service?->address,
-            'client_state' => $invoice->items->first()?->service?->state?->name,
-            'client_district' => $invoice->items->first()?->service?->district?->name,
-            'client_mobile' => $invoice->client?->mobile?->number ?? '',
-            'client_email' => $invoice->client?->email?->email ?? '',
+            'branch_phone' => $invoice->client?->branch?->mobile ?? '7626-6022',
+
             'invoice_issued' => Carbon::parse($invoice->period?->period_start)->toDateString(),
-            'invoice_overdue' => Carbon::parse($invoice->period?->due_date)->toDateString(),
+            'invoice_overdue' => Carbon::parse($invoice->period?->due_date ?? $invoice->period?->period_end)->toDateString(),
             'invoice_period' => $invoice->period?->name,
             'invoice_status' => $invoice->billing_status_id,
-            'items' => $items,
-            'subtotal' => number_format($invoice->subtotal, 2) ?? 0,
+
+            'subtotal' => $this->money($invoice->subtotal),
             'discounts' => 0,
-            'iva' => number_format($invoice->iva, 2) ?? 0,
-            'detained_iva' => number_format($invoice->detained_iva, 2) ?? 0,
-            'total' => number_format($invoice->total_amount, 2) ?? 0,
+            'iva' => $this->money($invoice->iva),
+            'detained_iva' => $this->money($invoice->iva_retenido ?? 0),
+            'total' => $this->money($invoice->total_amount),
         ];
+    }
 
-//        return $data;
+    /***
+     * Retorna campos cliente según el tipo de factura y el tipo de documento a emitir
+     * @param InvoiceModel $invoice
+     * @param bool $isIndividual
+     * @param bool $isCCF
+     * @return array
+     */
+    private function getClientFields(InvoiceModel $invoice, bool $isIndividual, bool $isCCF = false): array
+    {
+        if ($isCCF) {
+            return [
+                'client_name' => $invoice->client?->corporate_info?->invoice_alias,
+                'client_activity' => $invoice->client?->corporate_info?->activity?->name,
+                'client_nrc' => $invoice->client?->corporate_info?->nrc,
+                'client_nit' => $invoice->client?->corporate_info?->nit,
+                'client_address' => $invoice->client?->corporate_info?->address,
+                'client_state' => $invoice->client?->corporate_info?->state?->name,
+                'client_district' => $invoice->client?->corporate_info?->district?->name,
+                'client_mobile' => $invoice->client?->corporate_info?->phone_number,
+                'client_email' => $invoice->client?->email?->email,
+            ];
+        }
 
-        return Pdf::loadView('v1.management.pdf.billing.invoices.invoice', ['data' => $data])
-            ->setPaper('A4', 'portrait');
+        if ($isIndividual) {
+            $svc = $invoice->items->first()?->service;
+            return [
+                'client_name' => ucwords("{$invoice->client?->name} {$invoice->client?->surname}"),
+                'client_address' => $svc?->address ?? '',
+                'client_state' => $svc?->state?->name ?? '',
+                'client_district' => $svc?->district?->name ?? '',
+                'client_mobile' => $invoice->client?->mobile?->number ?? '',
+                'client_email' => $invoice->client?->email?->email ?? '',
+            ];
+        }
+
+        return [
+            'client_name' => ucwords("{$invoice->client?->name} {$invoice->client?->surname}"),
+            'client_address' => $invoice->client?->address?->address ?? '',
+            'client_state' => $invoice->client?->address?->state?->name ?? '',
+            'client_district' => $invoice->client?->address?->district?->name ?? '',
+            'client_mobile' => $invoice->client?->mobile?->number ?? '',
+            'client_email' => $invoice->client?->email?->email ?? '',
+        ];
+    }
+
+    /***
+     *  Obtiene los datos corporativos del cliente
+     * @param InvoiceModel $invoice
+     * @param bool $isIndividual
+     * @return array
+     */
+    private function ccfData(InvoiceModel $invoice, bool $isIndividual): array
+    {
+        $isCCF = true;
+        return array_merge(
+            $this->commonData($invoice),
+            $this->getClientFields($invoice, $isIndividual, $isCCF),
+            ['items' => $this->formatItems($invoice, false)]
+        );
+    }
+
+    /***
+     * Obtiene los datos generales del cliente
+     * @param InvoiceModel $invoice
+     * @param bool $isIndividual
+     * @return array
+     */
+    private function billData(InvoiceModel $invoice, bool $isIndividual): array
+    {
+        return array_merge(
+            $this->commonData($invoice),
+            $this->getClientFields($invoice, $isIndividual, false),
+            ['items' => $this->formatItems($invoice, true)]
+        );
     }
 }

@@ -3,11 +3,14 @@
 namespace App\Models\Clients;
 
 use App\Models\Billing\Options\ActivityModel;
+use App\Models\Configuration\Geography\DistrictModel;
+use App\Models\Configuration\Geography\MunicipalityModel;
+use App\Models\Configuration\Geography\StateModel;
 use App\Observers\Clients\FinancialInformationObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasStatusTrait;
 use App\Traits\DataViewer;
@@ -33,7 +36,10 @@ use App\Traits\DataViewer;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read ActivityModel|null $activity
+ * @property-read DistrictModel|null $district
  * @property-read array $status
+ * @property-read MunicipalityModel|null $municipality
+ * @property-read StateModel|null $state
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationModel newQuery()
@@ -121,8 +127,23 @@ class FinancialInformationModel extends Model
     ];
     protected $appends = ['status'];
 
-    public function activity(): HasOne
+    public function activity(): BelongsTo
     {
-        return $this->hasOne(ActivityModel::class, 'id', 'activity_id');
+        return $this->belongsTo(ActivityModel::class, 'activity_id', 'id');
+    }
+
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(StateModel::class, 'state_id', 'id');
+    }
+
+    public function municipality(): BelongsTo
+    {
+        return $this->belongsTo(MunicipalityModel::class, 'municipality_id', 'id');
+    }
+
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(DistrictModel::class, 'district_id', 'id');
     }
 }
