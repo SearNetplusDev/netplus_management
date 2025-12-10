@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    @include('v1.management.pdf.fonts')
+    @include('v1.management.pdf.styles.fonts')
     <style>
         * {
             margin: 0;
@@ -399,7 +399,7 @@
             <div style="width: 50%; margin: 0 auto; text-align: center">
                 <div class="signature-box">
                     <div
-                        class="signature-name">{{ $data['name'] ?? 'NOMBRE DEL CLIENTE' }}</div>
+                            class="signature-name">{{ $data['name'] ?? 'NOMBRE DEL CLIENTE' }}</div>
                     <div class="signature-title">FIRMA DEL CLIENTE</div>
                     <div class="signature-title">
                         {{$data['document_type']}}: {{ $data['document_number'] ?? '' }}</div>

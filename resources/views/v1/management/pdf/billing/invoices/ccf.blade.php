@@ -1,33 +1,33 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factura</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
     @include('v1.management.pdf.styles.invoices')
 </head>
 <body>
 <div class="container">
-    <!-- Header -->
+    <!--    Header      -->
     <div class="header">
         <div class="header-content">
             <div class="company-info">
-                <div class="company-name">NETPLUS S.A. DE C.V.</div>
+                <div class="company-name"> NETPLUS S.A. DE C.V.</div>
                 <div class="company-details">
                     {{ $data['branch_name'] }}<br>
-                    {{ $data['branch_address']  }}, {{ $data['branch_state'] }}, {{ $data['branch_district'] }}<br>
-                    <b>NRC:</b> 303483-9<br>
-                    <b>Tel:</b> {{ $data['branch_phone'] }}<br>
-                    <b>Email:</b> facturacion.netplus@gmail.com
+                    {{ $data['branch_address'] }}, {{ $data['branch_state'] }}, {{ $data['branch_district'] }} <br>
+                    <b>NRC: </b>303483-9 <br>
+                    <b>Tel: </b>{{ $data['branch_phone'] }} <br>
+                    <b>Email: </b> facturacion.netplus@gmail.com
                 </div>
             </div>
+
             <div class="invoice-info">
-                <div class="invoice-title">FACTURA C.F.</div>
+                <div class="invoice-title">Comprobante de crédito fiscal</div>
                 <div class="invoice-details">
-                    {{--                    <strong>No. Factura:</strong> FAC-2024-001<br>--}}
-                    <strong>Fecha Emisión:</strong> {{ $data['invoice_issued'] }}<br>
-                    <strong>Vencimiento:</strong> {{ $data['invoice_overdue'] }}<br>
-                    <strong>Mes a cancelar:</strong> {{ $data['invoice_period'] }}<br>
+                    <strong>Fecha emisión: </strong>{{ $data['invoice_issued'] }}<br>
+                    <strong>Vencimiento: </strong>{{ $data['invoice_overdue'] }}<br>
+                    <strong>Mes a cancelar: </strong>{{ $data['invoice_period'] }}<br>
                     @switch($data['invoice_status'])
                         @case(1)
                             <div class="status-badge status-issued">EMITIDA</div>
@@ -49,28 +49,28 @@
             </div>
         </div>
     </div>
+    <!--    Fin Header      -->
 
-    <!-- Billing Information -->
+    <!--    Información de facturación      -->
     <div class="billing-section">
         <div class="billing-to">
-            <div class="section-title">Datos del cliente</div>
-            <strong>Cliente: {{ $data['client_name'] }}</strong><br>
-            <b>Dirección:</b> {{ $data['client_address'] }}, {{ $data['client_state'] }},
-            {{ $data['client_district'] }}.<br>
-            <b>Tel:</b> {{ $data['client_mobile'] }}<br>
-            <b>Email:</b> {{ $data['client_email'] }}
+            <div class="section-title">
+                Datos del cliente
+            </div>
+            <strong>Cliente: {{ $data['client_name'] }} </strong> <br>
+            <b>N.R.C: </b>{{ $data['client_nrc'] }}<br>
+            <b>N.I.T: </b>{{ $data['client_nit'] }}<br>
+            <b>Giro: </b>{{ $data['client_activity'] }}<br>
+            <b>Dirección: </b> {{ $data['client_address'] }}
+            {{ $data['client_state'] }},
+            {{ $data['client_district'] }}. <br>
+            <b>Tel: </b>{{ $data['client_mobile'] }}<br>
+            <b>Email: </b>{{ $data['client_email'] }}<br>
         </div>
-        {{--        <div class="billing-details">--}}
-        {{--            <div class="section-title">Detalles del Servicio</div>--}}
-        {{--            <strong>ID Cliente:</strong> CLI-00123<br>--}}
-        {{--            <strong>Plan:</strong> Internet Fibra 100 Mbps<br>--}}
-        {{--            <strong>Periodo:</strong> Diciembre 2024<br>--}}
-        {{--            <strong>IP Asignada:</strong> 192.168.1.100<br>--}}
-        {{--            <strong>Método de Pago:</strong> Transferencia--}}
-        {{--        </div>--}}
     </div>
+    <!--    Fin Información de facturación      -->
 
-    <!-- Items Table -->
+    <!--    Items de factura        -->
     <table class="items-table">
         <thead>
         <tr>
@@ -95,8 +95,9 @@
         @endforeach
         </tbody>
     </table>
+    <!--    Fin Items de factura        -->
 
-    <!-- Totals -->
+    <!--    Totales     -->
     <div class="totals-section">
         <div class="total-row">
             <div class="total-label">Subtotal:</div>
@@ -104,19 +105,24 @@
         </div>
         <div class="total-row">
             <div class="total-label">Descuentos:</div>
-            <div class="total-value">-$ {{ number_format($data['discounts'], 2) }}</div>
+            <div class="total-value">- $ {{ number_format($data['discounts'], 2) }}</div>
         </div>
         <div class="total-row">
             <div class="total-label">IVA (13%):</div>
             <div class="total-value">$ {{ $data['iva'] }}</div>
+        </div>
+        <div class="total-row">
+            <div class="total-label">IVA Retenido (1%):</div>
+            <div class="total-value">- $ {{ $data['detained_iva'] }}</div>
         </div>
         <div class="total-row grand-total">
             <div class="total-label">TOTAL A PAGAR:</div>
             <div class="total-value">$ {{ $data['total'] }}</div>
         </div>
     </div>
+    <!--    Fin Totales     -->
 
-    <!-- Notes -->
+    <!--    Notas       -->
     <div style="margin-top: 20px; font-size: 9pt;">
         <strong>Notas:</strong><br>
         • El pago debe realizarse antes de la fecha de vencimiento para evitar suspensión del servicio.<br>
@@ -124,12 +130,15 @@
         {{--        • Esta factura es un documento fiscal válido para efectos tributarios.<br>--}}
         • Para soporte técnico comuníquese al (503) 7626-6022, atención 24/7
     </div>
+    <!--    Fin Notas       -->
 
+    <!--    Footer      -->
     <!-- Footer -->
     <div class="footer">
         {{--        Este documento fue generado electrónicamente y es válido sin sello ni firma.<br>--}}
         NETPLUS S.A. DE C.V. - Tel. (503) 7626-6022
     </div>
+    <!--    Fin Footer      -->
 </div>
 </body>
 </html>

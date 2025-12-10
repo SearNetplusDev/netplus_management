@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Document</title>
-    @include('v1.management.pdf.fonts')
+    @include('v1.management.pdf.styles.fonts')
     <style>
         * {
             margin: 0;
