@@ -67,7 +67,10 @@ Route::prefix('v1/billing')
 
         //      Extensions
         Route::group(['prefix' => 'extensions'], function () {
+            Route::post('/', [ExtensionController::class, 'store']);
             Route::post('data', [ExtensionController::class, 'invoiceExtensionList']);
+            Route::get('{id}', [ExtensionController::class, 'read']);
+            Route::put('{id}', [ExtensionController::class, 'update']);
         });
 
     });

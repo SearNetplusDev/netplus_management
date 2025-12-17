@@ -212,7 +212,12 @@ class InvoicesService
      */
     public function getInvoiceDueDate(int $id): string
     {
-        $invoice = InvoiceModel::query()->with('period')->findOrFail($id);
+        $invoice = InvoiceModel::query()->with(['period', 'extensions'])->findOrFail($id);
+
+        if ($invoice->extensions->isNotEmpty()) {
+            $lastExtension = $invoice->extensions->sortByDesc('id')->first();
+            return Carbon::parse($lastExtension->extended_due_date)->toDateString();
+        }
         return Carbon::parse($invoice->period?->cutoff_date ?? $invoice->period?->due_date)->toDateString();
     }
 }
