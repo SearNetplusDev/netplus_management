@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\v1\management\billing;
+namespace App\Services\v1\management\billing\background;
 
 use App\Enums\v1\Billing\InvoiceType;
 use App\Enums\v1\Clients\ClientTypes;

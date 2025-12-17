@@ -35,6 +35,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Billing\InvoiceDiscountModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\DiscountModel> $discounts
  * @property-read int|null $discounts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceExtensionModel> $extensions
+ * @property-read int|null $extensions_count
  * @property-read StatusModel $financial_status
  * @property-read array $status
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceDetailModel> $items
@@ -135,5 +137,10 @@ class InvoiceModel extends Model
             ->withPivot(['applied_amount'])
             ->withTimestamps()
             ->withTrashed();
+    }
+
+    public function extensions(): HasMany
+    {
+        return $this->hasMany(InvoiceExtensionModel::class, 'invoice_id', 'id');
     }
 }

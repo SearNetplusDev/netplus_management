@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\v1\management\billing\BillingController;
+use App\Http\Controllers\v1\management\billing\ExtensionController;
 use App\Http\Controllers\v1\management\billing\options\ActivitiesController;
 use App\Http\Controllers\v1\management\billing\options\DiscountController;
 use App\Http\Controllers\v1\management\billing\options\DocumentController;
@@ -17,6 +18,7 @@ Route::prefix('v1/billing')
         Route::group(['prefix' => 'invoices'], function () {
             Route::post('client', [BillingController::class, 'clientInvoices']);
             Route::get('print/{id}', [BillingController::class, 'printInvoice']);
+            Route::get('{id}/due-date', [BillingController::class, 'invoiceDueDate']);
         });
 
         //      Options
@@ -61,6 +63,11 @@ Route::prefix('v1/billing')
                 Route::post('edit', [PaymentMethodsController::class, 'edit']);
                 Route::put('{id}', [PaymentMethodsController::class, 'update']);
             });
+        });
+
+        //      Extensions
+        Route::group(['prefix' => 'extensions'], function () {
+            Route::post('data', [ExtensionController::class, 'invoiceExtensionList']);
         });
 
     });

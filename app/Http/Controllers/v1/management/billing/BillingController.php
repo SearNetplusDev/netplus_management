@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\management\billing;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\management\general\GeneralResource;
+use App\Models\Billing\InvoiceModel;
 use App\Models\Clients\ClientModel;
 use App\Services\v1\management\billing\InvoicesService;
 use App\Services\v1\management\DataViewerService;
@@ -71,5 +72,20 @@ class BillingController extends Controller
     {
         $pdf = $service->getInvoiceData($invoiceId);
         return $pdf->stream();
+    }
+
+    /***
+     * Retorna la fecha de corte del período de una factura
+     * @param int $id
+     * @param InvoicesService $service
+     * @return JsonResponse
+     */
+    public function invoiceDueDate(int $id, InvoicesService $service): JsonResponse
+    {
+        $date = $service->getInvoiceDueDate($id);
+
+        return response()->json([
+            'due_date' => $date,
+        ]);
     }
 }

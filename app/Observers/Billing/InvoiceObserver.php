@@ -3,7 +3,7 @@
 namespace App\Observers\Billing;
 
 use App\Models\Billing\InvoiceModel;
-use App\Services\v1\management\billing\ClientFinancialStatusService;
+use App\Services\v1\management\billing\background\ClientFinancialStatusService;
 
 class InvoiceObserver
 {

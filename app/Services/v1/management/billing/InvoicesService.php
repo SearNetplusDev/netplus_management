@@ -204,4 +204,15 @@ class InvoicesService
             ['items' => $this->formatItems($invoice, true)]
         );
     }
+
+    /***
+     * Retorna la fecha de corte del periodo de cada factura
+     * @param int $id
+     * @return string
+     */
+    public function getInvoiceDueDate(int $id): string
+    {
+        $invoice = InvoiceModel::query()->with('period')->findOrFail($id);
+        return Carbon::parse($invoice->period?->cutoff_date ?? $invoice->period?->due_date)->toDateString();
+    }
 }

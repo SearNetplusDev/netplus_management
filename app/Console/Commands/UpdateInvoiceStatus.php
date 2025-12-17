@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Services\v1\management\billing\ClientFinancialStatusService;
-use App\Services\v1\management\billing\InvoiceStatusService;
+use App\Services\v1\management\billing\background\ClientFinancialStatusService;
+use App\Services\v1\management\billing\background\InvoiceStatusService;
 use Illuminate\Console\Command;
 
 class UpdateInvoiceStatus extends Command

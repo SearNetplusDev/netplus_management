@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Billing\PeriodModel;
-use App\Services\v1\management\billing\BillingService;
+use App\Services\v1\management\billing\background\BillingService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
