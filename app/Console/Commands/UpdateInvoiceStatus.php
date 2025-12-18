@@ -16,7 +16,7 @@ class UpdateInvoiceStatus extends Command
     protected $signature = 'invoices:update-status
                                 {--period= : ID del periodo a actualizar}
                                 {--clients=: ID de los clientes separados por coma}
-                                {--full= : Actualiza estados financieros completos}
+                                {--full : Actualiza estados financieros completos}
                            ';
 
     /**
