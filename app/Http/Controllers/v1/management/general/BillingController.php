@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\management\general;
 
+use App\Enums\v1\General\CommonStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Options\ActivityModel;
 use App\Models\Billing\Options\DocumentTypeModel;
@@ -14,7 +15,7 @@ class BillingController extends Controller
     {
         return response()->json([
             'response' => DocumentTypeModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);
@@ -23,7 +24,7 @@ class BillingController extends Controller
     public function billingActivitiesList(): JsonResponse
     {
         $query = ActivityModel::query()
-            ->where('status_id', 1)
+            ->where('status_id', CommonStatus::ACTIVE->value)
             ->select('id', 'name')
             ->orderBy('name', 'ASC')
             ->get();

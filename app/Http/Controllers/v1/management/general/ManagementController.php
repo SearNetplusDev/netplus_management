@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\management\general;
 
+use App\Enums\v1\General\CommonStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Management\PermissionModel;
 use App\Models\Management\RoleModel;
@@ -39,7 +40,7 @@ class ManagementController extends Controller
     {
         return response()->json([
             'response' => User::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->orderBy('name', 'ASC')
                 ->get()
@@ -50,7 +51,7 @@ class ManagementController extends Controller
     {
         $query = TechnicianModel::query()
             ->with('user:id,name')
-            ->whereHas('user', fn($q) => $q->where('status_id', 1))
+            ->whereHas('user', fn($q) => $q->where('status_id', CommonStatus::ACTIVE->value))
             ->where('status_id', 1)
             ->get();
         $data = [];

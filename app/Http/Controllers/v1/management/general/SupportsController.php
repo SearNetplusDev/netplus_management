@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\management\general;
 
+use App\Enums\v1\General\CommonStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Supports\StatusModel;
@@ -15,7 +16,7 @@ class SupportsController extends Controller
     {
         return response()->json([
             'response' => StatusModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->orderBy('id', 'ASC')
                 ->get()
@@ -27,7 +28,7 @@ class SupportsController extends Controller
     {
         return response()->json([
             'response' => SupportType::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->orderBy('name', 'ASC')
                 ->get()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\management\general;
 
+use App\Enums\v1\General\CommonStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\Clients\ContractStateModel;
 use App\Models\Configuration\BranchModel;
@@ -11,7 +12,6 @@ use App\Models\Configuration\Geography\CountryModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
 use App\Models\Configuration\Geography\StateModel;
-use App\Models\Management\Profiles\InternetModel;
 use Illuminate\Http\JsonResponse;
 
 class DataController extends Controller
@@ -20,11 +20,11 @@ class DataController extends Controller
     {
         $status = [
             [
-                'id' => 0,
+                'id' => CommonStatus::INACTIVE->value,
                 'name' => 'Inactivo'
             ],
             [
-                'id' => 1,
+                'id' => CommonStatus::ACTIVE->value,
                 'name' => 'Activo'
             ],
         ];
@@ -108,7 +108,7 @@ class DataController extends Controller
     {
         return response()->json([
             'response' => GenderModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);
@@ -118,7 +118,7 @@ class DataController extends Controller
     {
         return response()->json([
             'response' => MaritalStatusModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);
@@ -128,7 +128,7 @@ class DataController extends Controller
     {
         return response()->json([
             'response' => BranchModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);
@@ -138,7 +138,7 @@ class DataController extends Controller
     {
         return response()->json([
             'response' => ContractStateModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);

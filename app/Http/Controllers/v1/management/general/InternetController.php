@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\management\general;
 
+use App\Enums\v1\General\CommonStatus;
 use App\Http\Controllers\Controller;
 use App\Libraries\MikrotikAPI;
 use App\Models\Infrastructure\Network\AuthServerModel;
@@ -16,7 +17,7 @@ class InternetController extends Controller
         return response()->json([
             'response' => InternetModel::query()
                 ->select(['id', 'name'])
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->orderBy('name', 'ASC')
                 ->get()
         ]);
@@ -71,7 +72,7 @@ class InternetController extends Controller
     {
         return InternetModel::query()
             ->where([
-                ['status_id', 1],
+                ['status_id', CommonStatus::ACTIVE->value],
                 ['iptv', $iptv]
             ])
             ->select(['id', 'name'])
