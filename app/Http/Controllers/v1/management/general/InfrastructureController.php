@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\v1\management\general;
 
+use App\Enums\v1\General\CommonStatus;
+use App\Enums\v1\General\InfrastructureStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\Infrastructure\EquipmentStatusModel;
 use App\Models\Infrastructure\Equipment\BrandModel;
@@ -18,7 +20,7 @@ class InfrastructureController extends Controller
     {
         return response()->json([
             'response' => AuthServerModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->orderBy('name', 'ASC')
                 ->get()
@@ -29,7 +31,7 @@ class InfrastructureController extends Controller
     {
         return response()->json([
             'response' => TypeModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->orderBy('name', 'ASC')
                 ->get()
@@ -40,7 +42,7 @@ class InfrastructureController extends Controller
     {
         return response()->json([
             'response' => BrandModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);
@@ -50,7 +52,7 @@ class InfrastructureController extends Controller
     {
         return response()->json([
             'response' => EquipmentStatusModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->orderBy('id', 'ASC')
                 ->get()
@@ -61,7 +63,7 @@ class InfrastructureController extends Controller
     {
         return response()->json([
             'response' => NodeModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);
@@ -71,7 +73,7 @@ class InfrastructureController extends Controller
     {
         return response()->json([
             'response' => ModelModel::query()
-                ->where('status_id', 1)
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->select('id', 'name')
                 ->get()
         ]);
@@ -93,7 +95,7 @@ class InfrastructureController extends Controller
         $query = EquipmentModel::query()
             ->where([
                 ['node_id', $id],
-                ['status_id', 3]
+                ['status_id', InfrastructureStatus::OPERATIVE->value]
             ])
             ->select('id', 'name')
             ->orderBy('name', 'ASC')

@@ -1,62 +1,42 @@
 [
     {
-        "name": "En espera",
+        "name": "En bodega",
         "description": "El equipo está encendido pero no está en uso activo.",
-        "color": "light-blue-10"
+        "color": "#52796f"
     },
     {
-        "name": "En mantenimiento",
+        "name": "En Ruta",
         "description": "El equipo está fuera de servicio para reparaciones o mantenimiento programado.",
-        "color": "teal-10"
+        "color": "#014f86"
     },
     {
-        "name": "En prueba",
+        "name": "Operativo",
         "description": "El equipo esta siendo evaluado o probado.",
-        "color": "cyan-9"
+        "color": "#538d22"
     },
     {
         "name": "Desconectado",
         "description": "El equipo no está conectado a la fuente de energía o red.",
-        "color": "red-13"
-    },
-    {
-        "name": "Actualizando",
-        "description": "El equipo está en proceso de actualización de software o firmware.",
-        "color": "indigo-8"
-    },
-    {
-        "name": "Sobrecarga",
-        "description": "El equipo está operando por encima de su capacidad recomendada.",
-        "color": "orange-10"
-    },
-    {
-        "name": "Reiniciando",
-        "description": "El equipo está en proceso de reinicio.",
-        "color": "light-green-10"
-    },
-    {
-        "name": "En configuración",
-        "description": "El equipo está siendo configurado o ajustado.",
-        "color": "blue-10"
-    },
-    {
-        "name": "Fuera de servicio",
-        "description": "El equipo no está disponible para su uso, pero no necesariamente está defectuoso.",
-        "color": "red-14"
-    },
-    {
-        "name": "Operativo",
-        "description": "El equipo está funcionando correctamente y está disponible para su uso.",
-        "color": "positive"
+        "color": "#b5179e"
     },
     {
         "name": "Vendido",
-        "description": "El equipo ha sido vendido.",
-        "color": "deep-purple-14"
+        "description": "El equipo está en proceso de actualización de software o firmware.",
+        "color": "#1b4332"
     },
     {
         "name": "Robado",
-        "description": "El equipo ha sido robado.",
-        "color": "red-9"
+        "description": "El equipo está operando por encima de su capacidad recomendada.",
+        "color": "#b130db"
+    },
+    {
+        "name": "Desconocido",
+        "description": "El equipo está en proceso de reinicio.",
+        "color": "#415a77"
+    },
+    {
+        "name": "Dañado",
+        "description": "El equipo está siendo configurado o ajustado.",
+        "color": "#c1121f"
     }
 ]
