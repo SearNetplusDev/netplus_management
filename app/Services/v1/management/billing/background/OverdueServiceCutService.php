@@ -6,8 +6,10 @@ use App\Enums\v1\General\BillingStatus;
 use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
+use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
 use App\Services\v1\network\MikrotikInternetService;
+use Illuminate\Support\Collection;
 
 class OverdueServiceCutService
 {
@@ -63,7 +65,10 @@ class OverdueServiceCutService
     private function disableService(ServiceModel $service): void
     {
         $server = $this->getServerData($service->node_id)->toArray();
-        $this->mikrotikInternetService->disableUser($server, $service->internet?->user);
+        $credentials = $this->getCredentials($service->id);
+        $this->mikrotikInternetService->updateUser($server, $credentials->user, [
+            'profile' => $credentials->profile?->debt_profile
+        ]);
     }
 
     /***
@@ -74,5 +79,18 @@ class OverdueServiceCutService
     private function getServerData(int $id): AuthServerModel
     {
         return AuthServerModel::query()->findOrFail($id);
+    }
+
+    /***
+     * Obtiene las credenciales y el perfil de cada servicio
+     * @param int $serviceId
+     * @return ServiceInternetModel
+     */
+    private function getCredentials(int $serviceId): ServiceInternetModel
+    {
+        return ServiceInternetModel::query()
+            ->with('profile')
+            ->where('service_id', $serviceId)
+            ->first();
     }
 }
