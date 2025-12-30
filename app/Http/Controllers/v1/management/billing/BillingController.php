@@ -88,4 +88,19 @@ class BillingController extends Controller
             'due_date' => $date,
         ]);
     }
+
+    /***
+     * Retorna las facturas pendientes y vencidas
+     * @param int $serviceId
+     * @param InvoicesService $service
+     * @return JsonResponse
+     */
+    public function serviceInvoices(int $serviceId, InvoicesService $service): JsonResponse
+    {
+        $invoices = $service->getServicesPendingInvoices($serviceId);
+
+        return response()->json([
+            'response' => new GeneralResource($invoices),
+        ]);
+    }
 }

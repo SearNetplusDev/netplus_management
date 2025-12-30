@@ -5,6 +5,8 @@ namespace App\Services\v1\management\billing;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Enums\v1\Billing\InvoiceType;
 use App\Enums\v1\Clients\ClientTypes;
+use App\Enums\v1\General\BillingStatus;
+use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Clients\ClientModel;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -13,10 +15,19 @@ use Carbon\Carbon;
 
 class InvoicesService
 {
+    /***
+     * Retorna facturas de un cliente determinado en orden descendente
+     * @param int $clientId
+     * @return ClientModel
+     */
     public function getClientInvoices(int $clientId): ClientModel
     {
         return ClientModel::query()
-            ->with(['invoices.financial_status', 'invoices.period'])
+            ->with([
+                'invoices' => fn($q) => $q->orderBy('id', 'desc'),
+                'invoices.financial_status',
+                'invoices.period'
+            ])
             ->find($clientId);
     }
 
@@ -219,5 +230,36 @@ class InvoicesService
             return Carbon::parse($lastExtension->extended_due_date)->toDateString();
         }
         return Carbon::parse($invoice->period?->cutoff_date ?? $invoice->period?->due_date)->toDateString();
+    }
+
+    /***
+     * Retorna las facturas pendientes y vencidas por servicio
+     * @param int $id
+     * @return array
+     */
+    public function getServicesPendingInvoices(int $id): array
+    {
+        $invoices = InvoiceModel::query()
+            ->with('period')
+            ->whereHas('items', function ($q) use ($id) {
+                $q->where([
+                    ['service_id', $id],
+                    ['status_id', CommonStatus::ACTIVE->value]
+                ]);
+            })
+            ->whereIn('billing_status_id', [BillingStatus::OVERDUE->value, BillingStatus::PENDING->value])
+            ->orderByRaw('CASE WHEN billing_status_id = ? THEN 0 ELSE 1 END', [BillingStatus::OVERDUE->value])
+            ->orderBy('billing_period_id', 'ASC')
+            ->get();
+
+        return $invoices->map(function ($invoice) {
+            $status = $invoice->billing_status_id === BillingStatus::OVERDUE->value ? 'Vencida' : 'Pendiente';
+            $total = number_format($invoice->total_amount, 2);
+            return [
+                'id' => $invoice->id,
+                'name' => "{$invoice->period?->name} ({$status})",
+                'total' => $total,
+            ];
+        })->toArray();
     }
 }

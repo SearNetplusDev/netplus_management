@@ -44,6 +44,7 @@ Route::prefix('v1/general')
             Route::get('activities', [BillingController::class, 'billingActivitiesList']);
             Route::get('documents', [BillingController::class, 'billingDocumentsList']);
             Route::get('statuses', [BillingController::class, 'statusesList']);
+            Route::get('payment-methods', [BillingController::class, 'paymentMethodsList']);
         });
 
         Route::group(['prefix' => 'client'], function () {
