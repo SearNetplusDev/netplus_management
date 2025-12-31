@@ -16,9 +16,9 @@ use App\Traits\HasStatusTrait;
  * @property string $description
  * @property string $mk_profile
  * @property string|null $debt_profile
- * @property string $net_value
- * @property string $iva
- * @property string $price
+ * @property numeric $net_value
+ * @property numeric $iva
+ * @property numeric $price
  * @property string $expiration_date
  * @property bool $status_id
  * @property \Illuminate\Support\Carbon|null $created_at

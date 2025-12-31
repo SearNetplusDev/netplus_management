@@ -15,7 +15,7 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property string $price
+ * @property numeric $price
  * @property-read array $status
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TypeModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TypeModel newModelQuery()

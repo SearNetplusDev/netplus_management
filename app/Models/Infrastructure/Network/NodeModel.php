@@ -18,8 +18,8 @@ use App\Traits\HasStatusTrait;
  * @property int $id
  * @property string $name
  * @property int $server_id
- * @property string $latitude
- * @property string $longitude
+ * @property numeric $latitude
+ * @property numeric $longitude
  * @property int $state_id
  * @property int $municipality_id
  * @property int $district_id

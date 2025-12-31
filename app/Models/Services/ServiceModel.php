@@ -29,8 +29,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $equipment_id
  * @property string $installation_date
  * @property int $technician_id
- * @property string $latitude
- * @property string $longitude
+ * @property numeric $latitude
+ * @property numeric $longitude
  * @property int $state_id
  * @property int $municipality_id
  * @property int $district_id

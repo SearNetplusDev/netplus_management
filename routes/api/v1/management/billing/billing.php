@@ -7,6 +7,7 @@ use App\Http\Controllers\v1\management\billing\options\DiscountController;
 use App\Http\Controllers\v1\management\billing\options\DocumentController;
 use App\Http\Controllers\v1\management\billing\options\PaymentMethodsController;
 use App\Http\Controllers\v1\management\billing\options\StatusesController;
+use App\Http\Controllers\v1\management\billing\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/billing')
@@ -58,11 +59,13 @@ Route::prefix('v1/billing')
             });
 
             //      Payment Methods
-            Route::group(['prefix' => 'payment/methods'], function () {
-                Route::post('/', [PaymentMethodsController::class, 'store']);
-                Route::post('data', [PaymentMethodsController::class, 'data']);
-                Route::post('edit', [PaymentMethodsController::class, 'edit']);
-                Route::put('{id}', [PaymentMethodsController::class, 'update']);
+            Route::group(['prefix' => 'payment'], function () {
+                Route::group(['prefix' => 'methods'], function () {
+                    Route::post('/', [PaymentMethodsController::class, 'store']);
+                    Route::post('data', [PaymentMethodsController::class, 'data']);
+                    Route::post('edit', [PaymentMethodsController::class, 'edit']);
+                    Route::put('{id}', [PaymentMethodsController::class, 'update']);
+                });
             });
         });
 
@@ -72,6 +75,11 @@ Route::prefix('v1/billing')
             Route::post('data', [ExtensionController::class, 'invoiceExtensionList']);
             Route::get('{id}', [ExtensionController::class, 'read']);
             Route::put('{id}', [ExtensionController::class, 'update']);
+        });
+
+        //  Payments
+        Route::group(['prefix' => 'payments'], function () {
+            Route::post('/', [PaymentController::class, 'store']);
         });
 
     });

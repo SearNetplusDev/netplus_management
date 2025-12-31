@@ -19,8 +19,8 @@ use App\Traits\HasStatusTrait;
  * @property int $client_id
  * @property string $contract_date
  * @property string $contract_end_date
- * @property string $installation_price
- * @property string $contract_amount
+ * @property numeric $installation_price
+ * @property numeric $contract_amount
  * @property int $contract_status_id
  * @property bool $status_id
  * @property \Illuminate\Support\Carbon|null $created_at
