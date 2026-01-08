@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\management\clients;
 
 use App\Http\Controllers\Controller;
+use App\Services\v1\imports\ImportClientsService;
 use App\Services\v1\management\client\ClientGeneralDataService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -98,5 +99,13 @@ class ClientsController extends Controller
             'name' => ucwords("{$query->name} {$query->surname}"),
         ];
         return response()->json(['response' => [$data]]);
+    }
+
+    public function importClients(ImportClientsService $service): JsonResponse
+    {
+        $clients = $service->importClients();
+        return response()->json([
+            'clients' => new GeneralDataResource($clients)
+        ]);
     }
 }

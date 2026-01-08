@@ -79,4 +79,6 @@ Route::prefix('v1/clients')
             Route::put('{id}', [ContractsController::class, 'update']);
             Route::get('print/{id}', [ContractsController::class, 'print']);
         });
+
+        Route::get('import', [ClientsController::class, 'importClients']);
     });

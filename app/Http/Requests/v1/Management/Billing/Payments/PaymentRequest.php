@@ -25,7 +25,7 @@ class PaymentRequest extends FormRequest
             'client' => 'required|integer|exists:clients,id',
             'service' => 'required|integer|exists:services,id',
             'invoice' => 'required|integer|exists:billing_invoices,id',
-            'amount' => 'required|decimal',
+            'amount' => 'required|numeric',
             'payment_method' => 'required|integer|exists:billing_payment_methods,id',
             'comments' => 'nullable|string|between:2,255',
         ];

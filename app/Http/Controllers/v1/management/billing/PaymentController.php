@@ -20,6 +20,7 @@ class PaymentController extends Controller
      * @param PaymentRequest $request
      * @param PaymentService $service
      * @return JsonResponse
+     * @throws \Throwable
      */
     public function store(PaymentRequest $request, PaymentService $service): JsonResponse
     {
@@ -40,6 +41,7 @@ class PaymentController extends Controller
         return response()->json([
             'saved' => (bool)$payment,
             'payment' => new GeneralResource($payment),
+            'assigned_invoice_id' => $payment->invoice_id,
         ]);
     }
 }

@@ -9,6 +9,7 @@ enum BillingStatus: int
     case PAID = 3;
     case OVERDUE = 4;
     case CANCELED = 5;
+    case PARTIALLY_PAID = 6;
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum BillingStatus: int
             self::PAID => 'Pagada',
             self::OVERDUE => 'Vencida',
             self::CANCELED => 'Anulada',
+            self::PARTIALLY_PAID => 'Parcialmente pagado',
         };
     }
 }
