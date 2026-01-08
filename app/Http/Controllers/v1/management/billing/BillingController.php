@@ -90,17 +90,16 @@ class BillingController extends Controller
     }
 
     /***
-     * Retorna las facturas pendientes y vencidas
-     * @param int $serviceId
+     * Retorna las facturas pendientes o vencidas de un cliente
+     * @param int $clientId
      * @param InvoicesService $service
      * @return JsonResponse
      */
-    public function serviceInvoices(int $serviceId, InvoicesService $service): JsonResponse
+    public function getClientPendingInvoices(int $clientId, InvoicesService $service): JsonResponse
     {
-        $invoices = $service->getServicesPendingInvoices($serviceId);
-
         return response()->json([
-            'response' => new GeneralResource($invoices),
+            'response' => new GeneralResource($service->clientPendingInvoices($clientId))
         ]);
     }
+
 }

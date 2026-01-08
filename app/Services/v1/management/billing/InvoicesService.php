@@ -232,21 +232,11 @@ class InvoicesService
         return Carbon::parse($invoice->period?->cutoff_date ?? $invoice->period?->due_date)->toDateString();
     }
 
-    /***
-     * Retorna las facturas pendientes y vencidas por servicio
-     * @param int $id
-     * @return array
-     */
-    public function getServicesPendingInvoices(int $id): array
+    public function clientPendingInvoices(int $clientId): array
     {
         $invoices = InvoiceModel::query()
-            ->with('period')
-            ->whereHas('items', function ($q) use ($id) {
-                $q->where([
-                    ['service_id', $id],
-                    ['status_id', CommonStatus::ACTIVE->value]
-                ]);
-            })
+            ->with(['period', 'items.service'])
+            ->where('client_id', $clientId)
             ->whereIn('billing_status_id', [BillingStatus::OVERDUE->value, BillingStatus::PENDING->value])
             ->orderByRaw('CASE WHEN billing_status_id = ? THEN 0 ELSE 1 END', [BillingStatus::OVERDUE->value])
             ->orderBy('billing_period_id', 'ASC')
@@ -255,11 +245,16 @@ class InvoicesService
         return $invoices->map(function ($invoice) {
             $status = $invoice->billing_status_id === BillingStatus::OVERDUE->value ? 'Vencida' : 'Pendiente';
             $total = number_format($invoice->total_amount, 2);
+            $independent = $invoice->items[0]->service?->separate_billing;
+
+            $address = (bool)$independent ? $invoice->items[0]->service?->address ?? '' : 'Servicios consolidados';
+
             return [
                 'id' => $invoice->id,
-                'name' => "{$invoice->period?->name} ({$status})",
+                'name' => "{$invoice->period?->name} ({$status}) - {$address}",
                 'total' => $total,
             ];
         })->toArray();
     }
+
 }
