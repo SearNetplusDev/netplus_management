@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\management\general;
 
 use App\Enums\v1\General\CommonStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Billing\DiscountModel;
 use App\Models\Billing\Options\ActivityModel;
 use App\Models\Billing\Options\DocumentTypeModel;
 use App\Models\Billing\Options\PaymentMethodModel;
@@ -47,6 +48,7 @@ class BillingController extends Controller
     }
 
     /***
+     * Retorna listado de métodos de pago
      * @return JsonResponse
      */
     public function paymentMethodsList(): JsonResponse
@@ -55,6 +57,21 @@ class BillingController extends Controller
             'response' => PaymentMethodModel::query()
                 ->select(['id', 'name'])
                 ->orderBy('name', 'ASC')
+                ->get()
+                ->makeHidden(['status'])
+        ]);
+    }
+
+    /***
+     * Retorna listado de descuentos
+     * @return JsonResponse
+     */
+    public function discountList(): JsonResponse
+    {
+        return response()->json([
+            'response' => DiscountModel::query()
+                ->select(['id', 'name', 'amount'])
+                ->where('status_id', CommonStatus::ACTIVE->value)
                 ->get()
                 ->makeHidden(['status'])
         ]);
