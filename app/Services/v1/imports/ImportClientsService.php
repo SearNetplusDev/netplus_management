@@ -102,7 +102,7 @@ class ImportClientsService
      */
     private function parsedName(string $name): string
     {
-        $lower = strtolower($name);
+        $lower = mb_strtolower($name);
         return (ucwords($lower));
     }
 

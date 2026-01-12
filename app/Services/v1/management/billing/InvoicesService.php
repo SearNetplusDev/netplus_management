@@ -251,7 +251,7 @@ class InvoicesService
 
             return [
                 'id' => $invoice->id,
-                'name' => "{$invoice->period?->name} ({$status}) - {$address}",
+                'name' => "{$invoice->period?->name} ({$status}) - {$address} || $ {$total}",
                 'total' => $total,
             ];
         })->toArray();

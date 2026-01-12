@@ -32,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read ClientModel $client
- * @property-read \App\Models\Billing\InvoiceDiscountModel|null $pivot
+ * @property-read \App\Models\Billing\PaymentInvoiceModel|\App\Models\Billing\InvoiceDiscountModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\DiscountModel> $discounts
  * @property-read int|null $discounts_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceExtensionModel> $extensions
@@ -41,6 +41,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read array $status
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceDetailModel> $items
  * @property-read int|null $items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\PaymentModel> $payments
+ * @property-read int|null $payments_count
  * @property-read \App\Models\Billing\PeriodModel $period
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceModel newQuery()
@@ -142,5 +144,19 @@ class InvoiceModel extends Model
     public function extensions(): HasMany
     {
         return $this->hasMany(InvoiceExtensionModel::class, 'invoice_id', 'id');
+    }
+
+    public function payments(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            PaymentModel::class,
+            'billing_payments_invoices',
+            'invoice_id',
+            'payment_id',
+        )
+            ->using(PaymentInvoiceModel::class)
+            ->withPivot(['amount_applied'])
+            ->withTimestamps()
+            ->withTrashed();
     }
 }

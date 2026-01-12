@@ -15,9 +15,6 @@ class PaymentDTO extends Data
 {
     public function __construct(
         #[Required, IntegerType]
-        public readonly int     $invoice_id,
-
-        #[Required, IntegerType]
         public readonly int     $client_id,
 
         #[Required, IntegerType]

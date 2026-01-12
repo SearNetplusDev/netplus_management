@@ -3,9 +3,11 @@
 namespace App\Services\v1\management\billing;
 
 use App\DTOs\v1\management\billing\extensions\ExtensionDTO;
+use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\InvoiceExtensionModel;
 use App\Models\Billing\InvoiceModel;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class ExtensionsService
 {
@@ -16,26 +18,44 @@ class ExtensionsService
      */
     public function invoiceExtensionData(int $invoiceId): array
     {
-        $data = [];
-        $invoice = InvoiceModel::with('extensions.user')->findOrFail($invoiceId);
-        $data['period'] = $invoice->period?->name;
-        $data['extensions'] = $invoice->extensions;
+        $invoice = InvoiceModel::query()
+            ->with(['extensions.user', 'period'])
+            ->findOrFail($invoiceId);
 
-        return $data;
+        return [
+            'period' => $invoice->period?->name,
+            'extensions' => $invoice->extensions,
+        ];
     }
 
     /***
-     * Almacena nueva extensión
+     *  Almacena nueva extensión
      * @param ExtensionDTO $dto
      * @return InvoiceExtensionModel
      */
     public function createExtension(ExtensionDTO $dto): InvoiceExtensionModel
     {
+        $invoice = InvoiceModel::query()->findOrFail($dto->invoiceId);
+
+        if (!$invoice) {
+            throw ValidationException::withMessages([
+                'invoice' => 'La factura no existe.'
+            ]);
+        }
+
         $newDate = $dto->previousDueDate->copy()->addDays($dto->days);
+
+        //  Solo se debe tener una prórroga activa por factura
+        InvoiceExtensionModel::query()
+            ->where([
+                ['invoice_id', $invoice->id],
+                ['status_id', CommonStatus::ACTIVE->value],
+            ])
+            ->update(['status_id' => CommonStatus::INACTIVE->value]);
 
         return InvoiceExtensionModel::query()
             ->create([
-                'invoice_id' => $dto->invoiceId,
+                'invoice_id' => $invoice->id,
                 'previous_due_date' => $dto->previousDueDate,
                 'extended_due_date' => $newDate,
                 'reason' => $dto->reason,
@@ -51,16 +71,15 @@ class ExtensionsService
      */
     public function extensionData(int $id): array
     {
-        $invoice = InvoiceExtensionModel::query()->findOrFail($id);
-        $end = Carbon::parse($invoice->previous_due_date);
-        $extended = Carbon::parse($invoice->extended_due_date);
-        $days = $end->diffInDays($extended);
+        $extension = InvoiceExtensionModel::query()->findOrFail($id);
+        $previous = Carbon::parse($extension->previous_due_date);
+        $extended = Carbon::parse($extension->extended_due_date);
 
         return [
-            'previous_due_date' => $end->toDateString(),
-            'days' => $days,
-            'status_id' => $invoice->status_id,
-            'reason' => $invoice->reason,
+            'previous_due_date' => $previous->toDateString(),
+            'days' => $previous->diffInDays($extended),
+            'status_id' => $extension->status_id,
+            'reason' => $extension->reason,
         ];
     }
 
@@ -72,6 +91,14 @@ class ExtensionsService
      */
     public function updateExtension(InvoiceExtensionModel $model, ExtensionDTO $dto): InvoiceExtensionModel
     {
+        $invoice = InvoiceModel::find($dto->invoiceId);
+
+        if (!$invoice) {
+            throw ValidationException::withMessages([
+                'invoice' => 'La factura no existe.'
+            ]);
+        }
+
         $newDate = $dto->previousDueDate->copy()->addDays($dto->days);
 
         $model->update([

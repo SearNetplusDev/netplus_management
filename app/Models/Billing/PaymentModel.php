@@ -8,11 +8,11 @@ use App\Models\User;
 use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
- * @property int $invoice_id
  * @property int $client_id
  * @property int $payment_method_id
  * @property numeric $amount
@@ -26,7 +26,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read ClientModel $client
  * @property-read array $status
- * @property-read \App\Models\Billing\InvoiceModel $invoice
+ * @property-read \App\Models\Billing\PaymentInvoiceModel|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceModel> $invoices
+ * @property-read int|null $invoices_count
  * @property-read PaymentMethodModel $payment_method
  * @property-read User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel newModelQuery()
@@ -39,7 +41,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereInvoiceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel wherePaymentDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel wherePaymentMethodId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereReferenceNumber($value)
@@ -58,7 +59,6 @@ class PaymentModel extends Model
     protected $table = 'billing_payments';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'invoice_id',
         'client_id',
         'payment_method_id',
         'amount',
@@ -75,9 +75,18 @@ class PaymentModel extends Model
     ];
     protected $appends = ['status'];
 
-    public function invoice(): BelongsTo
+    public function invoices(): BelongsToMany
     {
-        return $this->belongsTo(InvoiceModel::class, 'invoice_id', 'id');
+        return $this->belongsToMany(
+            InvoiceModel::class,
+            'billing_payments_invoices',
+            'payment_id',
+            'invoice_id'
+        )
+            ->using(PaymentInvoiceModel::class)
+            ->withPivot(['amount_applied'])
+            ->withTimestamps()
+            ->withTrashed();
     }
 
     public function client(): BelongsTo

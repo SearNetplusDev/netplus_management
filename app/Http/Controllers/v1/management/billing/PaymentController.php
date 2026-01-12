@@ -24,8 +24,8 @@ class PaymentController extends Controller
      */
     public function store(PaymentRequest $request, PaymentService $service): JsonResponse
     {
+        $ids = explode(',', $request->invoices);
         $dto = new PaymentDTO(
-            invoice_id: $request->invoice,
             client_id: $request->client,
             payment_method_id: $request->payment_method,
             amount: $request->amount,
@@ -36,7 +36,7 @@ class PaymentController extends Controller
             status_id: CommonStatus::ACTIVE->value,
         );
 
-        $payment = $service->createPayment($dto);
+        $payment = $service->createPayment($dto, $ids);
 
         return response()->json([
             'saved' => (bool)$payment,

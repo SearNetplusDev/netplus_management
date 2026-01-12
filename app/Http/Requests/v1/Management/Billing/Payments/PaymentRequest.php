@@ -23,11 +23,11 @@ class PaymentRequest extends FormRequest
     {
         return [
             'client' => 'required|integer|exists:clients,id',
-            'service' => 'required|integer|exists:services,id',
-            'invoice' => 'required|integer|exists:billing_invoices,id',
+            'invoices' => 'required|string',
             'amount' => 'required|numeric',
             'payment_method' => 'required|integer|exists:billing_payment_methods,id',
             'comments' => 'nullable|string|between:2,255',
+            'discount' => 'nullable|int|exists:billing_discounts,id',
         ];
     }
 
@@ -38,13 +38,9 @@ class PaymentRequest extends FormRequest
             'client.integer' => 'Formato incorrecto para cliente.',
             'client.exists' => 'El cliente seleccionado no existe.',
 
-            'service.required' => 'No se ha especificado el servicio.',
-            'service.integer' => 'Formato incorrecto para servicio.',
-            'service.exists' => 'El servicio seleccionado no existe.',
-
-            'invoice.required' => 'Factura no especificada.',
-            'invoice.integer' => 'Formato incorrecto para factura.',
-            'invoice.exists' => 'La factura seleccionada no existe.',
+            'invoices.required' => 'Factura no especificada.',
+            'invoices.integer' => 'Formato incorrecto para factura.',
+            'invoices.exists' => 'La factura seleccionada no existe.',
 
             'amount.required' => 'El monto es obligatorio.',
             'amount.decimal' => 'El monto debe ser un número decimal.',
@@ -55,6 +51,9 @@ class PaymentRequest extends FormRequest
 
             'comments.string' => 'Formato incorrecto para observaciones.',
             'comments.between' => 'Las observaciones deben tener entre 2 y 255 caracteres.',
+
+            'discount.int' => 'Formato incorrecto.',
+            'discount.exists' => 'El descuento seleccionado no existe.',
         ];
     }
 }
