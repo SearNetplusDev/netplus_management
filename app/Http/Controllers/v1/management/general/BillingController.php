@@ -68,12 +68,19 @@ class BillingController extends Controller
      */
     public function discountList(): JsonResponse
     {
+        $query = DiscountModel::query()
+            ->select(['id', 'name', 'amount'])
+            ->where('status_id', CommonStatus::ACTIVE->value)
+            ->get();
+
         return response()->json([
-            'response' => DiscountModel::query()
-                ->select(['id', 'name', 'amount'])
-                ->where('status_id', CommonStatus::ACTIVE->value)
-                ->get()
-                ->makeHidden(['status'])
+            'response' => $query->map(function ($el) {
+                return [
+                    'id' => $el->id,
+                    'name' => "{$el->name} ($ {$el->amount})",
+                    'amount' => $el->amount,
+                ];
+            })
         ]);
     }
 }

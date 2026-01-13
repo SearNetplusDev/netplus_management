@@ -36,7 +36,7 @@ class PaymentController extends Controller
             status_id: CommonStatus::ACTIVE->value,
         );
 
-        $payment = $service->createPayment($dto, $ids);
+        $payment = $service->createPayment($dto, $ids, $request->discount);
 
         return response()->json([
             'saved' => (bool)$payment,
