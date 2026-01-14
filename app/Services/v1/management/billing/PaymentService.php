@@ -7,22 +7,17 @@ use App\Enums\v1\General\BillingStatus;
 use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\DiscountModel;
 use App\Models\Billing\InvoiceModel;
-use App\Models\Billing\PaymentInvoiceModel;
 use App\Models\Billing\PaymentModel;
-use App\Models\Infrastructure\Network\AuthServerModel;
-use App\Models\Services\ServiceInternetModel;
-use App\Services\v1\management\billing\background\ClientFinancialStatusService;
+use App\Models\Services\ServiceModel;
 use App\Services\v1\network\MikrotikInternetService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class PaymentService
 {
-    public function __construct(
-        private MikrotikInternetService      $mikrotikInternetService,
-        private ClientFinancialStatusService $clientFinancialStatusService
-    )
+    public function __construct(private MikrotikInternetService $mikrotikInternetService)
     {
     }
 
@@ -54,8 +49,7 @@ class PaymentService
 
                 $invoice = $invoices[$invoiceId];
 
-                if ($invoice->balance_due <= 0) continue;
-                $discountAmount = 0;
+                if (round($invoice->balance_due, 2) <= 0) continue;
 
                 if (
                     $discount && !$invoice->discounts()
@@ -67,23 +61,24 @@ class PaymentService
                     $invoice->discounts()->attach($discount->id, ['applied_amount' => $discountAmount]);
                 }
 
-                $totalDiscounts = $invoice->discounts()->sum('applied_amount');
+                $totalDiscounts = round($invoice->discounts()->sum('applied_amount'), 2);
 
-                $maxPayable = max($invoice->total_amount - $totalDiscounts - $invoice->paid_amount, 0);
-                $amountToPay = min($dto->amount, $maxPayable);
+                $maxPayable = round(max($invoice->total_amount - $totalDiscounts - $invoice->paid_amount, 0), 2);
+                $amountToPay = round(min($dto->amount, $maxPayable), 2);
 
                 if ($amountToPay <= 0) continue;
 
                 $payment->invoices()->attach($invoice->id, ['amount_applied' => $amountToPay]);
                 $invoice->increment('paid_amount', $amountToPay);
-                $newBalance = max($invoice->total_amount - $invoice->paid_amount - $totalDiscounts, 0);
-                
+                $newBalance = round(max($invoice->total_amount - $invoice->paid_amount - $totalDiscounts, 0), 2);
+
                 $invoice->update([
                     'balance_due' => $newBalance,
                     'billing_status_id' => BillingStatus::PAID->value,
                 ]);
             }
 
+            $this->updateInternetAccessForPaidServices($payment->client_id);
             return $payment->load('invoices.discounts');
         });
     }
@@ -101,5 +96,168 @@ class PaymentService
         }
 
         return min($discount->amount, $base);
+    }
+
+    /***
+     * Verifica y actualiza el acceso a internet por cada
+     * servicio relacionado con las facturas pagadas
+     * @param int $clientId
+     * @return void
+     */
+    private function updateInternetAccessForPaidServices(int $clientId): void
+    {
+        //  Obteniendo servicios activos del cliente
+        $services = ServiceModel::query()
+            ->with(['internet', 'node.auth_server'])
+            ->where([
+                ['client_id', $clientId],
+                ['status_id', CommonStatus::ACTIVE->value],
+            ])
+            ->get();
+
+        foreach ($services as $service) {
+            //  Verificar si el servicio tiene facturas asociadas
+            $serviceInvoices = $this->getInvoicesForService($service->id, $clientId);
+
+            if ($serviceInvoices->isEmpty()) {
+                //  Si el servicio no tiene facturas, activarlo
+                $this->activateServiceInternet($service);
+                continue;
+            }
+
+            //  Verificar si hay facturas vencidas para el servicio
+            $hasOverdueInvoices = $serviceInvoices->contains(function ($invoice) {
+                return $invoice->billing_status_id === BillingStatus::OVERDUE->value;
+            });
+
+            //  Si no hay facturas vencidas para este servicio
+            if (!$hasOverdueInvoices) {
+
+                //  Verificar si hay facturas pendientes para este servicio
+                $hasPendingInvoices = $serviceInvoices->contains(function ($invoice) {
+                    return in_array($invoice->billing_status_id, [
+                        BillingStatus::ISSUED->value,
+                        BillingStatus::PENDING->value,
+                        BillingStatus::PARTIALLY_PAID->value,
+                    ]);
+                });
+
+                //  Si hay facturas pendientes o si todas están pagadas, activar el servicio
+                if ($hasPendingInvoices || $this->areAllInvoicesPaid($serviceInvoices)) {
+                    $this->activateServiceInternet($service);
+                }
+            }
+        }
+    }
+
+    /***
+     * Obtiene las facturas asociadas a un servicio específico
+     * @param int $serviceId
+     * @param int $clientId
+     * @return Collection
+     */
+    private function getInvoicesForService(int $serviceId, int $clientId): Collection
+    {
+        //  Obtiene las facturas que contienen items pertenecientes al servicio específico
+        return InvoiceModel::query()
+            ->where([
+                ['client_id', $clientId],
+                ['status_id', CommonStatus::ACTIVE->value],
+            ])
+            ->where('billing_status_id', '!=', BillingStatus::CANCELED->value)
+            ->whereHas('items', function ($q) use ($serviceId) {
+                $q->where('service_id', $serviceId);
+            })
+            ->get();
+    }
+
+    /***
+     * Verifica si todas las facturas del servicio están pagadas
+     * @param Collection $invoices
+     * @return bool
+     */
+    private function areAllInvoicesPaid(Collection $invoices): bool
+    {
+        return $invoices->every(function ($invoice) {
+            return $invoice->billing_status_id === BillingStatus::PAID->value;
+        });
+    }
+
+    /***
+     * Activa la navegación de un servicio en Mikrotik
+     * @param ServiceModel $service
+     * @return void
+     */
+    private function activateServiceInternet(ServiceModel $service): void
+    {
+        try {
+            //  Verificar que el servicio tenga internet configurado
+            if (!$service->internet || !$service->internet->profile) return;
+
+            //  Verificar que tenga un nodo y servidor de autenticación
+            if (!$service->node || !$service->node->auth_server) return;
+
+            $authServer = $service->node->auth_server;
+            $normalProfile = $service->internet?->profile?->mk_profile;
+            $username = $service->internet?->user;
+
+            //  Datos de conexión al auth server
+            $server = [
+                'ip' => $authServer->ip,
+                'user' => $authServer->user,
+                'secret' => $authServer->secret,
+            ];
+
+            //  Actualizar el usuario en Mikrotik con su perfil de navegación
+            $this->mikrotikInternetService->updateUser($server, $username, [
+                'profile' => $normalProfile,
+                'disabled' => 'no'
+            ]);
+
+            Log::info("Servicio de internet activado para el servicio {$service->id}, cliente: {$service->client_id}");
+        } catch (\Throwable $e) {
+            Log::error("Error al activar la navegación para el servicio {$service->id}: {$e->getMessage()}");
+        }
+    }
+
+    /***
+     * Desactiva la navegación de un servicio específico en Mikrotik
+     * @param ServiceModel $service
+     * @param string|null $debtProfile
+     * @return void
+     */
+    private function deactivateServiceInternet(ServiceModel $service, ?string $debtProfile = null): void
+    {
+        try {
+            //  Verificar que el servicio tenga internet configurado
+            if (!$service->internet) return;
+
+            //  Verificar que tenga un nodo y servidor de autenticación
+            if (!$service->node || !$service->node->auth_server) return;
+
+            $authServer = $service->node->auth_server;
+            $username = $service->internet?->user;
+            $server = [
+                'ip' => $authServer->ip,
+                'user' => $authServer->user,
+                'secret' => $authServer->secret,
+            ];
+
+            // Si hay perfil de deuda, cambiar a ese perfil, de lo contrario deshabilitar
+            if ($debtProfile && $service->internet?->profile && $service->internet?->profile?->debt_profile) {
+                $this->mikrotikInternetService->updateUser($server, $username, [
+                    'profile' => $debtProfile,
+                    'disabled' => 'no'
+                ]);
+
+                Log::info("Servicio {$service->id} cambiado a deuda");
+            } else {
+                $this->mikrotikInternetService->disableUser($server, $username);
+                Log::info("Servicio {$service->id} deshabilitado por deuda");
+            }
+
+        } catch (\Throwable $e) {
+            Log::error("Error al desactivar la navegación para el servicio {$service->id}: " . $e->getMessage());
+        }
     }
 }
