@@ -32,6 +32,15 @@ class PaymentService
     public function createPayment(PaymentDTO $dto, array $invoiceIds, ?int $discountId = null): PaymentModel
     {
         return DB::transaction(function () use ($dto, $invoiceIds, $discountId) {
+            //  Facturas vencidas previas al pago
+            $overdueInvoicesBefore = InvoiceModel::query()
+                ->where([
+                    ['client_id', $dto->client_id],
+                    ['billing_status_id', BillingStatus::OVERDUE->value]
+                ])
+                ->pluck('id')
+                ->toArray();
+
             $payment = PaymentModel::query()->create($dto->toArray());
             $discount = $discountId ? DiscountModel::query()->withoutGlobalScopes()->findOrFail($discountId) : null;
             $invoices = InvoiceModel::query()
@@ -39,6 +48,8 @@ class PaymentService
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
+
+            $invoicesUpdated = [];
 
             foreach ($invoiceIds as $invoiceId) {
                 if (!isset($invoices[$invoiceId])) {
@@ -62,7 +73,6 @@ class PaymentService
                 }
 
                 $totalDiscounts = round($invoice->discounts()->sum('applied_amount'), 2);
-
                 $maxPayable = round(max($invoice->total_amount - $totalDiscounts - $invoice->paid_amount, 0), 2);
                 $amountToPay = round(min($dto->amount, $maxPayable), 2);
 
@@ -76,9 +86,17 @@ class PaymentService
                     'balance_due' => $newBalance,
                     'billing_status_id' => BillingStatus::PAID->value,
                 ]);
+
+                $invoicesUpdated[] = $invoiceId;
             }
 
-            $this->updateInternetAccessForPaidServices($payment->client_id);
+            //  Solo actualiza si se pagaron las facturas que estaban vencidas
+            $paidOverdueInvoices = array_intersect($overdueInvoicesBefore, $invoicesUpdated);
+
+            if (!empty($paidOverdueInvoices)) {
+                $this->updateInternetAccessForPaidServices($payment->client_id);
+            }
+
             return $payment->load('invoices.discounts');
         });
     }
