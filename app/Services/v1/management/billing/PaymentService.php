@@ -41,8 +41,20 @@ class PaymentService
                 ->pluck('id')
                 ->toArray();
 
-            $payment = PaymentModel::query()->create($dto->toArray());
+            //  Calculando descuento sobre el monto de pago
             $discount = $discountId ? DiscountModel::query()->withoutGlobalScopes()->findOrFail($discountId) : null;
+            $discountAmount = $discount ? $this->calculateDiscount($discount, $dto->amount) : 0;
+
+            //  El monto efectivo a distribuir es el pago + descuento
+            $totalAmountToDistribute = round($dto->amount + $discountAmount, 2);
+
+            //  Crea el pago con los datos del DTO + descuento
+            $paymentData = array_merge($dto->toArray(), [
+                'discount_id' => $discountId,
+                'discount_amount' => $discountAmount,
+            ]);
+            $payment = PaymentModel::query()->create($paymentData);
+
             $invoices = InvoiceModel::query()
                 ->whereIn('id', $invoiceIds)
                 ->lockForUpdate()
@@ -50,6 +62,7 @@ class PaymentService
                 ->keyBy('id');
 
             $invoicesUpdated = [];
+            $remainingAmount = $totalAmountToDistribute;
 
             foreach ($invoiceIds as $invoiceId) {
                 if (!isset($invoices[$invoiceId])) {
@@ -60,33 +73,35 @@ class PaymentService
 
                 $invoice = $invoices[$invoiceId];
 
-                if (round($invoice->balance_due, 2) <= 0) continue;
+                //  Si la factura ya está pagada o no hay monto restante, continúa
+                if (round($invoice->balance_due, 2) <= 0 || $remainingAmount <= 0) continue;
 
-                if (
-                    $discount && !$invoice->discounts()
-                        ->withOutGlobalScopes()
-                        ->where('discount_id', $discount->id)
-                        ->exists()
-                ) {
-                    $discountAmount = $this->calculateDiscount($discount, $invoice->total_amount);
-                    $invoice->discounts()->attach($discount->id, ['applied_amount' => $discountAmount]);
-                }
-
-                $totalDiscounts = round($invoice->discounts()->sum('applied_amount'), 2);
-                $maxPayable = round(max($invoice->total_amount - $totalDiscounts - $invoice->paid_amount, 0), 2);
-                $amountToPay = round(min($dto->amount, $maxPayable), 2);
+                //  Calcula cuanto se puede pagar de esa factura
+                $maxPayable = round($invoice->balance_due, 2);
+                $amountToPay = round(min($remainingAmount, $maxPayable), 2);
 
                 if ($amountToPay <= 0) continue;
 
+                //  Registra el pago aplicado a cada factura
                 $payment->invoices()->attach($invoice->id, ['amount_applied' => $amountToPay]);
                 $invoice->increment('paid_amount', $amountToPay);
-                $newBalance = round(max($invoice->total_amount - $invoice->paid_amount - $totalDiscounts, 0), 2);
+
+                //  Recalcula balance
+                $newBalance = round(max($invoice->total_amount - $invoice->paid_amount, 0), 2);
+
+                //  Estado de la factura
+                $newStatus = $newBalance <= 0
+                    ? BillingStatus::PAID->value
+                    : ($invoice->paid_amount > 0
+                        ? BillingStatus::PARTIALLY_PAID->value
+                        : $invoice->billing_status_id);
 
                 $invoice->update([
                     'balance_due' => $newBalance,
-                    'billing_status_id' => BillingStatus::PAID->value,
+                    'billing_status_id' => $newStatus,
                 ]);
 
+                $remainingAmount -= $amountToPay;
                 $invoicesUpdated[] = $invoiceId;
             }
 
@@ -97,7 +112,7 @@ class PaymentService
                 $this->updateInternetAccessForPaidServices($payment->client_id);
             }
 
-            return $payment->load('invoices.discounts');
+            return $payment->load(['invoices', 'discount']);
         });
     }
 
@@ -113,7 +128,7 @@ class PaymentService
             return round($base * ($discount->percentage / 100), 2);
         }
 
-        return min($discount->amount, $base);
+        return round(min($discount->amount, $base), 2);
     }
 
     /***

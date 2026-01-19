@@ -24,7 +24,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $discount_id
+ * @property numeric|null $discount_amount
  * @property-read ClientModel $client
+ * @property-read \App\Models\Billing\DiscountModel|null $discount
+ * @property-read float $effective_amount
  * @property-read array $status
  * @property-read \App\Models\Billing\PaymentInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceModel> $invoices
@@ -40,6 +44,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereComments($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereDiscountAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereDiscountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel wherePaymentDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel wherePaymentMethodId($value)
@@ -67,12 +73,15 @@ class PaymentModel extends Model
         'user_id',
         'comments',
         'status_id',
+        'discount_id',
+        'discount_amount',
     ];
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected $casts = [
         'amount' => 'decimal:2',
         'payment_date' => 'date',
+        'discount_amount' => 'decimal:2',
     ];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected $appends = ['status'];
 
     public function invoices(): BelongsToMany
@@ -102,5 +111,15 @@ class PaymentModel extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function discount(): BelongsTo
+    {
+        return $this->belongsTo(DiscountModel::class, 'discount_id', 'id');
+    }
+
+    public function getEffectiveAmountAttribute(): float
+    {
+        return $this->amount + ($this->discount_amount ?? 0);
     }
 }

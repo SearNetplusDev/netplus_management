@@ -32,15 +32,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read ClientModel $client
- * @property-read \App\Models\Billing\PaymentInvoiceModel|\App\Models\Billing\InvoiceDiscountModel|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\DiscountModel> $discounts
- * @property-read int|null $discounts_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceExtensionModel> $extensions
  * @property-read int|null $extensions_count
  * @property-read StatusModel $financial_status
  * @property-read array $status
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceDetailModel> $items
  * @property-read int|null $items_count
+ * @property-read \App\Models\Billing\PaymentInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\PaymentModel> $payments
  * @property-read int|null $payments_count
  * @property-read \App\Models\Billing\PeriodModel $period
@@ -125,20 +123,6 @@ class InvoiceModel extends Model
     public function financial_status(): BelongsTo
     {
         return $this->belongsTo(StatusModel::class, 'billing_status_id', 'id');
-    }
-
-    public function discounts(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            DiscountModel::class,
-            'billing_invoice_discounts',
-            'invoice_id',
-            'discount_id',
-        )
-            ->using(InvoiceDiscountModel::class)
-            ->withPivot(['applied_amount'])
-            ->withTimestamps()
-            ->withTrashed();
     }
 
     public function extensions(): HasMany

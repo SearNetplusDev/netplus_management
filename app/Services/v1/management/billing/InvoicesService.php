@@ -27,8 +27,8 @@ class InvoicesService
                 'invoices' => fn($q) => $q->orderBy('id', 'desc'),
                 'invoices.financial_status',
                 'invoices.period',
-                'invoices.discounts',
                 'invoices.payments.payment_method',
+                'invoices.payments.discount'
             ])
             ->find($clientId);
     }

@@ -24,7 +24,7 @@ class PaymentController extends Controller
      */
     public function store(PaymentRequest $request, PaymentService $service): JsonResponse
     {
-        $ids = explode(',', $request->invoices);
+        $ids = array_map('intval', explode(',', $request->invoices));
         $dto = new PaymentDTO(
             client_id: $request->client,
             payment_method_id: $request->payment_method,
@@ -41,7 +41,6 @@ class PaymentController extends Controller
         return response()->json([
             'saved' => (bool)$payment,
             'payment' => new GeneralResource($payment),
-            'assigned_invoice_id' => $payment->invoice_id,
         ]);
     }
 }
