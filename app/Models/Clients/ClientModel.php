@@ -6,6 +6,7 @@ use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\ClientFinancialStatusModel;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\Options\DocumentTypeModel;
+use App\Models\Billing\PrepaymentModel;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Configuration\Clients\GenderModel;
@@ -64,6 +65,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property-read \App\Models\Clients\DocumentModel|null $passport
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Clients\DocumentModel> $personal_documents
  * @property-read int|null $personal_documents_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PrepaymentModel> $prepayments
+ * @property-read int|null $prepayments_count
  * @property-read \App\Models\Clients\DocumentModel|null $residence
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ServiceModel> $services
  * @property-read int|null $services_count
@@ -263,5 +266,17 @@ class ClientModel extends Model
     public function financial_status(): HasOne
     {
         return $this->hasOne(ClientFinancialStatusModel::class, 'client_id', 'id');
+    }
+
+    public function prepayments(): HasMany
+    {
+        return $this->hasMany(PrepaymentModel::class, 'client_id', 'id');
+    }
+
+    public function active_prepayment_balance(): float
+    {
+        return $this->prepayments()
+            ->where('status_id', CommonStatus::ACTIVE->value)
+            ->sum('remaining_amount');
     }
 }

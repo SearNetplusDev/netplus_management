@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property numeric $prepayment_balance
  * @property-read ClientModel $client
  * @property-read StatusModel $status
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel advancedFilter()
@@ -40,6 +41,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereOverdueInvoices($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel wherePaidInvoices($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel wherePendingInvoices($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel wherePrepaymentBalance($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereStatusId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereTotalInvoices($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel whereTotalPaidAmount($value)
@@ -60,6 +62,7 @@ class ClientFinancialStatusModel extends Model
         'current_balance',      //  Saldo de facturas que no sean pagadas
         'overdue_balance',      //  Saldo vencido
         'total_paid_amount',    //  Cantidad pagada
+        'prepayment_balance',   //  Cantidad abonada
         'total_invoices',       //  Facturas totales generadas
         'paid_invoices',        //  Facturas totales pagadas
         'pending_invoices',     //  Facturas pendientes
@@ -78,6 +81,7 @@ class ClientFinancialStatusModel extends Model
         'current_balance' => 'decimal:8',
         'overdue_balance' => 'decimal:8',
         'total_paid_amount' => 'decimal:8',
+        'prepayment_balance' => 'decimal:8',
         'total_invoices' => 'integer',
         'pending_invoices' => 'integer',
         'overdue_invoices' => 'integer',

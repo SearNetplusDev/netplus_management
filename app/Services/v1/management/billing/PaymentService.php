@@ -137,7 +137,7 @@ class PaymentService
      * @param int $clientId
      * @return void
      */
-    private function updateInternetAccessForPaidServices(int $clientId): void
+    public function updateInternetAccessForPaidServices(int $clientId): void
     {
         //  Obteniendo servicios activos del cliente
         $services = ServiceModel::query()
