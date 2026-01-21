@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Auth;
 
 class PrepaymentController extends Controller
 {
+    /***
+     * Registra abono
+     * @param PrepaymentRequest $request
+     * @param PrepaymentService $service
+     * @return JsonResponse
+     * @throws \Throwable
+     */
     public function store(PrepaymentRequest $request, PrepaymentService $service): JsonResponse
     {
         $dto = new PrepaymentDTO(
@@ -20,7 +27,7 @@ class PrepaymentController extends Controller
             payment_method_id: $request->payment_method,
             payment_date: $request->payment_date,
             user_id: Auth::user()->id,
-            reference_number: $request->reference_number,
+            reference_number: $request->reference,
             comments: $request->comments,
             status_id: $request->status,
         );

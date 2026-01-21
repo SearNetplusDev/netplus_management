@@ -8,6 +8,7 @@ use App\Http\Controllers\v1\management\billing\options\DocumentController;
 use App\Http\Controllers\v1\management\billing\options\PaymentMethodsController;
 use App\Http\Controllers\v1\management\billing\options\StatusesController;
 use App\Http\Controllers\v1\management\billing\PaymentController;
+use App\Http\Controllers\v1\management\billing\PrepaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/billing')
@@ -80,6 +81,11 @@ Route::prefix('v1/billing')
         //  Payments
         Route::group(['prefix' => 'payments'], function () {
             Route::post('/', [PaymentController::class, 'store']);
+        });
+
+        //  Prepayments
+        Route::group(['prefix' => 'prepayments'], function () {
+            Route::post('/', [PrepaymentController::class, 'store']);
         });
 
     });
