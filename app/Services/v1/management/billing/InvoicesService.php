@@ -239,14 +239,24 @@ class InvoicesService
         $invoices = InvoiceModel::query()
             ->with(['period', 'items.service'])
             ->where('client_id', $clientId)
-            ->whereIn('billing_status_id', [BillingStatus::OVERDUE->value, BillingStatus::PENDING->value])
+            ->whereIn('billing_status_id', [
+                BillingStatus::OVERDUE->value,
+                BillingStatus::PENDING->value,
+                BillingStatus::PARTIALLY_PAID->value,
+                BillingStatus::ISSUED->value
+            ])
             ->orderByRaw('CASE WHEN billing_status_id = ? THEN 0 ELSE 1 END', [BillingStatus::OVERDUE->value])
             ->orderBy('billing_period_id', 'ASC')
             ->get();
 
         return $invoices->map(function ($invoice) {
-            $status = $invoice->billing_status_id === BillingStatus::OVERDUE->value ? 'Vencida' : 'Pendiente';
-            $total = number_format($invoice->total_amount, 2);
+            $status = match ($invoice->billing_status_id) {
+                BillingStatus::OVERDUE->value => BillingStatus::OVERDUE->label(),
+                BillingStatus::PENDING->value => BillingStatus::PENDING->label(),
+                BillingStatus::PARTIALLY_PAID->value => BillingStatus::PARTIALLY_PAID->label(),
+                BillingStatus::ISSUED->value => BillingStatus::ISSUED->label(),
+            };
+            $total = number_format($invoice->balance_due, 2);
             $independent = $invoice->items[0]->service?->separate_billing;
 
             $address = (bool)$independent ? $invoice->items[0]->service?->address ?? '' : 'Servicios consolidados';

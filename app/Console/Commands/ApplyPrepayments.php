@@ -52,13 +52,14 @@ class ApplyPrepayments extends Command
             return self::SUCCESS;
         }
 
-        $this->info("Procesando {$clientsWithPrepayments->count()} clientes...}");
+        $this->info("Procesando {$clientsWithPrepayments->count()} clientes...");
 
         $stats = [
             'clients_processed' => 0,
             'total_invoices_paid' => 0,
             'total_amount_applied' => 0,
             'clients_with_errors' => 0,
+            'payments_created' => 0,
         ];
 
         $progressBar = $this->output->createProgressBar($clientsWithPrepayments->count());
@@ -75,6 +76,10 @@ class ApplyPrepayments extends Command
                 $stats['clients_processed']++;
                 $stats['total_invoices_paid'] += $result['invoices_paid'];
                 $stats['total_amount_applied'] += $result['total_applied'];
+
+                if (isset($result['payments_created'])) {
+                    $stats['payments_created'] += $result['payments_created'];
+                }
 
                 $this->logClientResult($clientData->client_id, $result, $isDryRun);
             } catch (\Throwable $e) {
@@ -205,7 +210,13 @@ class ApplyPrepayments extends Command
         $this->line("Facturas Pagadas: {$stats['total_invoices_paid']}");
         $this->line("Monto Total Aplicado: $" . number_format($stats['total_amount_applied'], 2, '.', ','));
 
-        if ($stats['clients_with_errors'] > 0) $this->error("Clientes con Errores: {$stats['clients_with_errors']}");
+        if (!$isDryRun && isset($stats['payments_created'])) {
+            $this->line("Pagos generados: {$stats['payments_created']}");
+        }
+
+        if ($stats['clients_with_errors'] > 0) {
+            $this->error("Clientes con Errores: {$stats['clients_with_errors']}");
+        }
         $this->info("=================================================================");
     }
 }

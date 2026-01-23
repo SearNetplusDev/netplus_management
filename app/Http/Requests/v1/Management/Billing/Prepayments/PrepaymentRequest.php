@@ -17,7 +17,7 @@ class PrepaymentRequest extends FormRequest
             'client' => 'required|integer|exists:clients,id',
             'amount' => 'required|decimal:2',
             'payment_method' => 'required|integer|exists:billing_payment_methods,id',
-            'payment_date' => 'required|date',
+//            'payment_date' => 'required|date',
             'reference' => 'nullable|string',
             'comments' => 'nullable|string',
             'status' => 'required|integer|in:0,1',
@@ -38,8 +38,8 @@ class PrepaymentRequest extends FormRequest
             'payment_method.integer' => 'Formato incorrecto para método.',
             'payment_method.exists' => 'El método seleccionado no existe.',
 
-            'payment_date.required' => 'Fecha del pago es requerido.',
-            'payment_date.date' => 'Formato incorrecto para la fecha del pago.',
+//            'payment_date.required' => 'Fecha del pago es requerido.',
+//            'payment_date.date' => 'Formato incorrecto para la fecha del pago.',
 
             'reference.string' => 'Formato incorrecto para número de referencia.',
 

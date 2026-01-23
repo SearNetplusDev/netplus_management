@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\Management\Billing\Prepayments\PrepaymentRequest;
 use App\Http\Resources\v1\management\general\GeneralResource;
 use App\Services\v1\management\billing\PrepaymentService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PrepaymentController extends Controller
@@ -25,7 +27,7 @@ class PrepaymentController extends Controller
             client_id: $request->client,
             amount: $request->amount,
             payment_method_id: $request->payment_method,
-            payment_date: $request->payment_date,
+            payment_date: Carbon::now(),
             user_id: Auth::user()->id,
             reference_number: $request->reference,
             comments: $request->comments,
@@ -36,6 +38,19 @@ class PrepaymentController extends Controller
         return response()->json([
             'saved' => (bool)$prepayment,
             'prepayment' => new GeneralResource($prepayment),
+        ]);
+    }
+
+    /***
+     * Obtiene listado de abonos de un cliente
+     * @param Request $request
+     * @param PrepaymentService $service
+     * @return JsonResponse
+     */
+    public function listByClient(Request $request, PrepaymentService $service): JsonResponse
+    {
+        return response()->json([
+            'list' => new GeneralResource($service->listByClient($request->client)),
         ]);
     }
 }

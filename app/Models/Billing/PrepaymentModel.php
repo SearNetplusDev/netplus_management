@@ -5,6 +5,7 @@ namespace App\Models\Billing;
 use App\Models\Billing\Options\PaymentMethodModel;
 use App\Models\Clients\ClientModel;
 use App\Models\User;
+use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\PrepaymentInvoiceModel> $applications
  * @property-read int|null $applications_count
  * @property-read ClientModel $client
+ * @property-read array $status
  * @property-read \App\Models\Billing\PrepaymentInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceModel> $invoices
  * @property-read int|null $invoices_count
@@ -56,7 +58,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class PrepaymentModel extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasStatusTrait;
 
     protected $connection = 'pgsql';
     protected $table = 'billing_prepayments';
@@ -78,6 +80,7 @@ class PrepaymentModel extends Model
         'remaining_amount' => 'decimal:2',
         'payment_date' => 'date',
     ];
+    protected $appends = ['status'];
 
     public function client(): BelongsTo
     {

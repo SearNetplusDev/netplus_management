@@ -2,13 +2,16 @@
 
 namespace App\Services\v1\management\billing;
 
+use App\DTOs\v1\management\billing\payments\PaymentDTO;
 use App\DTOs\v1\management\billing\prepayment\PrepaymentDTO;
 use App\Enums\v1\General\BillingStatus;
 use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\ClientFinancialStatusModel;
 use App\Models\Billing\InvoiceModel;
+use App\Models\Billing\PaymentModel;
 use App\Models\Billing\PrepaymentModel;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -101,6 +104,7 @@ class PrepaymentService
                 'invoices_paid' => 0,
                 'total_applied' => 0,
                 'prepayments_used' => 0,
+                'payments_created' => 0,
                 'details' => [],
             ];
 
@@ -109,6 +113,7 @@ class PrepaymentService
 
                 $invoiceBalance = round($invoice->balance_due, 2);
                 $appliedToInvoice = 0;
+                $prepaymentsUsedForInvoice = [];
 
                 foreach ($prepayments as $prepayment) {
                     if ($prepayment->remaining_amount <= 0) continue;
@@ -130,9 +135,47 @@ class PrepaymentService
                     $invoiceBalance -= $amountToApply;
                     $appliedToInvoice += $amountToApply;
 
+                    //  Guardar información del prepayment usado
+                    $prepaymentsUsedForInvoice[] = [
+                        'prepayment_id' => $prepayment->id,
+                        'prepayment_method_id' => $prepayment->payment_method_id,
+                        'reference_number' => $prepayment->reference_number,
+                        'amount' => $amountToApply,
+                    ];
+
                     $results['total_applied'] += $amountToApply;
 
                     if ($prepayment->remaining_amount <= 0) $results['prepayments_used']++;
+                }
+
+                //  Registrando pago
+                if ($appliedToInvoice > 0) {
+                    // Usar datos del primer abono aplicado
+                    $firstPrepayment = $prepaymentsUsedForInvoice[0];
+
+                    //  Generando referencias con los IDs de los abonos usados
+                    $prepaymentsIds = array_column($prepaymentsUsedForInvoice, 'prepayment_id');
+                    $referenceNumber = 'ABONO-' . implode('-', $prepaymentsIds) . '-FACTURA-' . $invoice->id;
+
+                    $paymentDTO = new PaymentDTO(
+                        client_id: $clientId,
+                        payment_method_id: $firstPrepayment['prepayment_method_id'],
+                        amount: $appliedToInvoice,
+                        payment_date: Carbon::now(),
+                        reference_number: $referenceNumber,
+                        user_id: 6,
+                        comments: 'Pago generado automáticamente desde abonos: ' . implode(', ', $prepaymentsIds),
+                        status_id: CommonStatus::ACTIVE->value,
+                    );
+
+                    $payment = PaymentModel::query()->create($paymentDTO->toArray());
+
+                    //  Asociando pagos con factura
+                    $payment->invoices()->attach($invoice->id, [
+                        'amount_applied' => $appliedToInvoice,
+                    ]);
+
+                    $results['payments_created']++;
                 }
 
                 //  Actualizar estado de la factura
@@ -155,6 +198,7 @@ class PrepaymentService
                     'amount_applied' => $appliedToInvoice,
                     'new_balance' => $newBalance,
                     'status' => $newStatus,
+                    'prepayments_used' => count($prepaymentsUsedForInvoice),
                 ];
             }
 
@@ -239,5 +283,19 @@ class PrepaymentService
 
             return $prepayment;
         });
+    }
+
+    /***
+     * Listado de abonos pertenecientes a un cliente
+     * @param int $clientId
+     * @return Collection
+     */
+    public function listByClient(int $clientId): Collection
+    {
+        return PrepaymentModel::query()
+            ->with(['payment_method', 'user'])
+            ->where('client_id', $clientId)
+            ->orderBy('id', 'desc')
+            ->get();
     }
 }
