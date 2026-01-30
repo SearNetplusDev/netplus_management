@@ -2,6 +2,8 @@
 
 namespace App\Models\Services;
 
+use App\Enums\v1\General\CommonStatus;
+use App\Models\Billing\PeriodModel;
 use App\Models\Clients\ClientModel;
 use App\Models\Configuration\Geography\DistrictModel;
 use App\Models\Configuration\Geography\MunicipalityModel;
@@ -57,6 +59,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read StateModel|null $state
  * @property-read TechnicianModel|null $technician
  * @property-read \App\Models\Services\ServiceUninstallationModel|null $uninstallation
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel activeOrUninstalledInPeriod(\App\Models\Billing\PeriodModel $period)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceModel newQuery()
@@ -196,5 +199,15 @@ class ServiceModel extends Model
     public function uninstallation(): HasOne
     {
         return $this->hasOne(ServiceUninstallationModel::class, 'service_id', 'id');
+    }
+
+    public function scopeActiveOrUninstalledInPeriod($query, PeriodModel $period)
+    {
+        return $query->where(function ($q) use ($period) {
+            $q->where('status_id', CommonStatus::ACTIVE->value)
+                ->orWhereHas('uninstallation', function ($q) use ($period) {
+                    $q->whereBetween('uninstallation_date', [$period->period_start, $period->period_end]);
+                });
+        });
     }
 }

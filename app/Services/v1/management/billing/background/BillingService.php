@@ -604,6 +604,7 @@ class BillingService
         return $profileName;
     }
 
+    
     private function createInvoice(
         ClientModel $client,
         PeriodModel $period,

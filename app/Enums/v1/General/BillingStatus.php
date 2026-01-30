@@ -19,7 +19,7 @@ enum BillingStatus: int
             self::PAID => 'Pagada',
             self::OVERDUE => 'Vencida',
             self::CANCELED => 'Anulada',
-            self::PARTIALLY_PAID => 'Parcialmente pagado',
+            self::PARTIALLY_PAID => 'Parcialmente pagada',
         };
     }
 }
