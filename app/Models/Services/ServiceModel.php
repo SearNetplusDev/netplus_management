@@ -2,7 +2,6 @@
 
 namespace App\Models\Services;
 
-use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\PeriodModel;
 use App\Models\Clients\ClientModel;
 use App\Models\Configuration\Geography\DistrictModel;
@@ -204,9 +203,17 @@ class ServiceModel extends Model
     public function scopeActiveOrUninstalledInPeriod($query, PeriodModel $period)
     {
         return $query->where(function ($q) use ($period) {
-            $q->where('status_id', CommonStatus::ACTIVE->value)
-                ->orWhereHas('uninstallation', function ($q) use ($period) {
-                    $q->whereBetween('uninstallation_date', [$period->period_start, $period->period_end]);
+            // Servicios activos (pueden o no tener desinstalación futura)
+            $q->where('status_id', true)
+                // O servicios inactivos que fueron desinstalados durante este período
+                ->orWhere(function ($subQ) use ($period) {
+                    $subQ->where('status_id', false)
+                        ->whereHas('uninstallation', function ($uninstQ) use ($period) {
+                            $uninstQ->whereBetween('uninstallation_date', [
+                                $period->period_start,
+                                $period->period_end
+                            ]);
+                        });
                 });
         });
     }

@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 class ItemCalculator
 {
-    /**
+    /***
      * Calcula los ítems de facturación para un servicio
      * @param ServiceModel $service
      * @param PeriodModel $period
@@ -31,7 +31,7 @@ class ItemCalculator
     }
 
     /***
-     * Calcula los items sin cambio de plan
+     * Calcula ítem cuando no hay cambio de plan
      * @param ServiceModel $service
      * @param PeriodModel $period
      * @return array
@@ -39,8 +39,9 @@ class ItemCalculator
     private function calculateSingleItem(ServiceModel $service, PeriodModel $period): array
     {
         $amount = $this->calculateServiceAmount($service, $period);
-
-        if ($amount <= 0) return [];
+        if ($amount <= 0) {
+            return [];
+        }
 
         $profile = $service->internet->profile ?? null;
         $netValue = $profile ? (float)$profile->net_value : 0;
@@ -58,7 +59,7 @@ class ItemCalculator
     }
 
     /***
-     * Calcula ítems con cambio de plan
+     * Calcula ítems cuando hay cambio de plan
      * @param ServiceModel $service
      * @param PeriodModel $period
      * @param Collection $planChanges
@@ -71,6 +72,29 @@ class ItemCalculator
     ): array
     {
         $items = [];
+
+        foreach ($this->splitPeriodByPlanChanges($service, $period, $planChanges) as $segment) {
+            $item = $this->createPlanChangeItem($service, $segment['profile'], $segment['start'], $segment['end']);
+
+            if ($item) $items[] = $item;
+        }
+        return $items;
+    }
+
+    /***
+     * Divide periodos según cambio de plan
+     * @param ServiceModel $service
+     * @param PeriodModel $period
+     * @param Collection $planChanges
+     * @return array
+     */
+    private function splitPeriodByPlanChanges(
+        ServiceModel $service,
+        PeriodModel  $period,
+        Collection   $planChanges
+    ): array
+    {
+        $segments = [];
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
         $currentDate = $periodStart->copy();
@@ -83,10 +107,16 @@ class ItemCalculator
             if ($currentDate->lt($changeDate)) {
                 $endDate = $changeDate->copy()->subDay();
 
-                if ($endDate->gt($periodEnd)) $endDate = $periodEnd;
+                if ($endDate->gt($periodEnd)) {
+                    $endDate = $periodEnd;
+                }
 
                 if ($currentDate->lte($endDate)) {
-                    $items[] = $this->createPlanChangeItem($service, $currentProfile, $currentDate, $endDate);
+                    $segments[] = [
+                        'profile' => $currentProfile,
+                        'start' => $currentDate->copy(),
+                        'end' => $endDate,
+                    ];
                 }
             }
             $currentDate = $changeDate;
@@ -94,14 +124,18 @@ class ItemCalculator
         }
 
         if ($currentDate->lte($periodEnd)) {
-            $items[] = $this->createPlanChangeItem($service, $currentProfile, $currentDate, $periodEnd);
+            $segments[] = [
+                'profile' => $currentProfile,
+                'start' => $currentDate,
+                'end' => $periodEnd,
+            ];
         }
 
-        return array_filter($items);
+        return $segments;
     }
 
     /***
-     * Crea un ítem para un segmento de tiempo específico
+     * Crea un ítem para un segmento con cambio de plan
      * @param ServiceModel $service
      * @param $profile
      * @param Carbon $startDate
@@ -115,25 +149,23 @@ class ItemCalculator
         Carbon       $endDate,
     ): ?array
     {
-        $profilePrice = $profile ? (float)$profile->net_value : 0;
-        $amount = $this->calculateProportionalAmount($startDate, $endDate, $profilePrice);
+        $netValue = $profile ? (float)$profile->net_value : 0;
+        $amount = $this->calculateProportionalAmount($startDate, $endDate, $netValue);
         $days = $startDate->diffInDays($endDate) + 1;
 
         if ($amount <= 0) return null;
 
-        $iva = $this->calculateIva($profilePrice, $amount);
-
         return [
             'service' => $service,
             'amount' => $amount,
-            'net_value' => $profilePrice,
-            'iva' => $iva,
-            'description' => $this->getPlanChangeDescription($profile, $startDate, $endDate, $days)
+            'net_value' => $netValue,
+            'iva' => $this->calculateIva($netValue, $amount),
+            'description' => $this->getPlanChangeDescription($profile, $startDate, $endDate, $days),
         ];
     }
 
     /***
-     * Obtiene cambios de plan durante un periodo
+     * Obtiene los cambios de plan durante un período
      * @param int $serviceId
      * @param Carbon $start
      * @param Carbon $end
@@ -158,11 +190,11 @@ class ItemCalculator
      */
     public function calculateProportionalAmount(Carbon $startDate, Carbon $endDate, float $monthlyPrice): float
     {
+        if ($monthlyPrice <= 0) return 0;
         $daysInMonth = $startDate->copy()->startOfMonth()->daysInMonth();
         $daysActive = $startDate->diffInDays($endDate) + 1;
-        $dailyRate = $monthlyPrice / $daysInMonth;
 
-        return round($dailyRate * $daysActive, 8);
+        return round(($monthlyPrice / $daysInMonth) * $daysActive, 8);
     }
 
     /***
@@ -174,9 +206,9 @@ class ItemCalculator
     public function calculateServiceAmount(ServiceModel $service, PeriodModel $period): float
     {
         $profile = $service->internet->profile ?? null;
-        if (!$profile || $profile->price <= 0) return 0;
+        if (!$profile || $profile->net_value <= 0) return 0;
 
-        $monthlyPrice = (float)$profile->net_value ?? 0;
+        $monthlyPrice = (float)$profile->net_value;
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
         $uninstallationDate = $this->getUninstallationDate($service, $period);
@@ -185,8 +217,11 @@ class ItemCalculator
             $installationDate = Carbon::parse($service->installation_date);
 
             if ($installationDate->gt($periodStart) && $installationDate->lte($periodEnd)) {
-                $endDate = $uninstallationDate ?? $periodEnd;
-                return $this->calculateProportionalAmount($installationDate, $endDate, $monthlyPrice);
+                return $this->calculateProportionalAmount(
+                    $installationDate,
+                    $uninstallationDate ?? $periodEnd,
+                    $monthlyPrice
+                );
             }
         }
 
@@ -196,14 +231,15 @@ class ItemCalculator
 
         $planChanges = $this->getPlanChanges($service->id, $periodStart, $periodEnd);
 
-        if ($planChanges->isNotEmpty())
+        if ($planChanges->isNotEmpty()) {
             return $this->calculateAmountWithPlanChanges($service, $period, $planChanges);
+        }
 
         return $monthlyPrice;
     }
 
     /***
-     * Calcula montos con cambio de plan
+     * Calcula monto total cuando hay cambios de plan
      * @param ServiceModel $service
      * @param PeriodModel $period
      * @param Collection $planChanges
@@ -215,40 +251,14 @@ class ItemCalculator
         Collection   $planChanges
     ): float
     {
-        $totalAmount = 0;
-        $periodStart = Carbon::parse($period->period_start);
-        $periodEnd = Carbon::parse($period->period_end);
-        $currentDate = $periodStart->copy();
+        $total = 0;
 
-        $firstChange = $planChanges->first();
-        $initialProfile = $firstChange->old_internet_profile ?? $service->internet->profile;
-        $currentProfilePrice = $initialProfile ? (float)$initialProfile->net_value : 0;
-
-        foreach ($planChanges as $change) {
-            $changeDate = Carbon::parse($change->change_date);
-
-            if ($currentDate->lt($changeDate)) {
-                $endDate = $changeDate->copy()->subDay();
-                if ($endDate->gt($periodEnd)) {
-                    $endDate = $periodEnd;
-                }
-
-                if ($currentDate->lte($endDate)) {
-                    $daysAmount = $this->calculateProportionalAmount($currentDate, $endDate, $currentProfilePrice);
-                    $totalAmount += $daysAmount;
-                }
-            }
-
-            $currentDate = $changeDate;
-            $currentProfilePrice = $change->new_internet_profile ? (float)$change->new_internet_profile->net_value : 0;
+        foreach ($this->splitPeriodByPlanChanges($service, $period, $planChanges) as $segment) {
+            $price = $segment['profile'] ? (float)$segment['profile']->net_value : 0;
+            $total += $this->calculateProportionalAmount($segment['start'], $segment['end'], $price);
         }
 
-        if ($currentDate->lte($periodEnd)) {
-            $daysAmount = $this->calculateProportionalAmount($currentDate, $periodEnd, $currentProfilePrice);
-            $totalAmount += $daysAmount;
-        }
-
-        return $totalAmount;
+        return $total;
     }
 
     /***
@@ -261,7 +271,6 @@ class ItemCalculator
     {
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
-
         $uninstallation = ServiceUninstallationModel::query()
             ->where('service_id', $service->id)
             ->whereBetween('uninstallation_date', [$periodStart, $periodEnd])
@@ -278,15 +287,12 @@ class ItemCalculator
      */
     public function calculateIva(float $netValue, float $amount): float
     {
-        if ($netValue <= 0) {
-            return 0;
-        }
-
+        if ($netValue <= 0) return 0;
         return round($amount * 0.13, 8);
     }
 
     /***
-     * Genera la descripción para un servicio normal
+     * Descripción para un servicio sin cambios
      * @param ServiceModel $service
      * @param PeriodModel $period
      * @return string
@@ -295,10 +301,8 @@ class ItemCalculator
     {
         $profile = $service->internet->profile ?? null;
         $profileName = $profile ? $profile->name : 'Servicio de internet';
-
         $periodStart = Carbon::parse($period->period_start);
         $periodEnd = Carbon::parse($period->period_end);
-
         $uninstallationDate = $this->getUninstallationDate($service, $period);
 
         if ($service->installation_date) {
@@ -307,24 +311,24 @@ class ItemCalculator
             if ($installationDate->gt($periodStart) && $installationDate->lte($periodEnd)) {
                 if ($uninstallationDate) {
                     $days = $installationDate->diffInDays($uninstallationDate) + 1;
-                    return "{$profileName} ({$days} días - del {$installationDate->format('d/m/Y')} al {$uninstallationDate->format('d/m/Y')})";
+                    return "$profileName ($days días - del {$installationDate->format('d/m/Y')} al {$uninstallationDate->format('d/m/Y')})";
                 }
 
                 $days = $installationDate->diffInDays($periodEnd) + 1;
-                return "{$profileName} ({$days} días de consumo - desde {$installationDate->format('d/m/Y')})";
+                return "$profileName ($days días de consumo - desde {$installationDate->format('d/m/Y')})";
             }
         }
 
         if ($uninstallationDate) {
             $days = $periodStart->diffInDays($uninstallationDate) + 1;
-            return "{$profileName} ({$days} días - del {$periodStart->format('d/m/Y')} hasta {$uninstallationDate->format('d/m/Y')})";
+            return "$profileName ($days días - del {$periodStart->format('d/m/Y')} hasta {$uninstallationDate->format('d/m/Y')})";
         }
 
         return $profileName;
     }
 
     /***
-     * Genera descripción para cambios de plan
+     * Descripción para ítems con cambios de plan
      * @param $profile
      * @param Carbon $startDate
      * @param Carbon $endDate
@@ -334,9 +338,13 @@ class ItemCalculator
     public function getPlanChangeDescription($profile, Carbon $startDate, Carbon $endDate, int $days): string
     {
         $profileName = $profile ? $profile->name : 'Servicio de internet';
-        $startFormatted = $startDate->format('d/m/Y');
-        $endFormatted = $endDate->format('d/m/Y');
 
-        return "{$profileName} ({$days} días - del {$startFormatted} al {$endFormatted})";
+        return sprintf(
+            '%s (%d días - del %s al %s)',
+            $profileName,
+            $days,
+            $startDate->format('d/m/Y'),
+            $endDate->format('d/m/Y')
+        );
     }
 }
