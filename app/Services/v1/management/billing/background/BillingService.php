@@ -67,9 +67,6 @@ class BillingService
      */
     private function processClientInvoices(ClientModel $client, PeriodModel $period, array &$results): void
     {
-//        $separateServices = $client->services->where('separate_billing', true);
-//        $consolidatedServices = $client->services->where('separate_billing', false);
-//
         $separateServices = $client->services->filter(function ($service) {
             return $service->separate_billing === true;
         });
@@ -199,7 +196,7 @@ class BillingService
      * @param PeriodModel $period
      * @return array
      */
-    private function getBillingStatistics(PeriodModel $period): array
+    public function getBillingStatistics(PeriodModel $period): array
     {
         $invoices = InvoiceModel::query()
             ->where('billing_period_id', $period->id)

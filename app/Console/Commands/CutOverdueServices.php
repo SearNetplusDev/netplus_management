@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\billing\CutOverdueServicesJob;
 use App\Services\v1\management\billing\background\OverdueServiceCutService;
 use Illuminate\Console\Command;
 
@@ -24,33 +25,17 @@ class CutOverdueServices extends Command
     /**
      * Execute the console command.
      */
-    public function handle(OverdueServiceCutService $service): int
+    public function handle(): int
     {
-        $this->info('Iniciando corte de servicios por morosidad.');
-        $this->newLine();
-
-        if ($this->option('dry-run')) {
+        $this->info('Despachando job para cortar los servicios de los clientes con facturas vencidas sin extensiones');
+        $dryRun = $this->option('dry-run');
+        if ($dryRun) {
             $this->warn('Modo simulación (dry-run)');
         }
 
-        $result = $service->cutOverdueClients();
+        CutOverdueServicesJob::dispatch($dryRun);
 
-        $this->table(
-            ['Métrica', 'Valor'],
-            [
-                ['Servicios Evaluados', $result['total']],
-                ['Servicios Cortados', $result['cut']],
-                ['Errores', count($result['errors'])],
-            ]
-        );
-
-        if (!empty($result['errors'])) {
-            $this->newLine();
-            $this->error('Errores encontrados');
-            foreach ($result['errors'] as $error) {
-                $this->error(": {$error}");
-            }
-        }
+        $this->info('Job enviado a la cola correctamente.');
 
         return Command::SUCCESS;
     }

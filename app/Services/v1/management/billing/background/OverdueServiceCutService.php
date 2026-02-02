@@ -10,6 +10,7 @@ use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
 use App\Services\v1\network\MikrotikInternetService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class OverdueServiceCutService
 {
@@ -19,12 +20,17 @@ class OverdueServiceCutService
     }
 
     /***
-     * Procesa el corte de los servicios morosos
-     * @return array
+     *  Procesa el corte de los servicios morosos
+     * @param bool $dryRun
+     * @return void
      */
-    public function cutOverdueClients(): array
+    public function cutOverdueClients(bool $dryRun = false): void
     {
-        $invoices = InvoiceModel::query()
+        Log::info('Iniciando corte de servicios morosos', [
+            'dry_run' => $dryRun,
+        ]);
+
+        InvoiceModel::query()
             ->with('client.active_services')
             ->where('billing_status_id', BillingStatus::OVERDUE->value)
             ->where('status_id', CommonStatus::ACTIVE->value)
@@ -32,27 +38,27 @@ class OverdueServiceCutService
                 $q->where('status_id', CommonStatus::ACTIVE->value)
                     ->whereDate('extended_due_date', '>=', now());
             })
-            ->get();
+            ->chunkById(50, function ($invoices) use ($dryRun) {
+                foreach ($invoices->groupBy('client_id') as $clientId => $clientInvoices) {
+                    $services = $clientInvoices->first()->client->active_services ?? collect();
 
-        $results = [
-            'total' => 0,
-            'cut' => 0,
-            'errors' => []
-        ];
-
-        foreach ($invoices->groupBy('client_id') as $clientId => $clientInvoices) {
-            foreach ($clientInvoices->first()->client->active_services as $service) {
-                try {
-                    $this->disableService($service);
-                    $results['cut']++;
-                } catch (\Throwable $e) {
-                    $results['errors'][] = "Cliente {$clientId}: {$e->getMessage()}";
+                    foreach ($services as $service) {
+                        try {
+                            if (!$dryRun) {
+                                $this->disableService($service);
+                            }
+                        } catch (\Throwable $e) {
+                            Log::error('Error cortando servicio por morosidad', [
+                                'client_id' => $clientId,
+                                'service_id' => $service->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
                 }
-                $results['total']++;
-            }
-        }
+            });
 
-        return $results;
+        Log::info('Finalizando corte de servicios morosos');
     }
 
     /***
@@ -66,6 +72,11 @@ class OverdueServiceCutService
     {
         $server = $this->getServerData($service->node_id)->toArray();
         $credentials = $this->getCredentials($service->id);
+
+        if (!$credentials) {
+            throw new \RuntimeException("Credenciales no encontradas para servicio {$service->id}");
+        }
+
         $this->mikrotikInternetService->updateUser($server, $credentials->user, [
             'profile' => $credentials->profile?->debt_profile
         ]);
