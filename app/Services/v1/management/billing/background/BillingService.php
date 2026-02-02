@@ -14,9 +14,12 @@ use App\Services\v1\management\billing\invoices\InvoiceDataCalculator;
 use App\Services\v1\management\billing\invoices\InvoiceValidator;
 use App\Services\v1\management\billing\invoices\ItemCalculator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BillingService
 {
+    private const CHUNK_SIZE = 50;
+
     public function __construct(
         private ClientSelector        $clientSelector,
         private InvoiceValidator      $invoiceValidator,
@@ -37,24 +40,59 @@ class BillingService
      */
     public function generateInvoicesForPeriod(PeriodModel $period, bool $allClients = false): array
     {
-        $clients = $this->clientSelector->getBillableClients($period, $allClients);
+        $query = $this->clientSelector->getBillableClientsQuery($period, $allClients);
+
         $results = [
             'generated' => 0,
             'errors' => [],
-            'total_clients' => $clients->count(),
+            'total_clients' => $query->count(),
+            'processed_chunks' => 0,
         ];
 
-        foreach ($clients as $client) {
-            try {
-                DB::transaction(function () use ($client, $period, &$results) {
-                    $this->processClientInvoices($client, $period, $results);
-                });
-            } catch (\Exception $e) {
-                $results['errors'][] = "Cliente {$client->id} : {$e->getMessage()}";
+//        $results['total_clients'] = $query->count();
+
+        Log::info("Iniciando generación de facturas para el periodo {$period->code}", [
+            'total_clients' => $results['total_clients'],
+            'chunk_size' => self::CHUNK_SIZE,
+        ]);
+
+        $query->chunkById(self::CHUNK_SIZE, function ($clients) use ($period, &$results) {
+            $results['processed_chunks']++;
+
+            Log::info("Procesando chunk #{$results['processed_chunks']}", [
+                'clients_in_chunk' => $clients->count(),
+            ]);
+
+            foreach ($clients as $client) {
+                $client->load([
+                    'services' => fn($q) => $q->activeOrUninstalledInPeriod($period)->with('internet.profile'),
+                    'client_type',
+                    'corporate_info'
+                ]);
+
+                try {
+                    DB::transaction(function () use ($client, $period, &$results) {
+                        $this->processClientInvoices($client, $period, $results);
+                    });
+
+                } catch (\Exception $e) {
+                    $results['errors'][] = "Cliente {$client->id}: {$e->getMessage()}";
+                    Log::error("Error procesando cliente {$client->id}", [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                }
             }
-        }
+
+            Log::info("Chunk #{$results['processed_chunks']} completado.", [
+                'facturas_generadas_hasta_ahora' => $results['generated'],
+            ]);
+        }, 'id');
+
+        Log::info("Generación de facturas completada.", $results);
 
         return $results;
+
     }
 
     /***
