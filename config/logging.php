@@ -89,7 +89,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
@@ -127,6 +127,29 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'invoices' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/invoices.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
+        'prepayments' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/prepayments.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
+        'cuts' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/cut_service.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
+        'reactivation' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/reactivate_service.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
     ],
 
 ];

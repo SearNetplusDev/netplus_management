@@ -25,7 +25,7 @@ class OverdueServiceCutService
      */
     public function cutOverdueClients(bool $dryRun = false): void
     {
-        Log::info('Iniciando corte de servicios morosos', [
+        Log::channel('cuts')->info('Iniciando corte de servicios morosos', [
             'dry_run' => $dryRun,
         ]);
 
@@ -47,7 +47,7 @@ class OverdueServiceCutService
                                 $this->disableService($service);
                             }
                         } catch (\Throwable $e) {
-                            Log::error('Error cortando servicio por morosidad', [
+                            Log::channel('cuts')->error('Error cortando servicio por morosidad', [
                                 'client_id' => $clientId,
                                 'service_id' => $service->id,
                                 'error' => $e->getMessage(),
@@ -57,7 +57,7 @@ class OverdueServiceCutService
                 }
             });
 
-        Log::info('Finalizando corte de servicios morosos');
+        Log::channel('cuts')->info('Finalizando corte de servicios morosos');
     }
 
     /***
@@ -73,7 +73,11 @@ class OverdueServiceCutService
         $credentials = $this->getCredentials($service->id);
 
         if (!$credentials) {
-            throw new \RuntimeException("Credenciales no encontradas para servicio {$service->id}");
+            Log::channel('cuts')
+                ->error("Credenciales no encontradas para servicio {$service->id}", [
+                    'pppoe_user' => $credentials->user ?? null,
+                    'pppoe_secret' => $credentials->secret ?? null,
+                ]);
         }
 
         $this->mikrotikInternetService->updateUser($server, $credentials->user, [

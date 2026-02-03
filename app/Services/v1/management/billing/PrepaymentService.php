@@ -13,7 +13,7 @@ use App\Models\Billing\PrepaymentModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class PrepaymentService
 {
@@ -71,9 +71,10 @@ class PrepaymentService
                 ->get();
 
             if ($prepayments->isEmpty()) {
-                throw ValidationException::withMessages([
-                    'prepayments' => 'No hay abonos disponibles para este cliente.',
-                ]);
+                Log::channel('prepayments')
+                    ->warning("No hay abonos disponibles para este cliente", [
+                        'client_id' => $clientId
+                    ]);
             }
 
             //  Obteniendo facturas a pagar
@@ -89,15 +90,33 @@ class PrepaymentService
 
             if ($invoiceIds) $invoicesQuery->whereIn('id', $invoiceIds);
 
-            $invoices = $invoicesQuery->orderByRaw('CASE WHEN billing_status_id = ? THEN 0 ELSE 1 END', [BillingStatus::OVERDUE->value])
+            $invoices = $invoicesQuery->orderByRaw('CASE WHEN billing_status_id = ? THEN 0 ELSE 1 END', [
+                BillingStatus::OVERDUE->value
+            ])
                 ->orderBy('billing_period_id', 'asc')
                 ->lockForUpdate()
                 ->get();
 
-            if ($invoices->isEmpty()) {
-                throw ValidationException::withMessages([
-                    'invoices' => 'No hay facturas pendientes para aplicar abonos.'
+            Log::channel('prepayments')
+                ->info("Facturas disponibles para aplicar abonos", [
+                    'client' => $clientId,
+                    'count' => $invoices->count(),
                 ]);
+
+            if ($invoices->isEmpty()) {
+                Log::channel('prepayments')
+                    ->warning("Cliente con saldo disponible, pero sin facturas pendientes", [
+                        'client_id' => $clientId
+                    ]);
+
+                return [
+                    'invoices_paid' => 0,
+                    'total_applied' => 0,
+                    'prepayments_used' => 0,
+                    'payments_created' => 0,
+                    'details' => [],
+                    'skipped' => true,
+                ];
             }
 
             $results = [
@@ -114,6 +133,8 @@ class PrepaymentService
                 $invoiceBalance = round($invoice->balance_due, 2);
                 $appliedToInvoice = 0;
                 $prepaymentsUsedForInvoice = [];
+
+                Log::channel('prepayments')->info("Se aplicó abono a la Factura: {$invoice->id}");
 
                 foreach ($prepayments as $prepayment) {
                     if ($prepayment->remaining_amount <= 0) continue;
@@ -272,9 +293,10 @@ class PrepaymentService
             $prepayment = PrepaymentModel::query()->findOrFail($prepaymentId);
 
             if ($prepayment->applications()->exists()) {
-                throw ValidationException::withMessages([
-                    'prepayment' => 'No se puede cancelar un abono que ya ha sido aplicado.',
-                ]);
+                Log::channel('prepayments')
+                    ->warning("No se puede cancelar un abono que ya ha sido aplicado", [
+                        'prepayment_id' => $prepaymentId
+                    ]);
             }
 
             $prepayment->update(['status_id' => CommonStatus::INACTIVE->value]);

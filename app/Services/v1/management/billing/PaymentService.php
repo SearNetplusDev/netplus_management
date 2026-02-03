@@ -247,9 +247,13 @@ class PaymentService
                 'disabled' => 'no'
             ]);
 
-            Log::info("Servicio de internet activado para el servicio {$service->id}, cliente: {$service->client_id}");
+            Log::channel('reactivation')
+                ->info("Servicio de internet activado para el servicio {$service->id}, cliente: {$service->client_id}", [
+                    'pppoe_user' => $service->internet?->user ?? null,
+                ]);
         } catch (\Throwable $e) {
-            Log::error("Error al activar la navegación para el servicio {$service->id}: {$e->getMessage()}");
+            Log::channel('reactivation')
+                ->error("Error al activar la navegación para el servicio {$service->id}: {$e->getMessage()}");
         }
     }
 
@@ -283,14 +287,15 @@ class PaymentService
                     'disabled' => 'no'
                 ]);
 
-                Log::info("Servicio {$service->id} cambiado a deuda");
+                Log::channel('cuts')->info("Servicio {$service->id} cambiado a deuda");
             } else {
                 $this->mikrotikInternetService->disableUser($server, $username);
-                Log::info("Servicio {$service->id} deshabilitado por deuda");
+                Log::channel('cuts')->info("Servicio {$service->id} deshabilitado por deuda");
             }
 
         } catch (\Throwable $e) {
-            Log::error("Error al desactivar la navegación para el servicio {$service->id}: " . $e->getMessage());
+            Log::channel('cuts')
+                ->error("Error al desactivar la navegación para el servicio {$service->id}: " . $e->getMessage());
         }
     }
 }

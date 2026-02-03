@@ -51,15 +51,16 @@ class BillingService
 
 //        $results['total_clients'] = $query->count();
 
-        Log::info("Iniciando generación de facturas para el periodo {$period->code}", [
-            'total_clients' => $results['total_clients'],
-            'chunk_size' => self::CHUNK_SIZE,
-        ]);
+        Log::channel('invoices')
+            ->info("Iniciando generación de facturas para el periodo {$period->code}", [
+                'total_clients' => $results['total_clients'],
+                'chunk_size' => self::CHUNK_SIZE,
+            ]);
 
         $query->chunkById(self::CHUNK_SIZE, function ($clients) use ($period, &$results) {
             $results['processed_chunks']++;
 
-            Log::info("Procesando chunk #{$results['processed_chunks']}", [
+            Log::channel('invoices')->info("Procesando chunk #{$results['processed_chunks']}", [
                 'clients_in_chunk' => $clients->count(),
             ]);
 
@@ -77,19 +78,19 @@ class BillingService
 
                 } catch (\Exception $e) {
                     $results['errors'][] = "Cliente {$client->id}: {$e->getMessage()}";
-                    Log::error("Error procesando cliente {$client->id}", [
+                    Log::channel('invoices')->error("Error procesando cliente {$client->id}", [
                         'error' => $e->getMessage(),
                         'trace' => $e->getTraceAsString(),
                     ]);
                 }
             }
 
-            Log::info("Chunk #{$results['processed_chunks']} completado.", [
+            Log::channel('invoices')->info("Chunk #{$results['processed_chunks']} completado.", [
                 'facturas_generadas_hasta_ahora' => $results['generated'],
             ]);
         }, 'id');
 
-        Log::info("Generación de facturas completada.", $results);
+        Log::channel('invoices')->info("Generación de facturas completada.", $results);
 
         return $results;
 
