@@ -3,10 +3,13 @@
 namespace App\Models\Services;
 
 use App\Models\Management\Profiles\InternetModel;
+use App\Observers\Services\ServicePlanChangeObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy([ServicePlanChangeObserver::class])]
 /**
  * @property int $id
  * @property int $service_id

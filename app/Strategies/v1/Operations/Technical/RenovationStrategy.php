@@ -40,7 +40,7 @@ class RenovationStrategy extends BaseSupportStrategy
             DB::transaction(function () use ($model, $params) {
                 $this->ensureExistingService($model);
                 $this->ensureServiceStatus($model);
-                $this->updateInternetProfile($model, $params);
+                $this->updateInternetProfile($params);
             });
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
@@ -52,19 +52,22 @@ class RenovationStrategy extends BaseSupportStrategy
     }
 
     /***
-     * @param SupportModel $model
      * @param array $params
      * @return void
      */
-    private function updateInternetProfile(SupportModel $model, array $params): void
+    private function updateInternetProfile(array $params): void
     {
         $service = ServiceModel::query()->findOrFail((int)$params['service']);
         $credentials = $this->getCredentials($service->id);
         $nodeChanged = $service->node_id !== (int)$params['node'];
         $profileChanged = $credentials->internet_profile_id !== (int)$params['profile'];
 
-        if ($nodeChanged) $this->changeNode($service, $credentials, $params);
-        if ($profileChanged) $this->changeProfile($credentials, $params);
+        if ($nodeChanged) {
+            $this->changeNode($service, $credentials, $params);
+        }
+        if ($profileChanged) {
+            $this->changeProfile($credentials, $params);
+        }
     }
 
     /***
@@ -105,16 +108,17 @@ class RenovationStrategy extends BaseSupportStrategy
     private function changeProfile(ServiceInternetModel $credentials, array $params): void
     {
         $node = $this->getNode((int)$params['node']);
+
         $server = $node->auth_server->toArray();
         $profile = $this->getProfile((int)$params['profile'])->toArray();
+
+        //  Almacenando registro para facturación
+        $this->registerChanges($credentials->service_id, $credentials->internet_profile_id, $params['profile']);
 
         //  Actualizando perfil en credenciales
         $credentials->update([
             'internet_profile_id' => (int)$params['profile'],
         ]);
-
-        //  Almacenando registro para facturación
-        $this->registerChanges($credentials->service_id, $credentials->internet_profile_id, $params['profile']);
 
         //  Actualizando perfil en Mikrotik
         $this->mikrotikInternetService->updateUser($server, $credentials->user, [

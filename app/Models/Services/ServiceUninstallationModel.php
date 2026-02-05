@@ -3,9 +3,12 @@
 namespace App\Models\Services;
 
 use App\Models\Management\Profiles\InternetModel;
+use App\Observers\Services\ServiceUninstallationObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ObservedBy([ServiceUninstallationObserver::class])]
 /**
  * @property int $id
  * @property int $service_id
