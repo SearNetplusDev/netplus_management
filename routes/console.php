@@ -1,11 +1,29 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::call(function () {
+    $period = now()->addMonth()->format('Ym');
 
-Schedule::command("billing:generate-periods")->yearlyOn(01, 20);
+    Artisan::call('billing:generate-invoices', [
+        'period' => $period,
+    ]);
+})
+    ->name('billing.generate.invoices.monthly')
+    ->monthlyOn(20, '01:00')
+    ->timezone('America/El_Salvador')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::command('billing:apply-prepayments')
+    ->monthlyOn(20, '03:00')
+    ->timezone('America/El_Salvador')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::command('billing:cut-overdue-invoices')
+    ->monthlyOn(10, '01:00')
+    ->timezone('America/El_Salvador')
+    ->withoutOverlapping()
+    ->onOneServer();
