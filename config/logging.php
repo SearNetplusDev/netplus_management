@@ -150,6 +150,12 @@ return [
             'path' => storage_path('logs/reactivate_service.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+
+        'import_clients' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/import_clients.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
     ],
 
 ];
