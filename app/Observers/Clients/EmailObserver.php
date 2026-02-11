@@ -18,7 +18,7 @@ class EmailObserver extends Conversion
             ->create([
                 'email_id' => $emailModel->id,
                 'client_id' => $emailModel->client_id,
-                'user_id' => Auth::user()->id,
+                'user_id' => Auth::user()->id ?? 6,
                 'action' => 'create',
                 'before' => null,
                 'after' => $this->convert($emailModel->getAttributes()),

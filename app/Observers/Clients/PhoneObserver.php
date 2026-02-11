@@ -18,7 +18,7 @@ class PhoneObserver extends Conversion
             ->create([
                 'phone_id' => $phoneModel->id,
                 'client_id' => $phoneModel->client_id,
-                'user_id' => Auth::user()->id,
+                'user_id' => Auth::user()->id ?? 6,
                 'action' => 'create',
                 'before' => null,
                 'after' => $this->convert($phoneModel->getAttributes()),

@@ -18,7 +18,7 @@ class FinancialInformationObserver extends Conversion
             ->create([
                 'finance_information_id' => $financialInformationModel->id,
                 'client_id' => $financialInformationModel->client_id,
-                'user_id' => Auth::user()->id,
+                'user_id' => Auth::user()->id ?? 6,
                 'action' => 'create',
                 'before' => null,
                 'after' => $this->convert($financialInformationModel->getAttributes()),

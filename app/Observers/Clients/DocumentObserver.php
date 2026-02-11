@@ -18,7 +18,7 @@ class DocumentObserver extends Conversion
             ->create([
                 'document_id' => $documentModel->id,
                 'client_id' => $documentModel->client_id,
-                'user_id' => Auth::id(),
+                'user_id' => Auth::id() ?? 6,
                 'action' => 'create',
                 'before' => null,
                 'after' => $this->convert($documentModel->getAttributes()),

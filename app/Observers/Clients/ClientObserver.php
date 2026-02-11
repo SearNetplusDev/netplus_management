@@ -16,7 +16,7 @@ class ClientObserver extends Conversion
     {
         ClientLogModel::query()->create([
             'client_id' => $clientModel->id,
-            'user_id' => Auth::user()->id,
+            'user_id' => Auth::user()->id ?? 6,
             'action' => 'create',
             'before' => null,
             'after' => $this->convert($clientModel->getAttributes()),

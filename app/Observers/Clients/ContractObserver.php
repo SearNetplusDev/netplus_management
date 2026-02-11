@@ -18,7 +18,7 @@ class ContractObserver extends Conversion
             ->create([
                 'contract_id' => $contractModel->id,
                 'client_id' => $contractModel->client_id,
-                'user_id' => Auth::user()->id,
+                'user_id' => Auth::user()->id ?? 6,
                 'action' => 'create',
                 'before' => null,
                 'after' => $this->convert($contractModel->getAttributes()),

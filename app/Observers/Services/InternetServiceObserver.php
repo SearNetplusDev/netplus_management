@@ -22,7 +22,7 @@ class InternetServiceObserver extends Conversion
                     ->create([
                         'internet_service_id' => $serviceInternetModel->id,
                         'service_id' => $serviceInternetModel->service_id,
-                        'user_id' => Auth::user()->id,
+                        'user_id' => Auth::user()->id ?? 6,
                         'action' => 'create',
                         'before' => null,
                         'after' => $this->convert($serviceInternetModel->getAttributes()),

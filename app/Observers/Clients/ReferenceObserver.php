@@ -18,7 +18,7 @@ class ReferenceObserver extends Conversion
             ->create([
                 'reference_id' => $referenceModel->id,
                 'client_id' => $referenceModel->client_id,
-                'user_id' => Auth::user()->id,
+                'user_id' => Auth::user()->id ?? 6,
                 'action' => 'create',
                 'before' => null,
                 'after' => $this->convert($referenceModel->getAttributes()),

@@ -3,13 +3,19 @@
 namespace App\Services\v1\imports;
 
 use App\Imports\ClientsImport;
+use App\Models\Clients\AddressModel;
 use App\Models\Clients\ClientModel;
 use App\Models\Clients\DocumentModel;
+use App\Models\Clients\PhoneModel;
+use App\Models\Clients\ReferenceModel;
+use App\Models\Services\ServiceInternetModel;
+use App\Models\Services\ServiceModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 class ImportClientsService
 {
@@ -21,8 +27,8 @@ class ImportClientsService
     protected int $technicianIdDefault = 1;
 
     /***
-     * Lee el archivo .xlsx y manda a procesar los datos.
-     * @return array
+     *  Lee el archivo .xlsx y manda a procesar los datos.
+     * @return void
      * @throws \Throwable
      */
     public function importClients(): void
@@ -111,7 +117,7 @@ class ImportClientsService
                 'surname' => $this->parsedName($nameParts['last_names']),
                 'gender_id' => 1,
                 'birthdate' => $this->getBirthDate($row['nit']),
-                'marital_status_id' => $row['civil_status'],
+                'marital_status_id' => $row['civil_status'] ?? 1,
                 'branch_id' => 1,
                 'client_type_id' => 1,
                 'profession' => 'Otro',
@@ -150,6 +156,133 @@ class ImportClientsService
                     'status_id' => true,
                 ]);
         }
+    }
+
+    /***
+     * Almacena la dirección del cliente.
+     * @param ClientModel $client
+     * @param Collection $row
+     * @return void
+     */
+    protected function createClientAddress(ClientModel $client, Collection $row): void
+    {
+        AddressModel::query()
+            ->create([
+                'client_id' => $client->id,
+                'neighborhood' => 'Caserío/Cantón/Barrio/Residencial/Colonia',
+                'address' => $this->parsedName($row['address']),
+                'state_id' => $row['state'],
+                'municipality_id' => $this->getMunicipalityId($row['district']),
+                'district_id' => $row['district'],
+                'country_id' => 59,
+                'status_id' => true,
+            ]);
+    }
+
+    /***
+     * Almacena el número de teléfono del cliente.
+     * @param ClientModel $client
+     * @param Collection $row
+     * @return void
+     */
+    private function createClientPhone(ClientModel $client, Collection $row): void
+    {
+        if (!empty($row['phone'])) {
+            PhoneModel::query()
+                ->create([
+                    'client_id' => $client->id,
+                    'phone_type_id' => $this->phoneTypeMobile,
+                    'number' => $row['phone'],
+                    'country_code' => 'SV',
+                    'status_id' => true,
+                ]);
+        }
+    }
+
+    /****
+     * Almacena las referencias de cada cliente.
+     * @param ClientModel $client
+     * @param Collection $row
+     * @return void
+     */
+    private function createClientReferences(ClientModel $client, Collection $row): void
+    {
+        ReferenceModel::query()
+            ->create([
+                'client_id' => $client->id,
+                'name' => $this->parsedName($row['reference_name'] ?? 'N/A'),
+                'dui' => $row['reference_dui'] ?? '00000000-0',
+                'mobile' => $row['reference_phone'] ?? '7000-0000',
+                'kinship_id' => $this->kinshipIdDefault,
+                'status_id' => true,
+            ]);
+    }
+
+    /***
+     * Crea servicio.
+     * @param ClientModel $client
+     * @param Collection $row
+     * @return void
+     */
+    protected function createService(ClientModel $client, Collection $row): void
+    {
+        $nodeName = strtolower($row['node']);
+        $node = match ($nodeName) {
+            'altomiro' => 1,
+            'san jacinto' => 2,
+            'jucuaran' => 3,
+            'chirilagua' => 4,
+            'conective' => 5,
+            'casitas' => 6,
+            'toledo' => 7,
+        };
+
+        $rawDate = $row['installation_date'];
+
+        if (is_numeric($rawDate)) {
+            $installationDate = Carbon::instance(ExcelDate::excelToDateTimeObject($rawDate));
+        } else {
+            $installationDate = Carbon::parse($rawDate);
+        }
+
+        $service = ServiceModel::query()
+            ->create([
+                'client_id' => $client->id,
+                'code' => null,
+                'name' => null,
+                'node_id' => $node,
+                'equipment_id' => 1,
+                'installation_date' => $installationDate->format('Y-m-d'),
+                'technician_id' => $this->technicianIdDefault,
+                'latitude' => 13.00000000,
+                'longitude' => -88.00000000,
+                'state_id' => $row['state'],
+                'municipality_id' => $this->getMunicipalityId($row['district']),
+                'district_id' => $row['district'],
+                'address' => $this->parsedName($row['address']),
+                'separate_billing' => true,
+                'status_id' => true,
+            ]);
+
+        $this->createInternetService($service, $row);
+    }
+
+    /***
+     * Almacena credenciales de internet y perfil contratado por servicio.
+     * @param ServiceModel $service
+     * @param Collection $row
+     * @return void
+     */
+    private function createInternetService(ServiceModel $service, Collection $row): void
+    {
+        ServiceInternetModel::query()
+            ->create([
+                'internet_profile_id' => 1,
+                'service_id' => $service->id,
+                'user' => $row['pppoe_user'],
+                'secret' => $row['pppoe_password'],
+                'status_id' => true,
+            ]);
     }
 
     /***

@@ -24,7 +24,7 @@ class ServiceObserver extends Conversion
                     ->create([
                         'service_id' => $serviceModel->id,
                         'client_id' => $serviceModel->client_id,
-                        'user_id' => Auth::user()->id,
+                        'user_id' => Auth::user()->id ?? 6,
                         'action' => 'create',
                         'before' => null,
                         'after' => $this->convert($serviceModel->getAttributes()),

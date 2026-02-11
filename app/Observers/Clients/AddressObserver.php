@@ -18,7 +18,7 @@ class AddressObserver extends Conversion
             ->create([
                 'address_id' => $addressModel->id,
                 'client_id' => $addressModel->client_id,
-                'user_id' => Auth::user()->id,
+                'user_id' => Auth::user()->id ?? 6,
                 'action' => 'create',
                 'before' => null,
                 'after' => $this->convert($addressModel->getAttributes()),
