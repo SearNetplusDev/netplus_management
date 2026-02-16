@@ -232,9 +232,9 @@ class ImportClientsService
             'san jacinto' => 2,
             'jucuaran' => 3,
             'chirilagua' => 4,
-            'conective' => 5,
-            'casitas' => 6,
-            'toledo' => 7,
+            'casitas' => 5,
+            'toledo' => 6,
+            'conective' => 7,
         };
 
         $rawDate = $row['installation_date'];

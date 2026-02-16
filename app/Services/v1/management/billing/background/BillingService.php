@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 
 class BillingService
 {
-    private const CHUNK_SIZE = 5;
+    private const CHUNK_SIZE = 50;
 
     public function __construct(
         private ClientSelector        $clientSelector,
