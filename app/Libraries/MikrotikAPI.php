@@ -15,7 +15,7 @@ use Throwable;
 
 class MikrotikAPI
 {
-    private const DEFAULT_PORT = 8728;
+    private const DEFAULT_PORT = 45000;
     private const TIMEOUT = 5;
     private const ATTEMPTS = 1;
     private ?Client $client = null;
