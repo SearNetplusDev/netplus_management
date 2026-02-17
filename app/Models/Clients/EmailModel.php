@@ -19,7 +19,7 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Clients\ClientModel|null $client
+ * @property-read \App\Models\Clients\ClientModel $client
  * @property-read array $status
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailModel newModelQuery()

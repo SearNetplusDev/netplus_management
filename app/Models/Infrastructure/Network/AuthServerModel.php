@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
+use Illuminate\Support\Facades\Crypt;
 
 /**
  * @property int $id
@@ -50,4 +51,32 @@ class AuthServerModel extends Model
     protected array $allowedFilters = ['id', 'name', 'ip', 'status_id'];
     protected array $orderable = ['id', 'name', 'ip', 'status_id'];
     protected $appends = ['status'];
+
+    public function setSecretAttribute($val)
+    {
+        if (!$val) return;
+
+        if ($this->exists && isset($this->attributes['secret'])) {
+            try {
+                $currentDecrypted = Crypt::decryptString($this->attributes['secret']);
+
+                if ($currentDecrypted === $val) return;
+
+            } catch (\Throwable $e) {
+            }
+        }
+
+        $this->attributes['secret'] = Crypt::encryptString($val);
+    }
+
+    public function getSecretAttribute($val)
+    {
+        if (!$val) return null;
+
+        try {
+            return Crypt::decryptString($val);
+        } catch (\Throwable $e) {
+            return $val;
+        }
+    }
 }

@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Clients\ClientModel|null $client
+ * @property-read \App\Models\Clients\ClientModel $client
  * @property-read DistrictModel|null $district
  * @property-read array $status
  * @property-read MunicipalityModel|null $municipality

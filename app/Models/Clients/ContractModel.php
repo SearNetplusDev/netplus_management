@@ -26,7 +26,7 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Clients\ClientModel|null $client
+ * @property-read \App\Models\Clients\ClientModel $client
  * @property-read ContractStateModel|null $contract_status
  * @property-read int|null $diff_days
  * @property-read array $status

@@ -24,7 +24,7 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property string|null $country_code
- * @property-read \App\Models\Clients\ClientModel|null $client
+ * @property-read \App\Models\Clients\ClientModel $client
  * @property-read CountryModel|null $country
  * @property-read array $status
  * @property-read PhoneTypeModel|null $phone_type
