@@ -17,6 +17,27 @@ class MikrotikInternetService
     }
 
     /***
+     * Obtiene PPPoe User
+     * @param array $server
+     * @param string $username
+     * @return array|null
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
+     * @throws \RouterOS\Exceptions\QueryException
+     */
+    public function getUser(array $server, string $username): ?array
+    {
+        $result = $this->mikrotikAPI->getPPPSecret(
+            $server['ip'],
+            $server['user'],
+            $server['secret'],
+            $username,
+        );
+
+        return $result[0] ?? null;
+    }
+
+    /***
      *  Create PPPoe Secrets
      * @param array $server
      * @param array $profile
@@ -180,4 +201,5 @@ class MikrotikInternetService
             ]);
         }
     }
+
 }

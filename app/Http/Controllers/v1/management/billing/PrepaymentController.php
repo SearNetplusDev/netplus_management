@@ -6,6 +6,7 @@ use App\DTOs\v1\management\billing\prepayment\PrepaymentDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\Management\Billing\Prepayments\PrepaymentRequest;
 use App\Http\Resources\v1\management\general\GeneralResource;
+use App\Models\Billing\PrepaymentModel;
 use App\Services\v1\management\billing\PrepaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -34,6 +35,42 @@ class PrepaymentController extends Controller
             status_id: $request->status,
         );
         $prepayment = $service->createPrepayment($dto);
+
+        return response()->json([
+            'saved' => (bool)$prepayment,
+            'prepayment' => new GeneralResource($prepayment),
+        ]);
+    }
+
+    /***
+     * Obtiene los datos de un abono.
+     * @param Request $request
+     * @param PrepaymentService $service
+     * @return JsonResponse
+     */
+    public function edit(Request $request, PrepaymentService $service): JsonResponse
+    {
+        return response()->json([
+            'prepayment' => new GeneralResource($service->prepaymentInfo($request->prepayment)),
+        ]);
+    }
+
+    /***
+     * Actualiza información de un abono.
+     * @param PrepaymentRequest $request
+     * @param PrepaymentModel $id
+     * @param PrepaymentService $service
+     * @return JsonResponse
+     */
+    public function update(PrepaymentRequest $request, PrepaymentModel $id, PrepaymentService $service): JsonResponse
+    {
+        $data = [
+            'amount' => $request->amount,
+            'payment_method_id' => $request->payment_method,
+            'status_id' => $request->status,
+            'comments' => $request->comments,
+        ];
+        $prepayment = $service->updatePrepayment($id, $data);
 
         return response()->json([
             'saved' => (bool)$prepayment,

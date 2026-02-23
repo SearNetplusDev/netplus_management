@@ -50,6 +50,35 @@ class PrepaymentService
     }
 
     /***
+     * Retorna datos de un abono.
+     * @param int $id
+     * @return PrepaymentModel
+     */
+    public function prepaymentInfo(int $id): PrepaymentModel
+    {
+        return PrepaymentModel::query()->findOrFail($id)->makeHidden('status');
+    }
+
+
+    /***
+     *    Actualiza cantidad, método de pago, comentario o estado de un abono
+     * @param PrepaymentModel $model
+     * @param array $data
+     * @return PrepaymentModel
+     */
+    public function updatePrepayment(PrepaymentModel $model, array $data): PrepaymentModel
+    {
+        $model->update([
+            'amount' => $data['amount'],
+            'payment_method_id' => $data['payment_method_id'],
+            'comments' => $data['comments'],
+            'status_id' => $data['status_id'],
+        ]);
+
+        return $model->refresh();
+    }
+
+    /***
      * Aplica abonos disponibles a facturas pendientes automáticamente
      * @param int $clientId
      * @param array|null $invoiceIds

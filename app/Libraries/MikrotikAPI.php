@@ -296,4 +296,27 @@ class MikrotikAPI
             return $client->query($queryDelete)->read();
         }, $port);
     }
+
+    /***
+     * Obtiene el PPP Secret por nombre
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $secretName
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     * @throws QueryException
+     */
+    public function getPPPSecret(
+        string $host,
+        string $user,
+        string $pass,
+        string $secretName,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->executeQuery($host, $user, $pass, '/ppp/secret/print', ['name' => $secretName], $port);
+    }
 }
