@@ -68,8 +68,20 @@ class PrepaymentService
      */
     public function updatePrepayment(PrepaymentModel $model, array $data): PrepaymentModel
     {
+        $totalApplied = $model->applications()->sum('amount_applied');
+        $newAmount = $data['amount'];
+
+        if ($totalApplied > 0 && $newAmount < $totalApplied) {
+            throw new \InvalidArgumentException(
+                "El nuevo monto ({$newAmount}) no puede ser menor al total aplicado a facturas ({$totalApplied})"
+            );
+        }
+
+        $newRemainingAmount = $newAmount - $totalApplied;
+
         $model->update([
-            'amount' => $data['amount'],
+            'amount' => $newAmount,
+            'remaining_amount' => $newRemainingAmount,
             'payment_method_id' => $data['payment_method_id'],
             'comments' => $data['comments'],
             'status_id' => $data['status_id'],

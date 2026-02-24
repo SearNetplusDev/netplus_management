@@ -64,18 +64,25 @@ class PrepaymentController extends Controller
      */
     public function update(PrepaymentRequest $request, PrepaymentModel $id, PrepaymentService $service): JsonResponse
     {
-        $data = [
-            'amount' => $request->amount,
-            'payment_method_id' => $request->payment_method,
-            'status_id' => $request->status,
-            'comments' => $request->comments,
-        ];
-        $prepayment = $service->updatePrepayment($id, $data);
+        try {
+            $data = [
+                'amount' => $request->amount,
+                'payment_method_id' => $request->payment_method,
+                'status_id' => $request->status,
+                'comments' => $request->comments,
+            ];
+            $prepayment = $service->updatePrepayment($id, $data);
 
-        return response()->json([
-            'saved' => (bool)$prepayment,
-            'prepayment' => new GeneralResource($prepayment),
-        ]);
+            return response()->json([
+                'saved' => (bool)$prepayment,
+                'prepayment' => new GeneralResource($prepayment),
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'saved' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     /***
