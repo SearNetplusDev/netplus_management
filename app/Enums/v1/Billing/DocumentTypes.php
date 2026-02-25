@@ -2,7 +2,18 @@
 
 namespace App\Enums\v1\Billing;
 
-use function Laravel\Prompts\select;
+use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
+use App\Strategies\v1\Accounting\DTE\ComprobanteDonacionStrategy;
+use App\Strategies\v1\Accounting\DTE\ComprobanteLiquidacionStrategy;
+use App\Strategies\v1\Accounting\DTE\ComprobanteRetencionStrategy;
+use App\Strategies\v1\Accounting\DTE\CreditoFiscalStrategy;
+use App\Strategies\v1\Accounting\DTE\DocumentoContableLiquidacionStrategy;
+use App\Strategies\v1\Accounting\DTE\FacturaExportacionStrategy;
+use App\Strategies\v1\Accounting\DTE\FacturaStrategy;
+use App\Strategies\v1\Accounting\DTE\FacturaSujetoExcluidoStrategy;
+use App\Strategies\v1\Accounting\DTE\NotaCreditoStrategy;
+use App\Strategies\v1\Accounting\DTE\NotaDebitoStrategy;
+use App\Strategies\v1\Accounting\DTE\NotaRemisionStrategy;
 
 enum DocumentTypes: int
 {
@@ -52,5 +63,27 @@ enum DocumentTypes: int
             self::COMPROBANTE_DONACION => '15',
             default => '00',
         };
+    }
+
+    public function strategyClass(): string
+    {
+        return match ($this) {
+            self::FACTURA => FacturaStrategy::class,
+            self::CREDITO_FISCAL => CreditoFiscalStrategy::class,
+            self::NOTA_REMISION => NotaRemisionStrategy::class,
+            self::NOTA_CREDITO => NotaCreditoStrategy::class,
+            self::NOTA_DEBITO => NotaDebitoStrategy::class,
+            self::COMPROBANTE_RETENCION => ComprobanteRetencionStrategy::class,
+            self::COMPROBANTE_LIQUIDACION => ComprobanteLiquidacionStrategy::class,
+            self::DOCUMENTO_CONTABLE_LIQUIDACION => DocumentoContableLiquidacionStrategy::class,
+            self::FACTURA_EXPORTACION => FacturaExportacionStrategy::class,
+            self::FACTURA_SUJETO_EXCLUIDO => FacturaSujetoExcluidoStrategy::class,
+            self::COMPROBANTE_DONACION => ComprobanteDonacionStrategy::class,
+        };
+    }
+
+    public function strategy(): DTEGeneratorInterface
+    {
+        return app($this->strategyClass());
     }
 }
