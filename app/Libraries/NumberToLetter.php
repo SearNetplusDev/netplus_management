@@ -11,7 +11,7 @@ class NumberToLetter
      * @param float $number
      * @return string
      */
-    public static function convert(float $number): string
+    public function convert(float $number): string
     {
         $formatter = new NumberFormatter('es', NumberFormatter::SPELLOUT);
         $integerPart = floor($number);
