@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\v1\accounting\DTE;
+namespace App\Services\v1\management\accounting\DTE;
 
 use App\Contexts\Accounting\DTEContext;
 use App\Enums\v1\Billing\DocumentTypes;
