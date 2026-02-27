@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\Accounting;
+namespace App\Libraries\Accounting\DTE;
 
 use App\Enums\v1\Billing\DocumentTypes;
 use Illuminate\Support\Carbon;

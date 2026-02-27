@@ -4,8 +4,8 @@ namespace App\Strategies\v1\Accounting\DTE;
 
 use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Enums\v1\Billing\DocumentTypes;
+use App\Libraries\Accounting\DTE\HeaderUtils;
 use App\Libraries\Accounting\DTE\IssuerUtils;
-use App\Libraries\Accounting\HeaderUtils;
 
 class FacturaStrategy implements DTEGeneratorInterface
 {
