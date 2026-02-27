@@ -10,6 +10,11 @@ use App\Libraries\NumberToLetter;
 
 class CreditoFiscalStrategy implements DTEGeneratorInterface
 {
+    /***
+     * @param HeaderUtils $header
+     * @param IssuerUtils $issuer
+     * @param NumberToLetter $numberToLetter
+     */
     public function __construct(
         private HeaderUtils    $header,
         private IssuerUtils    $issuer,
@@ -19,11 +24,21 @@ class CreditoFiscalStrategy implements DTEGeneratorInterface
 
     }
 
+    /***
+     * @param array $data
+     * @return array
+     * @throws \Random\RandomException
+     */
     public function generate(array $data): array
     {
         return $this->buildBody($data);
     }
 
+    /***
+     * @param array $data
+     * @return array
+     * @throws \Random\RandomException
+     */
     private function buildBody(array $data): array
     {
         return [
