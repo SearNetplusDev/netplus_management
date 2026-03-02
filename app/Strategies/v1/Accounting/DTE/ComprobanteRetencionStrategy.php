@@ -10,6 +10,11 @@ use App\Libraries\NumberToLetter;
 
 class ComprobanteRetencionStrategy implements DTEGeneratorInterface
 {
+    /***
+     * @param HeaderUtils $headerUtils
+     * @param IssuerUtils $issuerUtils
+     * @param NumberToLetter $numberToLetter
+     */
     public function __construct(
         private HeaderUtils    $headerUtils,
         private IssuerUtils    $issuerUtils,
@@ -19,11 +24,21 @@ class ComprobanteRetencionStrategy implements DTEGeneratorInterface
 
     }
 
+    /***
+     * @param array $data
+     * @return array
+     * @throws \Random\RandomException
+     */
     public function generate(array $data): array
     {
         return $this->buildBody($data);
     }
 
+    /***
+     * @param array $data
+     * @return array
+     * @throws \Random\RandomException
+     */
     private function buildBody(array $data): array
     {
         return [
