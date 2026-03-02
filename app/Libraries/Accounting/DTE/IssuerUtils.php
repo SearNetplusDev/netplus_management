@@ -10,7 +10,7 @@ class IssuerUtils
      */
     public function getNit(): string
     {
-        return '1217-020621-101-4';
+        return '12170206211014';
     }
 
     /***
