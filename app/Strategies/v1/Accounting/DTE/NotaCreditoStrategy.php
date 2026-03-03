@@ -96,7 +96,7 @@ class NotaCreditoStrategy implements DTEGeneratorInterface
                     'numItem' => 1,
                     'tipoItem' => 2,
                     'numeroDocumento' => 'DTE-03-NTPS2026-000000000000153',
-                    'cantidad' => 159.59,
+                    'cantidad' => 1,
                     'codigo' => null,
                     'codTributo' => null,
                     'uniMedida' => 99,
