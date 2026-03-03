@@ -9,6 +9,10 @@ use Carbon\Carbon;
 
 class AnulacionStrategy implements DTEGeneratorInterface
 {
+    /***
+     * @param HeaderUtils $headerUtils
+     * @param IssuerUtils $issuerUtils
+     */
     public function __construct(
         private HeaderUtils $headerUtils,
         private IssuerUtils $issuerUtils
@@ -17,18 +21,29 @@ class AnulacionStrategy implements DTEGeneratorInterface
 
     }
 
+    /***
+     * @param array $data
+     * @return array[]
+     * @throws \Random\RandomException
+     */
     public function generate(array $data): array
     {
         return $this->buildBody($data);
     }
 
+    /***
+     * @param array $data
+     * @return array[]
+     * @throws \Random\RandomException
+     */
     private function buildBody(array $data): array
     {
+        $genCode = $this->headerUtils->generationCode();
         return [
             'identificacion' => [
                 'version' => 2,
                 'ambiente' => '01',
-                'codigoGeneracion' => '',
+                'codigoGeneracion' => $genCode,
                 'fecAnula' => Carbon::today()->toDateString(),
                 'horAnula' => Carbon::now()->toTimeString(),
             ],
@@ -51,7 +66,7 @@ class AnulacionStrategy implements DTEGeneratorInterface
                 'numeroControl' => '',
                 'fecEmi' => '',
                 'montoIva' => 0,
-                'codigoGeneracionR' => $this->headerUtils->generationCode(),
+                'codigoGeneracionR' => $genCode,
                 'tipoDocumento' => '',  // 02. Carnet Residencia, 03. Pasaporte, 13. DUI, 36. NIT, 37. Otro
                 'numDocumento' => '',
                 'nombre' => 'John Doe',
