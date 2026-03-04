@@ -2,81 +2,21 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
-use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Libraries\Accounting\DTE\HeaderUtils;
-use App\Libraries\Accounting\DTE\IssuerUtils;
-use App\Libraries\NumberToLetter;
 
-class CreditoFiscalStrategy implements DTEGeneratorInterface
+class CreditoFiscalStrategy extends BaseDTEStrategy
 {
     /***
-     * @param HeaderUtils $header
-     * @param IssuerUtils $issuer
-     * @param NumberToLetter $numberToLetter
-     */
-    public function __construct(
-        private HeaderUtils    $header,
-        private IssuerUtils    $issuer,
-        private NumberToLetter $numberToLetter,
-    )
-    {
-
-    }
-
-    /***
      * @param array $data
      * @return array
      * @throws \Random\RandomException
      */
-    public function generate(array $data): array
-    {
-        return $this->buildBody($data);
-    }
-
-    /***
-     * @param array $data
-     * @return array
-     * @throws \Random\RandomException
-     */
-    private function buildBody(array $data): array
+    protected function buildBody(array $data): array
     {
         return [
-            'identificacion' => [
-                'version' => 3,
-                'ambiente' => '01',
-                'tipoDte' => DocumentTypes::CREDITO_FISCAL->code(),
-                'numeroControl' => $this->header->controlNumber(DocumentTypes::CREDITO_FISCAL),
-                'codigoGeneracion' => $this->header->generationCode(),
-                'tipoModelo' => 1,
-                'tipoOperacion' => 1,
-                'tipoContingencia' => null,
-                'motivoContin' => null,
-                'fecEmi' => $this->header->getDate(),
-                'horEmi' => $this->header->getHour(),
-                'tipoMoneda' => $this->header->getCurrency(),
-            ],
+            'identificacion' => $this->identificacion(DocumentTypes::CREDITO_FISCAL, 3),
             'documentoRelacionado' => null,
-            'emisor' => [
-                'nit' => $this->issuer->getNit(),
-                'nrc' => $this->issuer->getNrc(),
-                'nombre' => $this->issuer->getName(),
-                'codActividad' => $this->issuer->activityCode(),
-                'descActividad' => $this->issuer->activityName(),
-                'nombreComercial' => $this->issuer->getName(),
-                'tipoEstablecimiento' => '02',
-                'direccion' => [
-                    'departamento' => $this->issuer->getState(),
-                    'municipio' => $this->issuer->getMunicipality(),
-                    'complemento' => $this->issuer->getAddress(),
-                ],
-                'telefono' => $this->issuer->getPhoneNumber(),
-                'correo' => $this->issuer->getEmail(),
-                'codEstableMH' => null,
-                'codEstable' => null,
-                'codPuntoVentaMH' => null,
-                'codPuntoVenta' => null,
-            ],
+            'emisor' => $this->emisorBase(),
             'receptor' => [
                 'nit' => '036327737',
                 'nrc' => '12345678',

@@ -2,80 +2,20 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
-use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Libraries\Accounting\DTE\HeaderUtils;
-use App\Libraries\Accounting\DTE\IssuerUtils;
-use App\Libraries\NumberToLetter;
 
-class ComprobanteRetencionStrategy implements DTEGeneratorInterface
+class ComprobanteRetencionStrategy extends BaseDTEStrategy
 {
     /***
-     * @param HeaderUtils $headerUtils
-     * @param IssuerUtils $issuerUtils
-     * @param NumberToLetter $numberToLetter
-     */
-    public function __construct(
-        private HeaderUtils    $headerUtils,
-        private IssuerUtils    $issuerUtils,
-        private NumberToLetter $numberToLetter,
-    )
-    {
-
-    }
-
-    /***
      * @param array $data
      * @return array
      * @throws \Random\RandomException
      */
-    public function generate(array $data): array
-    {
-        return $this->buildBody($data);
-    }
-
-    /***
-     * @param array $data
-     * @return array
-     * @throws \Random\RandomException
-     */
-    private function buildBody(array $data): array
+    protected function buildBody(array $data): array
     {
         return [
-            'identificacion' => [
-                'version' => 1,
-                'ambiente' => '01',
-                'tipoDte' => DocumentTypes::COMPROBANTE_RETENCION->code(),
-                'numeroControl' => $this->headerUtils->controlNumber(DocumentTypes::COMPROBANTE_RETENCION),
-                'codigoGeneracion' => $this->headerUtils->generationCode(),
-                'tipoModelo' => 1,
-                'tipoOperacion' => 1,
-                'tipoContingencia' => null,
-                'motivoContin' => null,
-                'fecEmi' => $this->headerUtils->getDate(),
-                'horEmi' => $this->headerUtils->getHour(),
-                'tipoMoneda' => $this->headerUtils->getCurrency(),
-            ],
-            'emisor' => [
-                'nit' => $this->issuerUtils->getNit(),
-                'nrc' => $this->issuerUtils->getNrc(),
-                'nombre' => $this->issuerUtils->getName(),
-                'codActividad' => $this->issuerUtils->activityCode(),
-                'descActividad' => $this->issuerUtils->activityName(),
-                'nombreComercial' => $this->issuerUtils->getName(),
-                'tipoEstablecimiento' => '02',
-                'direccion' => [
-                    'departamento' => $this->issuerUtils->getState(),
-                    'municipio' => $this->issuerUtils->getMunicipality(),
-                    'complemento' => $this->issuerUtils->getAddress(),
-                ],
-                'telefono' => $this->issuerUtils->getPhoneNumber(),
-                'codigoMH' => null,
-                'codigo' => null,
-                'puntoVentaMH' => null,
-                'puntoVenta' => null,
-                'correo' => $this->issuerUtils->getEmail(),
-            ],
+            'identificacion' => $this->identificacion(DocumentTypes::COMPROBANTE_RETENCION),
+            'emisor' => $this->emisor(),
             'receptor' => [
                 'tipoDocumento' => '13',    //  36. NIT, 13. DUI, 37. Otro, 03. Pasaporte, 02. Carnet de residente
                 'numDocumento' => '000000002',
@@ -112,6 +52,16 @@ class ComprobanteRetencionStrategy implements DTEGeneratorInterface
             ],
             'extension' => null,
             'apendice' => null,
+        ];
+    }
+
+    protected function emisorFieldMap(): array
+    {
+        return [
+            'codEstableMH' => 'codigoMH',
+            'codEstable' => 'codigo',
+            'codPuntoVentaMH' => 'puntoVentaMH',
+            'codPuntoVenta' => 'puntoVenta',
         ];
     }
 }

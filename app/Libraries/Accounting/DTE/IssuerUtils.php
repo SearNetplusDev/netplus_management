@@ -82,7 +82,7 @@ class IssuerUtils
      */
     public function getPhoneNumber(): string
     {
-        return '7626-6022';
+        return '76266022';
     }
 
     /***

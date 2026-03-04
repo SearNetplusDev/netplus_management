@@ -5,7 +5,6 @@ namespace App\Strategies\v1\Accounting\DTE;
 use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Libraries\Accounting\DTE\HeaderUtils;
 use App\Libraries\Accounting\DTE\IssuerUtils;
-use Carbon\Carbon;
 
 class AnulacionStrategy implements DTEGeneratorInterface
 {
@@ -44,8 +43,8 @@ class AnulacionStrategy implements DTEGeneratorInterface
                 'version' => 2,
                 'ambiente' => '01',
                 'codigoGeneracion' => $genCode,
-                'fecAnula' => Carbon::today()->toDateString(),
-                'horAnula' => Carbon::now()->toTimeString(),
+                'fecAnula' => $this->headerUtils->getDate(),
+                'horAnula' => $this->headerUtils->getHour(),
             ],
             'emisor' => [
                 'nit' => $this->issuerUtils->getNit(),
