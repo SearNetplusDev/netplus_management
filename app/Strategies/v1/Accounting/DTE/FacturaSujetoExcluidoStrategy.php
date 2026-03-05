@@ -2,79 +2,64 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
-use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Libraries\Accounting\DTE\HeaderUtils;
-use App\Libraries\Accounting\DTE\IssuerUtils;
-use App\Libraries\NumberToLetter;
 
-class FacturaSujetoExcluidoStrategy implements DTEGeneratorInterface
+class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
 {
-
     /***
-     * @param HeaderUtils $header
-     * @param IssuerUtils $issuer
-     * @param NumberToLetter $numberToLetter
+     * @return true[]
      */
-    public function __construct(
-        private HeaderUtils    $header,
-        private IssuerUtils    $issuer,
-        private NumberToLetter $numberToLetter
-    )
-    {
-
-    }
-
-    /***
-     * @param array $data
-     * @return array
-     * @throws \Random\RandomException
-     */
-    public function generate(array $data): array
-    {
-        return $this->buildBody($data);
-    }
-
-    /***
-     * @param array $data
-     * @return array
-     * @throws \Random\RandomException
-     */
-    private function buildBody(array $data): array
+    protected function identificacionSchema(): array
     {
         return [
-            'identificacion' => [
-                'version' => 1,
-                'ambiente' => '01',
-                'tipoDte' => DocumentTypes::FACTURA_SUJETO_EXCLUIDO->code(),
-                'numeroControl' => $this->header->controlNumber(DocumentTypes::FACTURA_SUJETO_EXCLUIDO),
-                'codigoGeneracion' => $this->header->generationCode(),
-                'tipoModelo' => 1,
-                'tipoOperacion' => 1,
-                'tipoContingencia' => null,
-                'motivoContin' => null,
-                'fecEmi' => $this->header->getDate(),
-                'horEmi' => $this->header->getHour(),
-                'tipoMoneda' => $this->header->getCurrency(),
-            ],
-            'emisor' => [
-                'nit' => $this->issuer->getNit(),
-                'nrc' => $this->issuer->getNrc(),
-                'nombre' => $this->issuer->getName(),
-                'codActividad' => $this->issuer->activityCode(),
-                'descActividad' => $this->issuer->activityName(),
-                'direccion' => [
-                    'departamento' => $this->issuer->getState(),
-                    'municipio' => $this->issuer->getMunicipality(),
-                    'complemento' => $this->issuer->getAddress(),
-                ],
-                'telefono' => $this->issuer->getPhoneNumber(),
-                'codEstableMH' => null,
-                'codEstable' => null,
-                'codPuntoVentaMH' => null,
-                'codPuntoVenta' => null,
-                'correo' => $this->issuer->getEmail(),
-            ],
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'tipoContingencia' => true,
+            'motivoContin' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+        ];
+    }
+
+    /***
+     * @return array
+     */
+    protected function emisorSchema(): array
+    {
+        return [
+            'nit' => true,
+            'nrc' => true,
+            'nombre' => true,
+            'codActividad' => true,
+            'descActividad' => true,
+            'nombreComercial' => false,
+            'tipoEstablecimiento' => false,
+            'direccion' => true,
+            'telefono' => true,
+            'codEstableMH' => true,
+            'codEstable' => true,
+            'codPuntoVentaMH' => true,
+            'codPuntoVenta' => true,
+            'correo' => true,
+        ];
+    }
+
+    /***
+     * @param array $data
+     * @return array
+     * @throws \Random\RandomException
+     */
+    protected function buildBody(array $data): array
+    {
+        return [
+            'identificacion' => $this->identificacion(DocumentTypes::FACTURA_SUJETO_EXCLUIDO),
+            'emisor' => $this->emisor(),
             'sujetoExcluido' => [
                 'tipoDocumento' => '13',
                 'numDocumento' => '000000000',

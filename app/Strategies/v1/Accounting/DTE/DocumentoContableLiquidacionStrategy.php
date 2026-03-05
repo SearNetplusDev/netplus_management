@@ -2,77 +2,64 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
-use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Libraries\Accounting\DTE\HeaderUtils;
-use App\Libraries\Accounting\DTE\IssuerUtils;
-use App\Libraries\NumberToLetter;
 
-class DocumentoContableLiquidacionStrategy implements DTEGeneratorInterface
+class DocumentoContableLiquidacionStrategy extends BaseDTEStrategy
 {
     /***
-     * @param HeaderUtils $headerUtils
-     * @param IssuerUtils $issuerUtils
-     * @param NumberToLetter $numberToLetter
-     */
-    public function __construct(
-        private HeaderUtils    $headerUtils,
-        private IssuerUtils    $issuerUtils,
-        private NumberToLetter $numberToLetter,
-    )
-    {
-    }
-
-    /***
-     * @param array $data
      * @return array
-     * @throws \Random\RandomException
      */
-    public function generate(array $data): array
-    {
-        return $this->buildBody($data);
-    }
-
-    /***
-     * @param array $data
-     * @return array
-     * @throws \Random\RandomException
-     */
-    private function buildBody(array $data): array
+    protected function identificacionSchema(): array
     {
         return [
-            'identificacion' => [
-                'version' => 1,
-                'ambiente' => '01',
-                'tipoDte' => DocumentTypes::DOCUMENTO_CONTABLE_LIQUIDACION->code(),
-                'numeroControl' => $this->headerUtils->controlNumber(DocumentTypes::DOCUMENTO_CONTABLE_LIQUIDACION),
-                'codigoGeneracion' => $this->headerUtils->generationCode(),
-                'tipoModelo' => 1,
-                'tipoOperacion' => 1,
-                'fecEmi' => $this->headerUtils->getDate(),
-                'horEmi' => $this->headerUtils->getHour(),
-                'tipoMoneda' => $this->headerUtils->getCurrency(),
-            ],
-            'emisor' => [
-                'nit' => $this->issuerUtils->getNit(),
-                'nrc' => $this->issuerUtils->getNrc(),
-                'nombre' => $this->issuerUtils->getName(),
-                'codActividad' => $this->issuerUtils->activityCode(),
-                'descActividad' => $this->issuerUtils->activityName(),
-                'nombreComercial' => $this->issuerUtils->getName(),
-                'tipoEstablecimiento' => '02',
-                'telefono' => $this->issuerUtils->getPhoneNumber(),
-                'correo' => $this->issuerUtils->getEmail(),
-                'direccion' => [
-                    'departamento' => $this->issuerUtils->getState(),
-                    'municipio' => $this->issuerUtils->getMunicipality(),
-                    'complemento' => $this->issuerUtils->getAddress(),
-                ],
-                'codigoMH' => null,
-                'codigo' => null,
-                'puntoVentaMH' => null,
-                'puntoVentaContri' => null,
-            ],
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+            'tipoContingencia' => false,
+            'motivoContin' => false,
+        ];
+    }
+
+    /***
+     * @return array
+     */
+    protected function emisorSchema(): array
+    {
+        return [
+            'nit' => true,
+            'nrc' => true,
+            'nombre' => true,
+            'codActividad' => true,
+            'descActividad' => true,
+            'nombreComercial' => true,
+            'tipoEstablecimiento' => true,
+            'telefono' => true,
+            'correo' => true,
+            'direccion' => true,
+            'codEstableMH' => 'codigoMH',
+            'codEstable' => 'codigo',
+            'codPuntoVentaMH' => 'puntoVentaMH',
+            'codPuntoVenta' => 'puntoVentaContri',
+        ];
+    }
+
+    /***
+     * @param array $data
+     * @return array
+     * @throws \Random\RandomException
+     */
+    protected function buildBody(array $data): array
+    {
+        return [
+            'identificacion' => $this->identificacion(DocumentTypes::DOCUMENTO_CONTABLE_LIQUIDACION),
+            'emisor' => $this->emisor(),
             'receptor' => [
                 'nit' => '000000000',
                 'nrc' => '12345678',

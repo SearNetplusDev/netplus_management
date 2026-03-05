@@ -2,55 +2,53 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
-use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Libraries\Accounting\DTE\HeaderUtils;
-use App\Libraries\Accounting\DTE\IssuerUtils;
-use App\Libraries\NumberToLetter;
 
-class NotaCreditoStrategy implements DTEGeneratorInterface
+class NotaCreditoStrategy extends BaseDTEStrategy
 {
-    public function __construct(
-        private HeaderUtils    $headerUtils,
-        private IssuerUtils    $issuerUtils,
-        private NumberToLetter $numberToLetter,
-    )
-    {
-
-    }
-
     /***
-     * @param array $data
-     * @return array[]
-     * @throws \Random\RandomException
+     * @return true[]
      */
-    public function generate(array $data): array
-    {
-        return $this->buildBody($data);
-    }
-
-    /***
-     * @param array $data
-     * @return array[]
-     * @throws \Random\RandomException
-     */
-    private function buildBody(array $data): array
+    protected function identificacionSchema(): array
     {
         return [
-            'identificacion' => [
-                'version' => 3,
-                'ambiente' => '01',
-                'tipoDte' => DocumentTypes::NOTA_CREDITO->code(),
-                'numeroControl' => $this->headerUtils->controlNumber(DocumentTypes::NOTA_CREDITO),
-                'codigoGeneracion' => $this->headerUtils->generationCode(),
-                'tipoModelo' => 1,
-                'tipoOperacion' => 1,
-                'tipoContingencia' => null,
-                'motivoContin' => null,
-                'fecEmi' => $this->headerUtils->getDate(),
-                'horEmi' => $this->headerUtils->getHour(),
-                'tipoMoneda' => $this->headerUtils->getCurrency(),
-            ],
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'tipoContingencia' => true,
+            'motivoContin' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true
+        ];
+    }
+
+    /***
+     * @return false[]
+     */
+    protected function emisorSchema(): array
+    {
+        return [
+            'codEstableMH' => false,
+            'codEstable' => false,
+            'codPuntoVentaMH' => false,
+            'codPuntoVenta' => false,
+        ];
+    }
+
+    /***
+     * @param array $data
+     * @return array[]
+     * @throws \Random\RandomException
+     */
+    protected function buildBody(array $data): array
+    {
+        return [
+            'identificacion' => $this->identificacion(DocumentTypes::NOTA_CREDITO, 3),
             'documentoRelacionado' => [
                 [
                     'tipoDocumento' => '03',    // 03. Crédito fiscal, 07. Comprobante de retención.
@@ -59,22 +57,7 @@ class NotaCreditoStrategy implements DTEGeneratorInterface
                     'fechaEmision' => '2026-01-16',
                 ],
             ],
-            'emisor' => [
-                'nit' => $this->issuerUtils->getNit(),
-                'nrc' => $this->issuerUtils->getNrc(),
-                'nombre' => $this->issuerUtils->getName(),
-                'codActividad' => $this->issuerUtils->activityCode(),
-                'descActividad' => $this->issuerUtils->activityName(),
-                'nombreComercial' => $this->issuerUtils->getName(),
-                'tipoEstablecimiento' => '02',
-                'direccion' => [
-                    'departamento' => $this->issuerUtils->getState(),
-                    'municipio' => $this->issuerUtils->getMunicipality(),
-                    'complemento' => $this->issuerUtils->getAddress(),
-                ],
-                'telefono' => $this->issuerUtils->getPhoneNumber(),
-                'correo' => $this->issuerUtils->getEmail(),
-            ],
+            'emisor' => $this->emisor(),
             'receptor' => [
                 'nit' => '12031910901015',
                 'nrc' => '12345678',

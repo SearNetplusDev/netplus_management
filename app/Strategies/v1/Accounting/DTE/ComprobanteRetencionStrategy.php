@@ -7,6 +7,50 @@ use App\Enums\v1\Billing\DocumentTypes;
 class ComprobanteRetencionStrategy extends BaseDTEStrategy
 {
     /***
+     * @return true[]
+     */
+    protected function identificacionSchema(): array
+    {
+        return [
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'tipoContingencia' => true,
+            'motivoContin' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+        ];
+    }
+
+    /***
+     * @return array
+     */
+    protected function emisorSchema(): array
+    {
+        return [
+            'nit' => true,
+            'nrc' => true,
+            'nombre' => true,
+            'codActividad' => true,
+            'descActividad' => true,
+            'nombreComercial' => true,
+            'tipoEstablecimiento' => true,
+            'direccion' => true,
+            'telefono' => true,
+            'codEstableMH' => 'codigoMH',
+            'codEstable' => 'codigo',
+            'codPuntoVentaMH' => 'puntoVentaMH',
+            'codPuntoVenta' => 'puntoVenta',
+            'correo' => true,
+        ];
+    }
+
+    /***
      * @param array $data
      * @return array
      * @throws \Random\RandomException

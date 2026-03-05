@@ -7,6 +7,27 @@ use App\Enums\v1\Billing\DocumentTypes;
 class ComprobanteLiquidacionStrategy extends BaseDTEStrategy
 {
     /***
+     * @return array
+     */
+    protected function identificacionSchema(): array
+    {
+        return [
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'tipoContingencia' => false,
+            'motivoContin' => false,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+        ];
+    }
+
+    /***
      * @param array $data
      * @return array
      * @throws \Random\RandomException

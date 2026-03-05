@@ -42,7 +42,15 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     /***
      * @return array
      */
-    protected function emisorFieldMap(): array
+    protected function identificacionSchema(): array
+    {
+        return [];
+    }
+
+    /***
+     * @return array
+     */
+    protected function emisorSchema(): array
     {
         return [];
     }
@@ -57,9 +65,9 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
      */
     protected function identificacion(DocumentTypes $type, int $version = 1): array
     {
-        return [
+        $base = [
             'version' => $version,
-            'ambiente' => '00',
+            'ambiente' => $this->headerUtils->ambient(),
             'tipoDte' => $type->code(),
             'numeroControl' => $this->headerUtils->controlNumber($type),
             'codigoGeneracion' => $this->headerUtils->generationCode(),
@@ -71,6 +79,7 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
             'tipoContingencia' => null,
             'motivoContin' => null,
         ];
+        return $this->applyFieldSchema($base, $this->identificacionSchema());
     }
 
     /***
@@ -101,27 +110,51 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
         ];
     }
 
+    /***
+     * @return array
+     */
     protected function emisor(): array
     {
-        return $this->mapFields($this->emisorBase(), $this->emisorFieldMap());
+        return $this->applyFieldSchema($this->emisorBase(), $this->emisorSchema());
     }
 
     /***
-     * Mapeo dinámico para reemplazar campos en Emisor.
-     * @param array $data
-     * @param array $map
+     * Motor de Schemas
+     * - true => incluir con el nombre original
+     * - false => excluir
+     * - 'nuevoNombre' => incluir renombrado
+     * - (ausente) => incluir con nombre original
+     * @param array $base
+     * @param array $schema
      * @return array
      */
-    protected function mapFields(array $data, array $map): array
+    protected function applyFieldSchema(array $base, array $schema): array
     {
-        $newData = [];
-        foreach ($data as $key => $value) {
-            if (isset($map[$key])) {
-                $newData[$map[$key]] = $value;
-            } else {
-                $newData[$key] = $value;
+        if (empty($schema)) {
+            return $base;
+        }
+
+        $result = [];
+
+        foreach ($schema as $originalKey => $rule) {
+            if ($rule === false) {
+                continue;
+            }
+            if (!array_key_exists($originalKey, $base)) {
+                continue;
+            }
+            $result[is_string($rule) ? $rule : $originalKey] = $base[$originalKey];
+        }
+
+        foreach ($base as $key => $value) {
+            $inResult = array_key_exists($key, $result);
+            $renamedTo = is_string($schema[$key] ?? null) ? $schema[$key] : null;
+            $inResult = $inResult || ($renamedTo && array_key_exists($renamedTo, $result));
+
+            if (!$inResult && ($schema[$key] ?? true) !== false) {
+                $result[$key] = $value;
             }
         }
-        return $newData;
+        return $result;
     }
 }

@@ -13,7 +13,7 @@ class HeaderUtils
      */
     public function ambient(): string
     {
-        return '01';
+        return '00';
     }
 
     /***

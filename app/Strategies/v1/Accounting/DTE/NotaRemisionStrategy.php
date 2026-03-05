@@ -2,55 +2,40 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
-use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Libraries\Accounting\DTE\HeaderUtils;
-use App\Libraries\Accounting\DTE\IssuerUtils;
-use App\Libraries\NumberToLetter;
 
-class NotaRemisionStrategy implements DTEGeneratorInterface
+class NotaRemisionStrategy extends BaseDTEStrategy
 {
-    public function __construct(
-        private HeaderUtils    $headerUtils,
-        private IssuerUtils    $issuerUtils,
-        private NumberToLetter $numberToLetter,
-    )
-    {
-
-    }
-
     /***
-     * @param array $data
-     * @return array[]
-     * @throws \Random\RandomException
+     * @return true[]
      */
-    public function generate(array $data): array
-    {
-        return $this->buildBody($data);
-    }
-
-    /***
-     * @param array $data
-     * @return array[]
-     * @throws \Random\RandomException
-     */
-    private function buildBody(array $data): array
+    protected function identificacionSchema(): array
     {
         return [
-            'identificacion' => [
-                'version' => 3,
-                'ambiente' => '01',
-                'tipoDte' => DocumentTypes::NOTA_REMISION->code(),
-                'numeroControl' => $this->headerUtils->controlNumber(DocumentTypes::NOTA_REMISION),
-                'codigoGeneracion' => $this->headerUtils->generationCode(),
-                'tipoModelo' => 1,
-                'tipoOperacion' => 1,
-                'tipoContingencia' => null,
-                'motivoContin' => null,
-                'fecEmi' => $this->headerUtils->getDate(),
-                'horEmi' => $this->headerUtils->getHour(),
-                'tipoMoneda' => $this->headerUtils->getCurrency(),
-            ],
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'tipoContingencia' => true,
+            'motivoContin' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+        ];
+    }
+
+    /***
+     * @param array $data
+     * @return array[]
+     * @throws \Random\RandomException
+     */
+    protected function buildBody(array $data): array
+    {
+        return [
+            'identificacion' => $this->identificacion(DocumentTypes::NOTA_REMISION, 3),
             'documentoRelacionado' => [
                 [
                     'tipoDocumento' => '03',    // 01. Factura de consumidor final, 03. Crédito fiscal
@@ -59,26 +44,7 @@ class NotaRemisionStrategy implements DTEGeneratorInterface
                     'fechaEmision' => '2026-01-16',
                 ],
             ],
-            'emisor' => [
-                'nit' => $this->issuerUtils->getNit(),
-                'nrc' => $this->issuerUtils->getNrc(),
-                'nombre' => $this->issuerUtils->getName(),
-                'codActividad' => $this->issuerUtils->activityCode(),
-                'descActividad' => $this->issuerUtils->activityName(),
-                'nombreComercial' => $this->issuerUtils->getName(),
-                'tipoEstablecimiento' => '02',
-                'direccion' => [
-                    'departamento' => $this->issuerUtils->getState(),
-                    'municipio' => $this->issuerUtils->getMunicipality(),
-                    'complemento' => $this->issuerUtils->getAddress(),
-                ],
-                'telefono' => $this->issuerUtils->getPhoneNumber(),
-                'correo' => $this->issuerUtils->getEmail(),
-                'codEstableMH' => null,
-                'codEstable' => null,
-                'codPuntoVentaMH' => null,
-                'codPuntoVenta' => null,
-            ],
+            'emisor' => $this->emisor(),
             'receptor' => [
                 'tipoDocumento' => '13',
                 'numDocumento' => '123456789',

@@ -7,16 +7,62 @@ use App\Enums\v1\Billing\DocumentTypes;
 class ComprobanteDonacionStrategy extends BaseDTEStrategy
 {
     /***
+     * @return array
+     */
+    protected function identificacionSchema(): array
+    {
+        return [
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+            'tipoContingencia' => false,
+            'motivoContin' => false,
+        ];
+    }
+
+    /***
      * @param array $data
      * @return array
      * @throws \Random\RandomException
      */
     protected function buildBody(array $data): array
     {
+        $donante = $this->applyFieldSchema(
+            array_merge(
+                ['tipoDocumento' => '36', 'numDocumento' => $this->issuerUtils->getNit()],
+                array_slice($this->emisorBase(), 1)
+            ),
+            [
+                'tipoDocumento' => true,
+                'numDocumento' => true,
+                'nrc' => true,
+                'nombre' => true,
+                'codActividad' => true,
+                'descActividad' => true,
+                'nombreComercial' => true,
+                'tipoEstablecimiento' => true,
+                'direccion' => true,
+                'telefono' => true,
+                'correo' => true,
+                'codEstableMH' => true,
+                'codEstable' => true,
+                'codPuntoVentaMH' => true,
+                'codPuntoVenta' => true,
+                'nit' => false,
+            ]
+        );
+
         return [
             'identificacion' => $this->identificacion(DocumentTypes::COMPROBANTE_DONACION),
-            'donante' => $this->donante(),
-            'donatario' => [
+            'donatario' => $donante,
+            'donante' => [
                 'tipoDocumento' => '13',
                 'numDocumento' => '000000000',
                 'nrc' => '00000000',

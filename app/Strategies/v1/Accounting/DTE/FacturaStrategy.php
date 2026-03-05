@@ -7,6 +7,27 @@ use App\Enums\v1\Billing\DocumentTypes;
 class FacturaStrategy extends BaseDTEStrategy
 {
     /***
+     * @return true[]
+     */
+    protected function identificacionSchema(): array
+    {
+        return [
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+            'tipoContingencia' => true,
+            'motivoContin' => true,
+        ];
+    }
+
+    /***
      * @param array $data
      * @return array
      * @throws \Random\RandomException

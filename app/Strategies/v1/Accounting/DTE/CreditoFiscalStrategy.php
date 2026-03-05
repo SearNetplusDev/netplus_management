@@ -7,6 +7,27 @@ use App\Enums\v1\Billing\DocumentTypes;
 class CreditoFiscalStrategy extends BaseDTEStrategy
 {
     /***
+     * @return true[]
+     */
+    protected function identificacionSchema(): array
+    {
+        return [
+            'version' => true,
+            'ambiente' => true,
+            'tipoDte' => true,
+            'numeroControl' => true,
+            'codigoGeneracion' => true,
+            'tipoModelo' => true,
+            'tipoOperacion' => true,
+            'tipoContingencia' => true,
+            'motivoContin' => true,
+            'fecEmi' => true,
+            'horEmi' => true,
+            'tipoMoneda' => true,
+        ];
+    }
+
+    /***
      * @param array $data
      * @return array
      * @throws \Random\RandomException
@@ -49,7 +70,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
                     'ventaNoSuj' => 0,
                     'ventaExenta' => 0,
                     'ventaGravada' => 40.70796460,
-                    'tributos' => ["20"],
+                    'tributos' => ['20'],
                     'psv' => 0,
                     'noGravado' => 0,
                 ],
