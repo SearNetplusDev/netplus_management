@@ -43,4 +43,19 @@ class PaymentController extends Controller
             'payment' => new GeneralResource($payment),
         ]);
     }
+
+    /***
+     * Retorna el listado de pagos realizados por un cliente.
+     * @param Request $request
+     * @param PaymentService $service
+     * @return JsonResponse
+     */
+    public function paymentList(Request $request, PaymentService $service): JsonResponse
+    {
+        $list = $service->clientPayments($request->client);
+
+        return response()->json([
+            'list' => new GeneralResource($list)
+        ]);
+    }
 }

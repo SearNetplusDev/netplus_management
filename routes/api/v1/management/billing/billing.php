@@ -81,6 +81,7 @@ Route::prefix('v1/billing')
         //  Payments
         Route::group(['prefix' => 'payments'], function () {
             Route::post('/', [PaymentController::class, 'store']);
+            Route::post('list', [PaymentController::class, 'paymentList']);
         });
 
         //  Prepayments

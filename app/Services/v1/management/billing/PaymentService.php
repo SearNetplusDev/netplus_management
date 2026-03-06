@@ -298,4 +298,17 @@ class PaymentService
                 ->error("Error al desactivar la navegación para el servicio {$service->id}: " . $e->getMessage());
         }
     }
+
+    /***
+     * Retorna el listado de pagos de un cliente.
+     * @param int $clientId
+     * @return Collection
+     */
+    public function clientPayments(int $clientId): Collection
+    {
+        return PaymentModel::query()
+            ->with(['user', 'payment_method', 'discount'])
+            ->where(['client_id' => $clientId])
+            ->get();
+    }
 }

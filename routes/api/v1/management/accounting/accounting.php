@@ -9,6 +9,6 @@ Route::prefix('v1/accounting')
 
         //  DTEs
         Route::group(['prefix' => 'dte'], function () {
-            Route::post('create/{documentId}/{paymentId?}', [DTEController::class, 'store']);
+            Route::post('create/{documentId}', [DTEController::class, 'store']);
         });
     });
