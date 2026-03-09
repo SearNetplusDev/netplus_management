@@ -3,6 +3,7 @@
 namespace App\Strategies\v1\Accounting\DTE;
 
 use App\Enums\v1\Billing\DocumentTypes;
+use App\Models\Billing\PaymentModel;
 
 class FacturaStrategy extends BaseDTEStrategy
 {
@@ -34,99 +35,140 @@ class FacturaStrategy extends BaseDTEStrategy
      */
     protected function buildBody(array $data): array
     {
+        $query = PaymentModel::query()
+            ->with([
+                'invoices.items',
+                'invoices.period',
+                'client.dui.document_type',
+                'client.nit.document_type',
+                'client.address',
+                'client.mobile',
+                'client.email',
+            ])
+            ->where([
+                ['id', $data['payment_id']],
+                ['status_id', true],
+            ])
+            ->firstOrFail();
+
+        [$body, $gravado, $iva] = $this->buildDocumentBody($query->invoices);
+
         return [
             'identificacion' => $this->identificacion(DocumentTypes::FACTURA),
             'documentoRelacionado' => null,
             'emisor' => $this->emisor(),
-            'receptor' => [
-                'tipoDocumento' => 13,
-                'numDocumento' => '012564193',
-                'nrc' => null,
-                'nombre' => 'John Doe',
-                'codActividad' => null,
-                'descActividad' => null,
-                'direccion' => [
-                    'departamento' => 12,
-                    'municipio' => 22,
-                    'complemento' => 'Col. Ciudad Pacifíca.',
-                ],
-                'telefono' => null,
-                'correo' => null,
-            ],
+            'receptor' => $this->buildReceptor($query->client),
             'otrosDocumentos' => null,
             'ventaTercero' => null,
-            'cuerpoDocumento' => [
-                [
-                    'numItem' => 1,
+            'cuerpoDocumento' => $body,
+            'resumen' => $this->buildResumen($gravado, $iva),
+        ];
+    }
+
+    /***
+     * Crea contenido del apartado receptor
+     * @param $client
+     * @return array
+     */
+    private function buildReceptor($client): array
+    {
+        $document = $client->dui ?? $client->nit;
+        return [
+            'tipoDocumento' => $document?->document_type?->code,
+            'numDocumento' => $this->parseNumber($document->number ?? null),
+            'nrc' => null,
+            'nombre' => "{$client->name} {$client->surname}",
+            'codActividad' => null,
+            'descActividad' => null,
+            'direccion' => [
+                'departamento' => $client->address?->state_id,
+                'municipio' => $client->address?->municipality_id,
+                'complemento' => $client->address?->address,
+            ],
+            'telefono' => $this->phoneFormatter($client->mobile->number ?? null),
+            'correo' => $client->email?->email,
+        ];
+    }
+
+    /***
+     * Construye el apartado cuerpoDocumento.
+     * @param $invoices
+     * @return array
+     */
+    private function buildDocumentBody($invoices): array
+    {
+        $numItem = 1;
+        $gravado = 0;
+        $iva = 0;
+        $body = [];
+
+        foreach ($invoices as $invoice) {
+            $period = $invoice->period->name;
+
+            foreach ($invoice->items as $item) {
+                $body[] = [
+                    'numItem' => $numItem++,
                     'tipoItem' => 2,
                     'numeroDocumento' => null,
-                    'cantidad' => 1,
+                    'cantidad' => $item->quantity ?? 1,
                     'codigo' => null,
                     'codTributo' => null,
                     'uniMedida' => 99,
-                    'descripcion' => '35 Mbps + 2 EQM - Enero 2026',
-                    'precioUni' => 40.00,
+                    'descripcion' => "{$item->description} ({$period})",
+                    'precioUni' => $this->round2($item->total),
                     'montoDescu' => 0,
                     'ventaNoSuj' => 0,
                     'ventaExenta' => 0,
-                    'ventaGravada' => 40.00,
+                    'ventaGravada' => $this->round2($item->total),
                     'tributos' => null,
                     'psv' => 0,
                     'noGravado' => 0,
-                    'ivaItem' => 4.60,
-                ],
-                [
-                    'numItem' => 2,
-                    'tipoItem' => 2,
-                    'numeroDocumento' => null,
-                    'cantidad' => 1,
-                    'codigo' => null,
-                    'codTributo' => null,
-                    'uniMedida' => 99,
-                    'descripcion' => '35 Mbps + 2 EQM - Febrero 2026',
-                    'precioUni' => 40.00,
-                    'montoDescu' => 0,
-                    'ventaNoSuj' => 0,
-                    'ventaExenta' => 0,
-                    'ventaGravada' => 40.00,
-                    'tributos' => null,
-                    'psv' => 0,
-                    'noGravado' => 0,
-                    'ivaItem' => 4.60,
-                ],
+                    'ivaItem' => $this->round2($item->iva),
+                ];
+                $gravado += $item->total;
+                $iva += $item->iva;
+            }
+        }
+        return [array_map(fn($i) => $i, $body), $this->round2($gravado), $this->round2($iva)];
+    }
+
+    /***
+     * Construye elementos del apartado resumen.
+     * @param float $gravado
+     * @param float $iva
+     * @return array
+     */
+    private function buildResumen(float $gravado, float $iva): array
+    {
+        return [
+            'totalNoSuj' => 0,
+            'totalExenta' => 0,
+            'totalGravada' => $gravado,
+            'subTotalVentas' => $gravado,
+            'descuNoSuj' => 0,
+            'descuExenta' => 0,
+            'descuGravada' => 0,
+            'porcentajeDescuento' => 0,
+            'totalDescu' => 0,
+            'tributos' => [],
+            'subTotal' => $gravado,
+            'ivaRete1' => 0,
+            'reteRenta' => 0,
+            'montoTotalOperacion' => $gravado,
+            'totalNoGravado' => 0,
+            'totalPagar' => $gravado,
+            'totalLetras' => $this->numberToLetter->convert($gravado),
+            'totalIva' => $iva,
+            'saldoFavor' => 0,
+            'condicionOperacion' => 1,
+            'pagos' => [
+                'codigo' => '01',
+                'montoPago' => $gravado,
+                'referencia' => null,
+                'plazo' => null,
+                'periodo' => null,
             ],
-            'resumen' => [
-                'totalNoSuj' => 0,
-                'totalExenta' => 0,
-                'totalGravada' => 80.00,
-                'subTotalVentas' => 80.00,
-                'descuNoSuj' => 0,
-                'descuExenta' => 0,
-                'descuGravada' => 0,
-                'porcentajeDescuento' => 0,
-                'totalDescu' => 0,
-                'tributos' => [],
-                'subTotal' => 80.00,
-                'ivaRete1' => 0,
-                'reteRenta' => 0,
-                'montoTotalOperacion' => 80.00,
-                'totalNoGravado' => 0,
-                'totalPagar' => 80.00,
-                'totalLetras' => $this->numberToLetter->convert(80.00),
-                'totalIva' => 9.20,
-                'saldoFavor' => 0,
-                'condicionOperacion' => 1,
-                'pagos' => [
-                    'codigo' => '01',
-                    'montoPago' => 80.00,
-                    'referencia' => null,
-                    'plazo' => null,
-                    'periodo' => null,
-                ],
-                'numPagoElectronico' => null,
-            ],
-            'extension' => null,
-            'apendice' => null,
+            'numPagoElectronico' => null,
         ];
     }
 }

@@ -157,4 +157,40 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
         }
         return $result;
     }
+
+    /***
+     * Remueve guiones de una cadena de texto.
+     * @param string $number
+     * @return string
+     */
+    protected function parseNumber(string $number): string
+    {
+        return str_replace('-', '', $number);
+    }
+
+    /***
+     * Formatea números de telefono a formato aceptado por hacienda
+     * @param string $phone
+     * @return string|null
+     */
+    protected function phoneFormatter(string $phone): ?string
+    {
+        $clear = str_replace(['-', ' '], '', $phone);
+
+        if (strlen($clear) === 8) {
+            return $clear;
+        }
+
+        return null;
+    }
+
+    /***
+     * Redondea a 2 decimales los números
+     * @param float|int $number
+     * @return float
+     */
+    protected function round2(float|int $number): float
+    {
+        return round((float)$number, 2);
+    }
 }

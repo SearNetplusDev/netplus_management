@@ -13,10 +13,8 @@ class DTEController extends Controller
     {
     }
 
-    public function store(Request $request, int $documentId, ?int $paymentId = null): JsonResponse
+    public function store(Request $request, int $documentId): JsonResponse
     {
-        $request->merge(['payment_id' => $paymentId]);
-
         return response()->json(
             $this->dteService->generate($documentId, $request->all()),
         );
