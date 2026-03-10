@@ -277,7 +277,7 @@ class ImportClientsService
     {
         ServiceInternetModel::query()
             ->create([
-                'internet_profile_id' => 1,
+                'internet_profile_id' => mt_rand(1, 32),
                 'service_id' => $service->id,
                 'user' => $row['pppoe_user'],
                 'secret' => $row['pppoe_password'],

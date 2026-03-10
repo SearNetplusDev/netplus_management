@@ -37,10 +37,10 @@ class BillingController extends Controller
             'branch' => fn($q, $data) => $q->whereIn('branch_id', $data),
             'type' => fn($q, $data) => $q->whereIn('client_type_id', $data),
             'state' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
-                return $q->where('state_id', $data);
+                return $q->whereIn('state_id', $data);
             }),
             'district' => fn($q, $data) => $q->whereHas('address', function ($q) use ($data) {
-                return $q->where('district_id', $data);
+                return $q->whereIn('district_id', $data);
             }),
             'financial_status' => fn($q, $data) => $q->whereHas('financial_status', function ($q) use ($data) {
                 return $q->whereIn('status_id', $data);

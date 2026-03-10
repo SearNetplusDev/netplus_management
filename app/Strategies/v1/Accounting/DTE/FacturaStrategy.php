@@ -125,8 +125,8 @@ class FacturaStrategy extends BaseDTEStrategy
                     'noGravado' => 0,
                     'ivaItem' => $this->round2($item->iva),
                 ];
-                $gravado += $item->total;
-                $iva += $item->iva;
+                $gravado += $this->round2($item->total);
+                $iva += $this->round2($item->iva);
             }
         }
         return [array_map(fn($i) => $i, $body), $this->round2($gravado), $this->round2($iva)];
@@ -158,7 +158,7 @@ class FacturaStrategy extends BaseDTEStrategy
             'totalNoGravado' => 0,
             'totalPagar' => $gravado,
             'totalLetras' => $this->numberToLetter->convert($gravado),
-            'totalIva' => $iva,
+            'totalIva' => $this->round2($iva),
             'saldoFavor' => 0,
             'condicionOperacion' => 1,
             'pagos' => [

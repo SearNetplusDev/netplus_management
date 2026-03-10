@@ -9,11 +9,8 @@ trait DataViewer
     public function scopeAdvancedFilter($query)
     {
         $request = request();
-        $processedQuery = $this->process($query, $request->all())
-            ->orderBy(
-                $request->input('order_column', 'created_at'),
-                $request->input('order_direction', 'desc'),
-            );
+        $processedQuery = $this->process($query, $request->all());
+
         return $request->boolean('no_limit')
             ? $processedQuery->get()
             : $processedQuery->paginate($request->input('limit', 10));

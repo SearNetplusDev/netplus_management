@@ -30,7 +30,7 @@ class DataViewerService
 
                 $data = json_decode($filter['data'], true);
 
-                if (!is_array($data)) continue;
+                if (!is_array($data) || empty($data)) continue;
 
                 if (isset($filterColumns[$filter['column']])) {
                     $filterColumns[$filter['column']] ($query, $data);
@@ -38,19 +38,13 @@ class DataViewerService
             }
         }
 
-        $orderColumn = $request->input('order_by', $defaultOrderColumn);
+        $orderColumn = $request->input('order_column', $defaultOrderColumn);
         $orderDirection = $request->input('order_direction', $defaultOrderDirection);
-
         $orderDirection = in_array(strtolower($orderDirection), ['asc', 'desc']) ? strtolower($orderDirection) : 'desc';
+        $query->orderBy($orderColumn, $orderDirection);
+        $result = $query->advancedFilter();
 
-        if ($orderDirection === 'desc') {
-            $query->orderByDesc($orderColumn);
-        } else {
-            $query->orderBy($orderColumn);
-        }
-        $query = $query->advancedFilter();
-
-        return response()->json(['collection' => $query]);
+        return response()->json(['collection' => $result]);
     }
 
 }
