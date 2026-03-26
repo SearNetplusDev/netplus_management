@@ -46,7 +46,7 @@ class FacturaStrategy extends BaseDTEStrategy
                 'client.email',
             ])
             ->where([
-                ['id', $data['payment_id']],
+                ['id', $data['payment']],
                 ['status_id', true],
             ])
             ->firstOrFail();
