@@ -70,12 +70,16 @@ class FacturaStrategy extends BaseDTEStrategy
                 'client.address',
                 'client.mobile',
                 'client.email',
+                'client.corporate_info'
             ])
             ->where('id', $paymentId)
             ->where('status_id', true)
             ->firstOrFail();
 
-        [$body, $gravado, $iva] = $this->buildBodyFromInvoices($payment->invoices);
+        $retainedIva = (bool)($payment->client->corporate_info?->retained_iva ?? false);
+        $paymentDiscount = $this->round2((float)$payment->discount_amount ?? 0);
+
+        [$body, $gravado] = $this->buildBodyFromInvoices($payment->invoices);
 
         return [
             'identificacion' => $this->identificacion(DocumentTypes::FACTURA),
@@ -85,7 +89,13 @@ class FacturaStrategy extends BaseDTEStrategy
             'otrosDocumentos' => null,
             'ventaTercero' => null,
             'cuerpoDocumento' => $body,
-            'resumen' => $this->buildResumen($gravado, $iva, 1, 1),
+            'resumen' => $this->buildResumen(
+                gravado: $gravado,
+                retainedIva: $retainedIva,
+                discount: $paymentDiscount,
+                condition: 1,
+                method: 1
+            ),
         ];
     }
 
@@ -99,7 +109,6 @@ class FacturaStrategy extends BaseDTEStrategy
     {
         $numItem = 1;
         $gravado = 0;
-        $iva = 0;
         $body = [];
 
         foreach ($invoices as $invoice) {
@@ -130,11 +139,10 @@ class FacturaStrategy extends BaseDTEStrategy
                 ];
 
                 $gravado += $lineTotal;
-                $iva += $lineIva;
             }
         }
 
-        return [$body, $this->round2($gravado), $this->round2($iva)];
+        return [$body, $this->round2($gravado)];
     }
 
     /***
@@ -155,10 +163,14 @@ class FacturaStrategy extends BaseDTEStrategy
                 'address',
                 'mobile',
                 'email',
+                'corporate_info',
             ])
             ->findOrFail($data['client_id']);
 
-        [$body, $gravado, $iva] = $this->buildFromItems($data['items']);
+        $retainedIva = (bool)($client->corporate_info?->retained_iva ?? false);
+        $manualDiscount = $this->round2((float)($data['totals']['discount'] ?? 0));
+
+        [$body, $gravado] = $this->buildFromItems($data['items']);
 
         return [
             'identificacion' => $this->identificacion(DocumentTypes::FACTURA),
@@ -168,7 +180,13 @@ class FacturaStrategy extends BaseDTEStrategy
             'otrosDocumentos' => null,
             'ventaTercero' => null,
             'cuerpoDocumento' => $body,
-            'resumen' => $this->buildResumen($gravado, $iva, (int)$data['payment_condition'], (int)$data['payment_method']),
+            'resumen' => $this->buildResumen(
+                gravado: $gravado,
+                retainedIva: $retainedIva,
+                discount: $manualDiscount,
+                condition: (int)$data['payment_condition'],
+                method: (int)$data['payment_method']
+            ),
         ];
     }
 
@@ -242,14 +260,30 @@ class FacturaStrategy extends BaseDTEStrategy
     }
 
     /***
-     * Construye elementos del apartado resumen a partir de los totales calculados.
+     *  Construye elementos del apartado resumen a partir de los totales calculados.
      *
      * @param float $gravado
      * @param float $iva
+     * @param float $retainedIva
+     * @param float $discount
+     * @param int $condition
+     * @param int $method
      * @return array
      */
-    private function buildResumen(float $gravado, float $iva, int $condition, int $method): array
+    private function buildResumen(
+        float $gravado,
+        bool  $retainedIva,
+        float $discount,
+        int   $condition,
+        int   $method
+    ): array
     {
+        $gravadoConDescuento = $this->round2($gravado - $discount);
+        $neto = $this->round2($gravadoConDescuento / 1.13);
+        $iva = $this->round2($neto * 0.13);
+        $ivaRetenido = ($retainedIva && $gravadoConDescuento >= 100.00) ? $this->round2($neto * 0.01) : 0;
+        $montoTotal = $this->round2($neto + $iva - $ivaRetenido);
+
         return [
             'totalNoSuj' => 0,
             'totalExenta' => 0,
@@ -257,40 +291,28 @@ class FacturaStrategy extends BaseDTEStrategy
             'subTotalVentas' => $gravado,
             'descuNoSuj' => 0,
             'descuExenta' => 0,
-            'descuGravada' => 0,
+            'descuGravada' => $discount,
             'porcentajeDescuento' => 0,
-            'totalDescu' => 0,
+            'totalDescu' => $discount,
             'tributos' => [],
-            'subTotal' => $gravado,
-            'ivaRete1' => 0,
+            'subTotal' => $gravadoConDescuento,
+            'ivaRete1' => $ivaRetenido,
             'reteRenta' => 0,
-            'montoTotalOperacion' => $gravado,
+            'montoTotalOperacion' => $montoTotal,
             'totalNoGravado' => 0,
-            'totalPagar' => $gravado,
-            'totalLetras' => $this->numberToLetter->convert($gravado),
+            'totalPagar' => $montoTotal,
+            'totalLetras' => $this->numberToLetter->convert($montoTotal),
             'totalIva' => $this->round2($iva),
             'saldoFavor' => 0,
             'condicionOperacion' => $condition,
             'pagos' => [
                 'codigo' => $this->paymentMethodCode($method),
-                'montoPago' => $gravado,
+                'montoPago' => $montoTotal,
                 'referencia' => null,
                 'plazo' => null,
                 'periodo' => null,
             ],
             'numPagoElectronico' => null,
         ];
-    }
-
-    /***
-     * Retorna el código del método de pago.
-     *
-     * @param int $methodId
-     * @return string
-     */
-    private function paymentMethodCode(int $methodId): string
-    {
-        $query = PaymentMethodModel::query()->findOrFail($methodId);
-        return $query->code;
     }
 }

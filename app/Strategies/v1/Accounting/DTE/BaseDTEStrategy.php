@@ -7,6 +7,7 @@ use App\Enums\v1\Billing\DocumentTypes;
 use App\Libraries\Accounting\DTE\HeaderUtils;
 use App\Libraries\Accounting\DTE\IssuerUtils;
 use App\Libraries\NumberToLetter;
+use App\Models\Billing\Options\PaymentMethodModel;
 
 abstract class BaseDTEStrategy implements DTEGeneratorInterface
 {
@@ -192,5 +193,17 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     protected function round2(float|int $number): float
     {
         return round((float)$number, 2);
+    }
+
+    /***
+     * Retorna el código del método de pago.
+     *
+     * @param int $methodId
+     * @return string
+     */
+    protected function paymentMethodCode(int $methodId): string
+    {
+        $query = PaymentMethodModel::query()->findOrFail($methodId);
+        return $query->code;
     }
 }
