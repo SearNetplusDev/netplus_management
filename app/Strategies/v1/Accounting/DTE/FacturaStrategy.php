@@ -260,11 +260,10 @@ class FacturaStrategy extends BaseDTEStrategy
     }
 
     /***
-     *  Construye elementos del apartado resumen a partir de los totales calculados.
+     *   Construye elementos del apartado resumen a partir de los totales calculados.
      *
      * @param float $gravado
-     * @param float $iva
-     * @param float $retainedIva
+     * @param bool $retainedIva
      * @param float $discount
      * @param int $condition
      * @param int $method
