@@ -192,7 +192,7 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
      */
     protected function round2(float|int $number): float
     {
-        return round((float)$number, 2);
+        return bcadd((string)$number, '0', 2);
     }
 
     /***
