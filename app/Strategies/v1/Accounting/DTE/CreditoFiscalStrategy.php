@@ -11,6 +11,9 @@ use Illuminate\Support\Collection;
 class CreditoFiscalStrategy extends BaseDTEStrategy
 {
     /***
+     * Crédito fiscal exige un orden específico de campos en
+     * "identificacion" diferente al orden base.
+     *
      * @return true[]
      */
     protected function identificacionSchema(): array
@@ -31,12 +34,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
         ];
     }
 
-
     /***
-     *  Verifica el metodo con el que se origina el DTE y redirige a su respectiva función.
-     *  - Id de pago
-     *  - Llenado de formulario
-     *  - Por selección de facturas
+     * Detecta el origen del DTE y delega al escenario correspondiente.
      *
      * @param array $data
      * @return array
@@ -44,21 +43,17 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      */
     protected function buildBody(array $data): array
     {
-        if (isset($data['payment'])) {
-            return $this->buildFromPayment((int)$data['payment']);
-        }
-
-        return match ($data['source']) {
-            'manual' => $this->buildFromManual($data),
-            'invoices' => $this->buildFromSelectedInvoices($data),
-            default => throw new \InvalidArgumentException("Fuente no soportada: {$data['source']}"),
+        return match (true) {
+            isset($data['payment']) => $this->buildFromPayment((int)$data['payment']),
+            $data['source'] === 'manual' => $this->buildFromManual($data),
+            $data['source'] === 'invoices' => $this->buildFromSelectedInvoices($data),
+            default => throw new \InvalidArgumentException("Origen no soportado: {$data['source']}"),
         };
-
     }
 
     /***
-     * Escenario 1 - Desde un pago ya registrado.
-     * Construye el crédito fiscal a partir del id del pago ingresado en el sistema.
+     * Escenario 1 - Desde un pago previamente registrado.
+     * Construye el DTE a partir de un pago ya registrado en el sistema.
      *
      * @param int $paymentId
      * @return array
@@ -76,40 +71,31 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
                 'client.email',
                 'invoices.items',
                 'invoices.period',
-                'payment_method'
+                'payment_method',
             ])
             ->where('id', $paymentId)
             ->where('status_id', true)
             ->firstOrFail();
 
         $client = $payment->client;
-        $retainedIva = (bool)$client->corporate_info?->retained_iva ?? false;
-        $paymentDiscount = $this->round2((float)$payment->discount_amount ?? 0);
+        $retainedIva = (bool)($client->corporate_info?->retained_iva ?? false);
+        $discount = (float)($payment->discount_amount ?? 0);
         [$body, $gravado] = $this->buildFromInvoices($payment->invoices);
 
-        return [
-            'identificacion' => $this->identificacion(DocumentTypes::CREDITO_FISCAL, 3),
-            'documentoRelacionado' => null,
-            'emisor' => $this->emisorBase(),
-            'receptor' => $this->buildReceptor($client),
-            'otrosDocumentos' => null,
-            'ventaTercero' => null,
-            'cuerpoDocumento' => $body,
-            'resumen' => $this->buildResumen(
-                gravado: $gravado,
-                retainedIva: $retainedIva,
-                discount: $paymentDiscount,
-                condition: 1,
-                method: $payment->payment_method?->code,
-            ),
-            'extension' => null,
-            'apendice' => null,
-        ];
+        return $this->assembleDocument(
+            client: $client,
+            body: $body,
+            gravado: (float)$gravado,
+            retainedIva: $retainedIva,
+            discount: (float)$discount,
+            condition: 1,
+            method: $payment->payment_method?->code,
+        );
     }
 
     /***
-     *  Escenario 2 - Llenado de formulario desde el frontend
-     *  Genera el crédito fiscal a partir de los datos ingresados por el usuario en el frontend.
+     * Escenario 2 - Formulario desde el frontend.
+     * Genera el DTE a partir de los datos ingresados manualmente por el usuario.
      *
      * @param array $data
      * @return array
@@ -117,44 +103,25 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      */
     private function buildFromManual(array $data): array
     {
-        $client = ClientModel::query()
-            ->with([
-                'corporate_info.activity',
-                'corporate_info.state',
-                'corporate_info.municipality',
-                'nit',
-                'mobile',
-                'email',
-            ])
-            ->findOrFail($data['client_id']);
-
-        $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)$client->corporate_info?->retained_iva ?? false;
-        $manualDiscount = $this->round2((float)$data['totals']['discount'] ?? 0);
+        $client = $this->loadClient((int)$data['client_id']);
+        $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
+        $discount = round((float)($data['totals']['discount'] ?? 0), 2);
         [$body, $gravado] = $this->buildFromItems($data['items']);
 
-        return [
-            'identificacion' => $this->identificacion(DocumentTypes::CREDITO_FISCAL, 3),
-            'documentoRelacionado' => null,
-            'emisor' => $this->emisorBase(),
-            'receptor' => $this->buildReceptor($client),
-            'otrosDocumentos' => null,
-            'ventaTercero' => null,
-            'cuerpoDocumento' => $body,
-            'resumen' => $this->buildResumen(
-                gravado: $gravado,
-                retainedIva: $retainedIva,
-                discount: $manualDiscount,
-                condition: (int)$data['payment_condition'],
-                method: $this->paymentMethodCode((int)$data['payment_method']),
-            ),
-            'extension' => null,
-            'apendice' => null,
-        ];
+        return $this->assembleDocument(
+            client: $client,
+            body: $body,
+            gravado: (float)$gravado,
+            retainedIva: $retainedIva,
+            discount: (float)$discount,
+            condition: (int)($data['payment_condition']),
+            method: $this->paymentMethodCode((int)$data['payment_method']),
+        );
     }
 
     /***
-     *  Escenario 3 - Selección de facturas desde el frontend
-     *  Crea el crédito fiscal a partir de las facturas seleccionadas por el usuario en el frontend.
+     * Escenario 3 - Selección de facturas desde el frontend.
+     * Crea el DTE a partir de facturas seleccionadas por el usuario.
      *
      * @param array $data
      * @return array
@@ -162,7 +129,37 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      */
     private function buildFromSelectedInvoices(array $data): array
     {
-        $client = ClientModel::query()
+        $client = $this->loadClient((int)$data['client_id']);
+        $invoices = InvoiceModel::query()
+            ->with(['items', 'period'])
+            ->whereIn('id', $data['items'])
+            ->where('client_id', $data['client_id'])
+            ->get();
+
+        $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
+        $discount = round((float)($data['totals']['discount'] ?? 0), 2);
+        [$body, $gravado] = $this->buildFromInvoices($invoices);
+
+        return $this->assembleDocument(
+            client: $client,
+            body: $body,
+            gravado: (float)$gravado,
+            retainedIva: $retainedIva,
+            discount: (float)$discount,
+            condition: (int)($data['payment_condition']),
+            method: $this->paymentMethodCode((int)$data['payment_method']),
+        );
+    }
+
+    /***
+     * Carga el cliente con todas las relaciones necesarias para crear el DTE.
+     *
+     * @param int $clientId
+     * @return ClientModel
+     */
+    private function loadClient(int $clientId): ClientModel
+    {
+        return ClientModel::query()
             ->with([
                 'corporate_info.activity',
                 'corporate_info.state',
@@ -171,18 +168,32 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
                 'mobile',
                 'email',
             ])
-            ->findOrFail($data['client_id']);
+            ->findOrFail($clientId);
+    }
 
-        $invoices = InvoiceModel::query()
-            ->with(['items', 'period'])
-            ->whereIn('id', $data['items'])
-            ->where('client_id', $data['client_id'])
-            ->get();
-
-        $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
-        $invoiceDiscount = $this->round2((float)$data['totals']['discount'] ?? 0);
-        [$body, $gravado] = $this->buildFromInvoices($invoices);
-
+    /***
+     * Ensambla la estructura completa del DTE.
+     *
+     * @param ClientModel $client
+     * @param array $body
+     * @param float $gravado
+     * @param bool $retainedIva
+     * @param float $discount
+     * @param int $condition
+     * @param string|null $method
+     * @return array
+     * @throws \Random\RandomException
+     */
+    private function assembleDocument(
+        ClientModel $client,
+        array       $body,
+        float       $gravado,
+        bool        $retainedIva,
+        float       $discount,
+        int         $condition,
+        ?string     $method,
+    ): array
+    {
         return [
             'identificacion' => $this->identificacion(DocumentTypes::CREDITO_FISCAL, 3),
             'documentoRelacionado' => null,
@@ -194,9 +205,9 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'resumen' => $this->buildResumen(
                 gravado: $gravado,
                 retainedIva: $retainedIva,
-                discount: $invoiceDiscount,
-                condition: (int)$data['payment_condition'],
-                method: $this->paymentMethodCode((int)$data['payment_method']),
+                discount: $discount,
+                condition: $condition,
+                method: $method ?? '01',
             ),
             'extension' => null,
             'apendice' => null,
@@ -204,7 +215,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
     }
 
     /***
-     * Itera la colección de las facturas junto con sus ítems para construir el cuerpo del documento
+     * Itera las facturas con sus ítems y construye las líneas del cuerpoDocumento.
      *
      * @param Collection $invoices
      * @return array
@@ -221,25 +232,14 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             foreach ($invoice->items as $item) {
                 $precioUni = (float)$item->unit_price;
                 $gravada = $precioUni * (int)$item->quantity;
-
-                $body[] = [
-                    'numItem' => $numItem++,
-                    'tipoItem' => 2,
-                    'numeroDocumento' => null,
-                    'codigo' => null,
-                    'codTributo' => null,
-                    'descripcion' => "{$item->description} ({$period})",
-                    'cantidad' => (int)$item->quantity,
-                    'uniMedida' => 99,
-                    'precioUni' => $precioUni,
-                    'montoDescu' => 0,
-                    'ventaNoSuj' => 0,
-                    'ventaExenta' => 0,
-                    'ventaGravada' => $gravada,
-                    'tributos' => ['20'],
-                    'psv' => 0,
-                    'noGravado' => 0,
-                ];
+                $body[] = $this->buildLineItem(
+                    num: $numItem++,
+                    tipoItem: 2,
+                    descripcion: "{$item->description} ({$period})",
+                    cantidad: (int)$item->quantity,
+                    precioUni: $precioUni,
+                    gravada: $gravada,
+                );
 
                 $gravado += $gravada;
             }
@@ -249,7 +249,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
     }
 
     /***
-     * Construye el cuerpo del documento desde el array de ítems ingresados manualmente.
+     * Construye las líneas del cuerpoDocumento desde ítems ingresados manualmente.
      *
      * @param array $items
      * @return array
@@ -260,27 +260,17 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
         $body = [];
 
         foreach ($items as $item) {
-            $unitPrice = (float)$item['unit_price'] / 1.13;
-            $gravada = (float)$unitPrice * (int)$item['quantity'];
+            $precioUni = (float)$item['unit_price'] / parent::TASA_VALOR_NETO;
+            $gravada = $precioUni * (int)$item['quantity'];
 
-            $body[] = [
-                'numItem' => $item['_line'],
-                'tipoItem' => $item['item_type'],
-                'numeroDocumento' => null,
-                'codigo' => null,
-                'codTributo' => null,
-                'descripcion' => $item['description'],
-                'cantidad' => (int)$item['quantity'],
-                'uniMedida' => 99,
-                'precioUni' => $unitPrice,
-                'montoDescu' => 0,
-                'ventaNoSuj' => 0,
-                'ventaExenta' => 0,
-                'ventaGravada' => $gravada,
-                'tributos' => ['20'],
-                'psv' => 0,
-                'noGravado' => 0,
-            ];
+            $body[] = $this->buildLineItem(
+                num: (int)$item['_line'],
+                tipoItem: (int)$item['item_type'],
+                descripcion: $item['description'],
+                cantidad: (int)$item['quantity'],
+                precioUni: $precioUni,
+                gravada: $gravada,
+            );
 
             $gravado += $gravada;
         }
@@ -289,8 +279,47 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
     }
 
     /***
-     * Crea el apartado receptor a partir de ClientModel.
+     * Construye las líneas del cuerpoDocumento con los campos fijos requeridos del crédito fiscal.
      *
+     * @param int $num
+     * @param int $tipoItem
+     * @param string $descripcion
+     * @param int $cantidad
+     * @param float $precioUni
+     * @param float $gravada
+     * @return array
+     */
+    private function buildLineItem(
+        int    $num,
+        int    $tipoItem,
+        string $descripcion,
+        int    $cantidad,
+        float  $precioUni,
+        float  $gravada,
+    ): array
+    {
+        return [
+            'numItem' => $num,
+            'tipoItem' => $tipoItem,
+            'numeroDocumento' => null,
+            'codigo' => null,
+            'codTributo' => null,
+            'descripcion' => $descripcion,
+            'cantidad' => $cantidad,
+            'uniMedida' => 99,
+            'precioUni' => $precioUni,
+            'montoDescu' => 0,
+            'ventaNoSuj' => 0,
+            'ventaExenta' => 0,
+            'ventaGravada' => $gravada,
+            'tributos' => ['20'],
+            'psv' => 0,
+            'noGravado' => 0,
+        ];
+    }
+
+    /***
+     * Construye el bloque "receptor" a partir de ClientModel.
      * @param ClientModel $client
      * @return array
      */
@@ -308,38 +337,41 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'direccion' => [
                 'departamento' => $fi?->state?->code ?? $client->address?->state?->code,
                 'municipio' => $fi?->municipality?->code ?? $client->address?->municipality?->code,
-                'complemento' => $fi?->address ?? $client?->address?->address,
+                'complemento' => $fi?->address ?? $client->address?->address,
             ],
-            'telefono' => $this->phoneFormatter($fi?->phone_number ?? $client?->mobile?->number ?? ''),
+            'telefono' => $this->phoneFormatter($fi?->phone_number ?? $client->mobile?->number) ?? null,
             'correo' => $client->email?->email,
         ];
     }
 
     /***
-     * Construye el apartado resumen con toda la lógica financiera.
+     * Construye el bloque "resumen" con la lógica financiera del crédito fiscal.
      *
      * @param float $gravado
      * @param bool $retainedIva
      * @param float $discount
      * @param int $condition
-     * @param string $method
+     * @param string|null $method
      * @return array
      */
     private function buildResumen(
-        float  $gravado,
-        bool   $retainedIva,
-        float  $discount,
-        int    $condition,
-        string $method,
+        float   $gravado,
+        bool    $retainedIva,
+        float   $discount,
+        int     $condition,
+        ?string $method,
     ): array
     {
-        $rawIva = $gravado * 0.13;
-        $rawBruto = $gravado + $rawIva;
-        $rawTotal = $rawBruto - $discount;
+        //  Total bruto con Iva antes del descuento
+        $totalConIva = $gravado * parent::TASA_VALOR_NETO;
 
-        $neto = $rawTotal / 1.13;
-        $iva = $neto * 0.13;
-        $ivaRetenido = ($retainedIva && $rawTotal > 100) ? $neto * 0.01 : 0;
+        //  Aplicar descuento al total con Iva y extraer el neto resultante
+        $totalDescontado = $totalConIva - $discount;
+        $neto = $totalDescontado / parent::TASA_VALOR_NETO;
+        $iva = $neto * parent::TASA_IVA;
+
+        //  Iva Retenido; 1% del valor neto si aplica y el total supera los $100
+        $ivaRetenido = ($retainedIva && $totalDescontado > 100) ? $neto * parent::TASA_IVA_RETENIDO : 0;
         $totalPagar = $neto + $iva - $ivaRetenido;
 
         return [
@@ -368,13 +400,16 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'saldoFavor' => 0,
             'condicionOperacion' => $condition,
             'pagos' => [
-                'codigo' => $method,
-                'montoPago' => round($totalPagar, 2),
-                'referencia' => null,
-                'plazo' => null,
-                'periodo' => null,
+                [
+                    'codigo' => $method,
+                    'montoPago' => round($totalPagar, 2),
+                    'referencia' => null,
+                    'plazo' => null,
+                    'periodo' => null,
+                ],
             ],
             'numPagoElectronico' => null,
         ];
     }
+
 }

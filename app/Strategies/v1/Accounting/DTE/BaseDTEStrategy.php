@@ -11,6 +11,10 @@ use App\Models\Billing\Options\PaymentMethodModel;
 
 abstract class BaseDTEStrategy implements DTEGeneratorInterface
 {
+    protected const TASA_VALOR_NETO = 1.13;
+    protected const TASA_IVA = 0.13;
+    protected const TASA_IVA_RETENIDO = 0.01;
+
     /***
      * @param HeaderUtils $headerUtils
      * @param IssuerUtils $issuerUtils
@@ -58,7 +62,8 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
 
 
     /***
-     * Campo identificación del DTE
+     * Construye el bloque "identificacion" del DTE.
+     *
      * @param DocumentTypes $type
      * @param int $version
      * @return array
@@ -84,7 +89,8 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     }
 
     /***
-     * Elementos del campo emisor del DTE.
+     * Construye el bloque "emisor" del DTE.
+     *
      * @return array
      */
     protected function emisorBase(): array
@@ -112,6 +118,8 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     }
 
     /***
+     * Aplica el schema sobre el emisor base.
+     *
      * @return array
      */
     protected function emisor(): array
@@ -161,6 +169,7 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
 
     /***
      * Remueve guiones de una cadena de texto.
+     *
      * @param string $number
      * @return string
      */
@@ -170,7 +179,9 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     }
 
     /***
-     * Formatea números de telefono a formato aceptado por hacienda
+     * Formatea números de telefono a formato aceptado por hacienda (8 dígitos sin separadores).
+     * Retorna null si el número no tiene exactamente 8 dígitos.
+     *
      * @param string $phone
      * @return string|null
      */
@@ -186,7 +197,8 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     }
 
     /***
-     * Redondea a 2 decimales los números
+     * Redondea a 2 decimales usando bcmath para evitar perdida de precisión.
+     *
      * @param float|int $number
      * @return float
      */
