@@ -60,10 +60,19 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
      */
     protected function buildBody(array $data): array
     {
-        $client = $this->loadClient((int)$data['client_id']);
+        $client = $this->loadClient((int)$data['client_id'], [
+            'dui.document_type',
+            'address.state',
+            'address.municipality',
+            'mobile',
+            'email',
+            'corporate_info',
+            'corporate_info.state',
+            'corporate_info.municipality',
+        ]);
         $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
-        $discount = round((float)($data['totals']['discount'] ?? 0), 2);
-        [$body, $compra] = $this->buildFromItems($data['items']);
+        $discount = $this->round2((float)($data['totals']['discount'] ?? 0));
+        [$body, $compra] = $this->buildLinesFromItems($data['items']);
 
         return $this->assembleDocument(
             client: $client,
@@ -77,34 +86,12 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
     }
 
     /***
-     * Carga el cliente con las relaciones necesarias para el campo "sujetoExcluido"
-     *
-     * @param int $clientId
-     * @return ClientModel
-     */
-    protected function loadClient(int $clientId): ClientModel
-    {
-        return ClientModel::query()
-            ->with([
-                'dui.document_type',
-                'address.state',
-                'address.municipality',
-                'mobile',
-                'email',
-                'corporate_info',
-                'corporate_info.state',
-                'corporate_info.municipality',
-            ])
-            ->findOrFail($clientId);
-    }
-
-    /***
      * Construye las líneas del "cuerpoDocumento" a partir de los elementos ingresados manualmente.
      *
      * @param array $items
      * @return array
      */
-    private function buildFromItems(array $items): array
+    private function buildLinesFromItems(array $items): array
     {
         $compra = 0;
         $body = [];
@@ -213,33 +200,19 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
         ?string $method,
     ): array
     {
-        $totalConDescuento = $compra - $discount;
-        $neto = $totalConDescuento / parent::TASA_VALOR_NETO;
-        $iva = $neto * parent::TASA_IVA;
-
-        //  IVA retenido: 1% del valor neto si aplica y el total supera los $100
-        $ivaRetenido = ($retainedIva && $totalConDescuento > 100) ? $neto * parent::TASA_IVA_RETENIDO : 0;
-        $totalPagar = $neto + $iva - $ivaRetenido;
+        $totales = $this->calculateTotals($compra, $discount, $retainedIva);
 
         return [
-            'totalCompra' => round($compra, 2),
-            'descu' => round($discount, 2),
-            'totalDescu' => round($discount, 2),
-            'subTotal' => round($compra, 2),
-            'ivaRete1' => round($ivaRetenido, 2),
+            'totalCompra' => $this->round2($compra),
+            'descu' => $this->round2($discount),
+            'totalDescu' => $this->round2($discount),
+            'subTotal' => $this->round2($compra),
+            'ivaRete1' => $this->round2($totales['ivaRetenido']),
             'reteRenta' => 0,
-            'totalPagar' => round($totalPagar, 2),
-            'totalLetras' => $this->numberToLetter->convert(round($totalPagar, 2)),
+            'totalPagar' => $this->round2($totales['totalPagar']),
+            'totalLetras' => $this->numberToLetter->convert($this->round2($totales['totalPagar'])),
             'condicionOperacion' => $condition,
-            'pagos' => [
-                [
-                    'codigo' => $method,
-                    'montoPago' => round($totalPagar, 2),
-                    'referencia' => null,
-                    'plazo' => null,
-                    'periodo' => null,
-                ],
-            ],
+            'pagos' => $this->buildPagos($method, $totales['totalPagar']),
             'observaciones' => null,
         ];
     }

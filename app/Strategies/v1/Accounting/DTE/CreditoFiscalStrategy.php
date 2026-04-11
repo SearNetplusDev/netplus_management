@@ -80,7 +80,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
         $client = $payment->client;
         $retainedIva = (bool)($client->corporate_info?->retained_iva ?? false);
         $discount = (float)($payment->discount_amount ?? 0);
-        [$body, $gravado] = $this->buildFromInvoices($payment->invoices);
+        [$body, $gravado] = $this->buildLinesFromInvoices($payment->invoices);
 
         return $this->assembleDocument(
             client: $client,
@@ -89,7 +89,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             retainedIva: $retainedIva,
             discount: (float)$discount,
             condition: 1,
-            method: $payment->payment_method?->code,
+            method: $payment->payment_method?->code ?? '01',
         );
     }
 
@@ -103,10 +103,17 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      */
     private function buildFromManual(array $data): array
     {
-        $client = $this->loadClient((int)$data['client_id']);
+        $client = $this->loadClient((int)$data['client_id'], [
+            'corporate_info.activity',
+            'corporate_info.state',
+            'corporate_info.municipality',
+            'nit',
+            'mobile',
+            'email',
+        ]);
         $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
         $discount = round((float)($data['totals']['discount'] ?? 0), 2);
-        [$body, $gravado] = $this->buildFromItems($data['items']);
+        [$body, $gravado] = $this->buildLinesFromItems($data['items']);
 
         return $this->assembleDocument(
             client: $client,
@@ -129,7 +136,14 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      */
     private function buildFromSelectedInvoices(array $data): array
     {
-        $client = $this->loadClient((int)$data['client_id']);
+        $client = $this->loadClient((int)$data['client_id'], [
+            'corporate_info.activity',
+            'corporate_info.state',
+            'corporate_info.municipality',
+            'nit',
+            'mobile',
+            'email',
+        ]);
         $invoices = InvoiceModel::query()
             ->with(['items', 'period'])
             ->whereIn('id', $data['items'])
@@ -138,7 +152,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
 
         $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
         $discount = round((float)($data['totals']['discount'] ?? 0), 2);
-        [$body, $gravado] = $this->buildFromInvoices($invoices);
+        [$body, $gravado] = $this->buildLinesFromInvoices($invoices);
 
         return $this->assembleDocument(
             client: $client,
@@ -149,26 +163,6 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             condition: (int)($data['payment_condition']),
             method: $this->paymentMethodCode((int)$data['payment_method']),
         );
-    }
-
-    /***
-     * Carga el cliente con todas las relaciones necesarias para crear el DTE.
-     *
-     * @param int $clientId
-     * @return ClientModel
-     */
-    private function loadClient(int $clientId): ClientModel
-    {
-        return ClientModel::query()
-            ->with([
-                'corporate_info.activity',
-                'corporate_info.state',
-                'corporate_info.municipality',
-                'nit',
-                'mobile',
-                'email',
-            ])
-            ->findOrFail($clientId);
     }
 
     /***
@@ -220,32 +214,24 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      * @param Collection $invoices
      * @return array
      */
-    private function buildFromInvoices(Collection $invoices): array
+    private function buildLinesFromInvoices(Collection $invoices): array
     {
-        $numItem = 1;
-        $gravado = 0;
-        $body = [];
+        return $this->iterateInvoiceItems($invoices, function ($item, $invoice, $numItem) {
+            $precioUni = (float)$item->unit_price;
+            $gravada = $precioUni * (int)$item->quantity;
 
-        foreach ($invoices as $invoice) {
-            $period = $invoice->period?->name;
-
-            foreach ($invoice->items as $item) {
-                $precioUni = (float)$item->unit_price;
-                $gravada = $precioUni * (int)$item->quantity;
-                $body[] = $this->buildLineItem(
-                    num: $numItem++,
+            return [
+                $this->buildLineItem(
+                    num: $numItem,
                     tipoItem: 2,
-                    descripcion: "{$item->description} ({$period})",
+                    descripcion: "{$item->description} ({$invoice->period?->name})",
                     cantidad: (int)$item->quantity,
                     precioUni: $precioUni,
                     gravada: $gravada,
-                );
-
-                $gravado += $gravada;
-            }
-        }
-
-        return [$body, $gravado];
+                ),
+                $gravada
+            ];
+        });
     }
 
     /***
@@ -254,13 +240,13 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      * @param array $items
      * @return array
      */
-    private function buildFromItems(array $items): array
+    private function buildLinesFromItems(array $items): array
     {
         $gravado = 0;
         $body = [];
 
         foreach ($items as $item) {
-            $precioUni = (float)$item['unit_price'] / parent::TASA_VALOR_NETO;
+            $precioUni = (float)$item['unit_price'] / self::TASA_VALOR_NETO;
             $gravada = $precioUni * (int)$item['quantity'];
 
             $body[] = $this->buildLineItem(
@@ -363,22 +349,14 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
     ): array
     {
         //  Total bruto con Iva antes del descuento
-        $totalConIva = $gravado * parent::TASA_VALOR_NETO;
-
-        //  Aplicar descuento al total con Iva y extraer el neto resultante
-        $totalDescontado = $totalConIva - $discount;
-        $neto = $totalDescontado / parent::TASA_VALOR_NETO;
-        $iva = $neto * parent::TASA_IVA;
-
-        //  Iva Retenido; 1% del valor neto si aplica y el total supera los $100
-        $ivaRetenido = ($retainedIva && $totalDescontado > 100) ? $neto * parent::TASA_IVA_RETENIDO : 0;
-        $totalPagar = $neto + $iva - $ivaRetenido;
+        $totalConIva = $gravado * self::TASA_VALOR_NETO;
+        $totales = $this->calculateTotals($totalConIva, $discount, $retainedIva);
 
         return [
             'totalNoSuj' => 0,
             'totalExenta' => 0,
-            'totalGravado' => round($neto, 2),
-            'subTotalVentas' => round($neto, 2),
+            'totalGravado' => $this->round2($totales['neto']),
+            'subTotalVentas' => $this->round2($totales['neto']),
             'descuNoSuj' => 0,
             'descuExenta' => 0,
             'descuGravado' => $discount,
@@ -388,28 +366,19 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
                 [
                     'codigo' => '20',
                     'descripcion' => 'Impuesto al Valor Agregado 13%',
-                    'valor' => round($iva, 2),
+                    'valor' => $this->round2($totales['iva']),
                 ],
             ],
-            'subTotal' => round($neto, 2),
+            'subTotal' => $this->round2($totales['neto']),
             'ivaPerci1' => 0,
-            'ivaRete1' => round($ivaRetenido, 2),
+            'ivaRete1' => $this->round2($totales['ivaRetenido']),
             'totalNoGravado' => 0,
-            'totalPagar' => round($totalPagar, 2),
-            'totalLetras' => $this->numberToLetter->convert(round($totalPagar, 2)),
+            'totalPagar' => $this->round2($totales['totalPagar']),
+            'totalLetras' => $this->numberToLetter->convert($this->round2($totales['totalPagar'])),
             'saldoFavor' => 0,
             'condicionOperacion' => $condition,
-            'pagos' => [
-                [
-                    'codigo' => $method,
-                    'montoPago' => round($totalPagar, 2),
-                    'referencia' => null,
-                    'plazo' => null,
-                    'periodo' => null,
-                ],
-            ],
+            'pagos' => $this->buildPagos($method, $totales['totalPagar']),
             'numPagoElectronico' => null,
         ];
     }
-
 }

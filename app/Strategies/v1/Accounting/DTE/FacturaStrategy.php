@@ -3,9 +3,9 @@
 namespace App\Strategies\v1\Accounting\DTE;
 
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Models\Billing\Options\PaymentMethodModel;
 use App\Models\Billing\PaymentModel;
 use App\Models\Clients\ClientModel;
+use Illuminate\Support\Collection;
 
 class FacturaStrategy extends BaseDTEStrategy
 {
@@ -77,72 +77,19 @@ class FacturaStrategy extends BaseDTEStrategy
             ->firstOrFail();
 
         $retainedIva = (bool)($payment->client->corporate_info?->retained_iva ?? false);
-        $paymentDiscount = $this->round2((float)$payment->discount_amount ?? 0);
+        $discount = $this->round2((float)$payment->discount_amount ?? 0);
+        $methodCode = $payment->payment_method?->code ?? '01';
+        [$body, $gravado] = $this->buildLinesFromInvoices($payment->invoices);
 
-        [$body, $gravado] = $this->buildBodyFromInvoices($payment->invoices);
-
-        return [
-            'identificacion' => $this->identificacion(DocumentTypes::FACTURA),
-            'documentoRelacionado' => null,
-            'emisor' => $this->emisor(),
-            'receptor' => $this->buildReceptor($payment->client),
-            'otrosDocumentos' => null,
-            'ventaTercero' => null,
-            'cuerpoDocumento' => $body,
-            'resumen' => $this->buildResumen(
-                gravado: $gravado,
-                retainedIva: $retainedIva,
-                discount: $paymentDiscount,
-                condition: 1,
-                method: 1
-            ),
-        ];
-    }
-
-    /***
-     * Itera las facturas y sus ítems para construir el cuerpo del documento.
-     *
-     * @param $invoices
-     * @return array
-     */
-    private function buildBodyFromInvoices($invoices): array
-    {
-        $numItem = 1;
-        $gravado = 0;
-        $body = [];
-
-        foreach ($invoices as $invoice) {
-            $period = $invoice->period->name;
-
-            foreach ($invoice->items as $item) {
-                $lineTotal = $this->round2($item->total);
-                $lineIva = $this->round2($item->iva);
-
-                $body[] = [
-                    'numItem' => $numItem++,
-                    'tipoItem' => 2,
-                    'numeroDocumento' => null,
-                    'cantidad' => $item->quantity ?? 1,
-                    'codigo' => null,
-                    'codTributo' => null,
-                    'uniMedida' => 99,
-                    'descripcion' => "{$item->description} ({$period})",
-                    'precioUni' => $this->round2($item->total),
-                    'montoDescu' => 0,
-                    'ventaNoSuj' => 0,
-                    'ventaExenta' => 0,
-                    'ventaGravada' => $lineTotal,
-                    'tributos' => null,
-                    'psv' => 0,
-                    'noGravado' => 0,
-                    'ivaItem' => $lineIva,
-                ];
-
-                $gravado += $lineTotal;
-            }
-        }
-
-        return [$body, $this->round2($gravado)];
+        return $this->assembleDocument(
+            client: $payment->client,
+            body: $body,
+            gravado: $gravado,
+            retainedIva: $retainedIva,
+            discount: $discount,
+            condition: 1,
+            method: $methodCode,
+        );
     }
 
     /***
@@ -156,22 +103,54 @@ class FacturaStrategy extends BaseDTEStrategy
      */
     private function buildFromManualData(array $data): array
     {
-        $client = ClientModel::query()
-            ->with([
-                'dui.document_type',
-                'nit.document_type',
-                'address',
-                'mobile',
-                'email',
-                'corporate_info',
-            ])
-            ->findOrFail($data['client_id']);
+        $client = $this->loadClient((int)$data['client_id'], [
+            'dui.document_type',
+            'nit.document_type',
+            'address',
+            'mobile',
+            'email',
+            'corporate_info',
+        ]);
 
         $retainedIva = (bool)($client->corporate_info?->retained_iva ?? false);
-        $manualDiscount = $this->round2((float)($data['totals']['discount'] ?? 0));
+        $discount = $this->round2((float)($data['totals']['discount'] ?? 0));
+        $methodCode = $this->paymentMethodCode((int)$data['payment_method'] ?? 1);
+        [$body, $gravado] = $this->buildLinesFromItems($data['items']);
 
-        [$body, $gravado] = $this->buildFromItems($data['items']);
+        return $this->assembleDocument(
+            client: $client,
+            body: $body,
+            gravado: $gravado,
+            retainedIva: $retainedIva,
+            discount: $discount,
+            condition: (int)$data['payment_condition'],
+            method: $methodCode,
+        );
+    }
 
+    /***
+     * Ensambla la estructura completa del DTE.
+     *
+     * @param ClientModel $client
+     * @param array $body
+     * @param float $gravado
+     * @param bool $retainedIva
+     * @param float $discount
+     * @param int $condition
+     * @param string $method
+     * @return array
+     * @throws \Random\RandomException
+     */
+    private function assembleDocument(
+        ClientModel $client,
+        array       $body,
+        float       $gravado,
+        bool        $retainedIva,
+        float       $discount,
+        int         $condition,
+        string      $method
+    ): array
+    {
         return [
             'identificacion' => $this->identificacion(DocumentTypes::FACTURA),
             'documentoRelacionado' => null,
@@ -183,11 +162,47 @@ class FacturaStrategy extends BaseDTEStrategy
             'resumen' => $this->buildResumen(
                 gravado: $gravado,
                 retainedIva: $retainedIva,
-                discount: $manualDiscount,
-                condition: (int)$data['payment_condition'],
-                method: (int)$data['payment_method']
-            ),
+                discount: $discount,
+                condition: $condition,
+                method: $method,
+            )
         ];
+    }
+
+    /****
+     * Itera facturas y sus items usando el helper base.
+     * @param Collection $invoices
+     * @return array
+     */
+    private function buildLinesFromInvoices(Collection $invoices): array
+    {
+        return $this->iterateInvoiceItems($invoices, function ($item, $invoice, $numItem) {
+            $lineTotal = $this->round2($item->total);
+            $lineIva = $this->round2($item->iva);
+
+            return [
+                [
+                    'numItem' => $numItem,
+                    'tipoItem' => 2,
+                    'numeroDocumento' => null,
+                    'cantidad' => $item->quantity ?? 1,
+                    'codigo' => null,
+                    'codTributo' => null,
+                    'uniMedida' => 99,
+                    'descripcion' => "{$item->description} ({$invoice->period?->name})",
+                    'precioUni' => $lineTotal,
+                    'montoDescu' => 0,
+                    'ventaNoSuj' => 0,
+                    'ventaExenta' => 0,
+                    'ventaGravada' => $lineTotal,
+                    'tributos' => null,
+                    'psv' => 0,
+                    'noGravado' => 0,
+                    'ivaItem' => $lineIva,
+                ],
+                $lineTotal,
+            ];
+        });
     }
 
     /***
@@ -196,10 +211,9 @@ class FacturaStrategy extends BaseDTEStrategy
      * @param array $items
      * @return array
      */
-    private function buildFromItems(array $items): array
+    private function buildLinesFromItems(array $items): array
     {
         $gravado = 0;
-        $iva = 0;
         $body = [];
 
         foreach ($items as $item) {
@@ -227,10 +241,9 @@ class FacturaStrategy extends BaseDTEStrategy
             ];
 
             $gravado += $lineTotal;
-            $iva += $lineIva;
         }
 
-        return [$body, $this->round2($gravado), $this->round2($iva)];
+        return [$body, $this->round2($gravado)];
     }
 
     /***
@@ -277,11 +290,7 @@ class FacturaStrategy extends BaseDTEStrategy
         int   $method
     ): array
     {
-        $gravadoConDescuento = $this->round2($gravado - $discount);
-        $neto = $this->round2($gravadoConDescuento / 1.13);
-        $iva = $this->round2($neto * 0.13);
-        $ivaRetenido = ($retainedIva && $gravadoConDescuento >= 100.00) ? $this->round2($neto * 0.01) : 0;
-        $montoTotal = $this->round2($neto + $iva - $ivaRetenido);
+        $totales = $this->calculateTotals($gravado, $discount, $retainedIva);
 
         return [
             'totalNoSuj' => 0,
@@ -294,23 +303,17 @@ class FacturaStrategy extends BaseDTEStrategy
             'porcentajeDescuento' => 0,
             'totalDescu' => $discount,
             'tributos' => [],
-            'subTotal' => $gravadoConDescuento,
-            'ivaRete1' => $ivaRetenido,
+            'subTotal' => $this->round2($totales['totalConDescuento']),
+            'ivaRete1' => $this->round2($totales['ivaRetenido']),
             'reteRenta' => 0,
-            'montoTotalOperacion' => $montoTotal,
+            'montoTotalOperacion' => $this->round2($totales['totalPagar']),
             'totalNoGravado' => 0,
-            'totalPagar' => $montoTotal,
-            'totalLetras' => $this->numberToLetter->convert($montoTotal),
-            'totalIva' => $this->round2($iva),
+            'totalPagar' => $this->round2($totales['totalPagar']),
+            'totalLetras' => $this->numberToLetter->convert($this->round2($totales['totalPagar'])),
+            'totalIva' => $this->round2($totales['iva']),
             'saldoFavor' => 0,
             'condicionOperacion' => $condition,
-            'pagos' => [
-                'codigo' => $this->paymentMethodCode($method),
-                'montoPago' => $montoTotal,
-                'referencia' => null,
-                'plazo' => null,
-                'periodo' => null,
-            ],
+            'pagos' => $this->buildPagos($method, $totales['totalPagar']),
             'numPagoElectronico' => null,
         ];
     }

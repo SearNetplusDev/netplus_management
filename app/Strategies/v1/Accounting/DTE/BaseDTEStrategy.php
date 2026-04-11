@@ -8,6 +8,8 @@ use App\Libraries\Accounting\DTE\HeaderUtils;
 use App\Libraries\Accounting\DTE\IssuerUtils;
 use App\Libraries\NumberToLetter;
 use App\Models\Billing\Options\PaymentMethodModel;
+use App\Models\Clients\ClientModel;
+use Illuminate\Support\Collection;
 
 abstract class BaseDTEStrategy implements DTEGeneratorInterface
 {
@@ -146,10 +148,7 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
         $result = [];
 
         foreach ($schema as $originalKey => $rule) {
-            if ($rule === false) {
-                continue;
-            }
-            if (!array_key_exists($originalKey, $base)) {
+            if ($rule === false || !array_key_exists($originalKey, $base)) {
                 continue;
             }
             $result[is_string($rule) ? $rule : $originalKey] = $base[$originalKey];
@@ -204,7 +203,7 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
      */
     protected function round2(float|int $number): float
     {
-        return bcadd((string)$number, '0', 2);
+        return bcadd((string)$number, '0.005', 2);
     }
 
     /***
@@ -217,5 +216,90 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     {
         $query = PaymentMethodModel::query()->findOrFail($methodId);
         return $query->code;
+    }
+
+    /***
+     * Carga los datos de un cliente con las relaciones indicadas.
+     *
+     * @param int $clientId
+     * @param array $relations
+     * @return ClientModel
+     */
+    protected function loadClient(int $clientId, array $relations = []): ClientModel
+    {
+        return ClientModel::query()
+            ->with($relations)
+            ->findOrFail($clientId);
+    }
+
+    /***
+     * Calcula los totales financieros compartidos por todas las estrategias.
+     *
+     * @param float $gravado
+     * @param float $discount
+     * @param bool $retainedIva
+     * @return array
+     */
+    protected function calculateTotals(
+        float $gravado,
+        float $discount,
+        bool  $retainedIva,
+    ): array
+    {
+        $totalConDescuento = $gravado - $discount;
+        $neto = $totalConDescuento / self::TASA_VALOR_NETO;
+        $iva = $neto * self::TASA_IVA;
+        $ivaRetenido = ($retainedIva && $totalConDescuento > 100) ? $neto * self::TASA_IVA_RETENIDO : 0;
+        $totalPagar = $neto + $iva - $ivaRetenido;
+
+        return compact('neto', 'iva', 'ivaRetenido', 'totalPagar', 'totalConDescuento');
+    }
+
+    /****
+     * Construye el array del bloque "pagos" presente en el bloque "resumen".
+     *
+     * @param string $method
+     * @param float $monto
+     * @return array
+     */
+    protected function buildPagos(string $method, float $monto): array
+    {
+        return [
+            [
+                'codigo' => $method,
+                'montoPago' => $this->round2($monto),
+                'referencia' => null,
+                'plazo' => null,
+                'periodo' => null,
+            ]
+        ];
+    }
+
+    /***
+     * Itera las facturas con sus ítems y delega la construcción de cada línea al Closure proporcionado por la
+     * estrategia correcta.
+     *
+     * El closure recibe $item, $invoice, $numItem y debe retornar [$lineArray, $valorAcumulable].
+     *
+     * @param Collection $invoices
+     * @param \Closure $lineBuilder
+     * @return array
+     */
+    protected function iterateInvoiceItems(Collection $invoices, \Closure $lineBuilder): array
+    {
+        $numItem = 1;
+        $acumulado = 0;
+        $body = [];
+
+        foreach ($invoices as $invoice) {
+            foreach ($invoice->items as $item) {
+                [$line, $valor] = $lineBuilder($item, $invoice, $numItem);
+                $body[] = $line;
+                $acumulado += $valor;
+                $numItem++;
+            }
+        }
+
+        return [$body, $this->round2($acumulado)];
     }
 }
