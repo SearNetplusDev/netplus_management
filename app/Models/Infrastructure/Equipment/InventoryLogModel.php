@@ -24,11 +24,11 @@ use App\Traits\DataViewer;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Infrastructure\Equipment\InventoryModel $equipment
+ * @property-read \App\Models\Infrastructure\Equipment\InventoryModel|null $equipment
  * @property-read ServiceModel|null $service
- * @property-read EquipmentStatusModel $status
+ * @property-read EquipmentStatusModel|null $status
  * @property-read TechnicianModel|null $technician
- * @property-read User $user
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryLogModel newQuery()

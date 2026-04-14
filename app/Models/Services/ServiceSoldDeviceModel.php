@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read InventoryModel $equipment
- * @property-read \App\Models\Services\ServiceModel $service
+ * @property-read InventoryModel|null $equipment
+ * @property-read \App\Models\Services\ServiceModel|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceSoldDeviceModel onlyTrashed()

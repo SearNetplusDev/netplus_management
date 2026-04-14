@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $deleted_at
- * @property-read InternetModel $profile
- * @property-read \App\Models\Services\ServiceModel $service
+ * @property-read InternetModel|null $profile
+ * @property-read \App\Models\Services\ServiceModel|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceUninstallationModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceUninstallationModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceUninstallationModel query()

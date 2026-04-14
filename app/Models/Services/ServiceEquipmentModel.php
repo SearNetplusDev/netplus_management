@@ -20,9 +20,9 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read InventoryModel $equipment
+ * @property-read InventoryModel|null $equipment
  * @property-read array $status
- * @property-read \App\Models\Services\ServiceModel $service
+ * @property-read \App\Models\Services\ServiceModel|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceEquipmentModel newQuery()

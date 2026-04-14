@@ -26,15 +26,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property int|null $discount_id
  * @property numeric|null $discount_amount
- * @property-read ClientModel $client
+ * @property-read ClientModel|null $client
  * @property-read \App\Models\Billing\DiscountModel|null $discount
  * @property-read float $effective_amount
  * @property-read array $status
  * @property-read \App\Models\Billing\PaymentInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceModel> $invoices
  * @property-read int|null $invoices_count
- * @property-read PaymentMethodModel $payment_method
- * @property-read User $user
+ * @property-read PaymentMethodModel|null $payment_method
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentModel onlyTrashed()

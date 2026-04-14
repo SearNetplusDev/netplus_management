@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Billing\DiscountModel|null $discount
- * @property-read \App\Models\Billing\InvoiceModel $invoice
- * @property-read \App\Models\Billing\PaymentModel $payment
+ * @property-read \App\Models\Billing\InvoiceModel|null $invoice
+ * @property-read \App\Models\Billing\PaymentModel|null $payment
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentInvoiceModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentInvoiceModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentInvoiceModel onlyTrashed()

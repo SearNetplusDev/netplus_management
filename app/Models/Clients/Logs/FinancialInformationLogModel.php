@@ -18,9 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<array-key, mixed>|null $after
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read ClientModel $client
- * @property-read FinancialInformationModel $financial_information
- * @property-read User $user
+ * @property-read ClientModel|null $client
+ * @property-read FinancialInformationModel|null $financial_information
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinancialInformationLogModel query()

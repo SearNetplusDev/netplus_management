@@ -27,11 +27,11 @@ use App\Traits\DataViewer;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read BrandModel $brand
- * @property-read ModelModel $model
- * @property-read \App\Models\Infrastructure\Network\NodeModel $node
- * @property-read EquipmentStatusModel $status
- * @property-read TypeModel $type
+ * @property-read BrandModel|null $brand
+ * @property-read ModelModel|null $model
+ * @property-read \App\Models\Infrastructure\Network\NodeModel|null $node
+ * @property-read EquipmentStatusModel|null $status
+ * @property-read TypeModel|null $type
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentModel newQuery()

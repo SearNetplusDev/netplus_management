@@ -30,18 +30,18 @@ use App\Traits\HasCompanyTrait;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property int $company_id
- * @property-read BranchModel $branch
- * @property-read \App\Models\Infrastructure\Equipment\BrandModel $brand
+ * @property-read BranchModel|null $branch
+ * @property-read \App\Models\Infrastructure\Equipment\BrandModel|null $brand
  * @property-read array $company
  * @property-read \App\Models\Infrastructure\Equipment\InventoryLogModel|null $last_technician
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Infrastructure\Equipment\InventoryLogModel> $logs
  * @property-read int|null $logs_count
- * @property-read \App\Models\Infrastructure\Equipment\ModelModel $model
+ * @property-read \App\Models\Infrastructure\Equipment\ModelModel|null $model
  * @property-read ServiceEquipmentModel|null $on_internet_service
  * @property-read ServiceIptvEquipmentModel|null $on_iptv_service
  * @property-read ServiceSoldDeviceModel|null $on_sold_devices
- * @property-read EquipmentStatusModel $status
- * @property-read \App\Models\Infrastructure\Equipment\TypeModel $type
+ * @property-read EquipmentStatusModel|null $status
+ * @property-read \App\Models\Infrastructure\Equipment\TypeModel|null $type
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InventoryModel newQuery()

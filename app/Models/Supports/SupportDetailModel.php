@@ -19,7 +19,7 @@ use App\Traits\DataViewer;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read InternetModel|null $profile
- * @property-read \App\Models\Supports\SupportModel $support
+ * @property-read \App\Models\Supports\SupportModel|null $support
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportDetailModel newQuery()

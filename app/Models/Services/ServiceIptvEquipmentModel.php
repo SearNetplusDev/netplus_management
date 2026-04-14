@@ -25,9 +25,9 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property int $email_correlative
- * @property-read InventoryModel $equipment
+ * @property-read InventoryModel|null $equipment
  * @property-read array $status
- * @property-read \App\Models\Services\ServiceModel $service
+ * @property-read \App\Models\Services\ServiceModel|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIptvEquipmentModel newQuery()

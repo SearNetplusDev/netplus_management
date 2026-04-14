@@ -18,9 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<array-key, mixed>|null $after
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read ClientModel $client
- * @property-read DocumentModel $document
- * @property-read User $user
+ * @property-read ClientModel|null $client
+ * @property-read DocumentModel|null $document
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLogModel query()

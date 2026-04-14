@@ -22,8 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Billing\InvoiceModel $invoice
- * @property-read ServiceModel $service
+ * @property-read \App\Models\Billing\InvoiceModel|null $invoice
+ * @property-read ServiceModel|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceDetailModel onlyTrashed()

@@ -25,8 +25,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property numeric $prepayment_balance
- * @property-read ClientModel $client
- * @property-read StatusModel $status
+ * @property-read ClientModel|null $client
+ * @property-read StatusModel|null $status
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientFinancialStatusModel newQuery()

@@ -24,8 +24,8 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read array $status
- * @property-read InternetModel $profile
- * @property-read ServiceModel $service
+ * @property-read InternetModel|null $profile
+ * @property-read ServiceModel|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceInternetModel newQuery()

@@ -46,18 +46,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read BranchModel $branch
- * @property-read ClientModel $client
+ * @property-read BranchModel|null $branch
+ * @property-read ClientModel|null $client
  * @property-read ContractModel|null $contract
  * @property-read \App\Models\Supports\SupportDetailModel|null $details
- * @property-read DistrictModel $district
- * @property-read MunicipalityModel $municipality
+ * @property-read DistrictModel|null $district
+ * @property-read MunicipalityModel|null $municipality
  * @property-read ServiceModel|null $service
- * @property-read StateModel $state
- * @property-read \App\Models\Supports\StatusModel $status
+ * @property-read StateModel|null $state
+ * @property-read \App\Models\Supports\StatusModel|null $status
  * @property-read TechnicianModel|null $technician
- * @property-read \App\Models\Supports\TypeModel $type
- * @property-read User $user
+ * @property-read \App\Models\Supports\TypeModel|null $type
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel newQuery()

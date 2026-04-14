@@ -18,9 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<array-key, mixed>|null $after
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read AddressModel $address
- * @property-read ClientModel $client
- * @property-read User $user
+ * @property-read AddressModel|null $address
+ * @property-read ClientModel|null $client
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AddressLogModel query()

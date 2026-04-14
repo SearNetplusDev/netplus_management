@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<array-key, mixed>|null $after
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Supports\SupportModel $support
- * @property-read User $user
+ * @property-read \App\Models\Supports\SupportModel|null $support
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LogModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LogModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LogModel query()

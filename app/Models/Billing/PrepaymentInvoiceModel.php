@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Billing\InvoiceModel $invoice
- * @property-read \App\Models\Billing\PrepaymentModel $prepayment
+ * @property-read \App\Models\Billing\InvoiceModel|null $invoice
+ * @property-read \App\Models\Billing\PrepaymentModel|null $prepayment
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PrepaymentInvoiceModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PrepaymentInvoiceModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PrepaymentInvoiceModel onlyTrashed()

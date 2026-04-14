@@ -6,6 +6,7 @@ use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\ClientFinancialStatusModel;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\Options\DocumentTypeModel;
+use App\Models\Billing\OtherInvoiceModel;
 use App\Models\Billing\PrepaymentModel;
 use App\Models\Configuration\BranchModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
@@ -62,6 +63,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property-read MaritalStatusModel|null $marital_status
  * @property-read \App\Models\Clients\PhoneModel|null $mobile
  * @property-read \App\Models\Clients\DocumentModel|null $nit
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OtherInvoiceModel> $other_invoices
+ * @property-read int|null $other_invoices_count
  * @property-read \App\Models\Clients\DocumentModel|null $passport
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Clients\DocumentModel> $personal_documents
  * @property-read int|null $personal_documents_count
@@ -261,6 +264,11 @@ class ClientModel extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(InvoiceModel::class, 'client_id', 'id');
+    }
+
+    public function other_invoices(): HasMany
+    {
+        return $this->hasMany(OtherInvoiceModel::class, 'client_id', 'id');
     }
 
     public function financial_status(): HasOne

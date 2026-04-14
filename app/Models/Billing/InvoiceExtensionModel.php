@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $user_id
  * @property bool $status_id
  * @property-read array $status
- * @property-read \App\Models\Billing\InvoiceModel $invoice
- * @property-read User $user
+ * @property-read \App\Models\Billing\InvoiceModel|null $invoice
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceExtensionModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceExtensionModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceExtensionModel newQuery()

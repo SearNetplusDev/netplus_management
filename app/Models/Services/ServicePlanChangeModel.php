@@ -19,9 +19,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read InternetModel $new_internet_profile
- * @property-read InternetModel $old_internet_profile
- * @property-read \App\Models\Services\ServiceModel $service
+ * @property-read InternetModel|null $new_internet_profile
+ * @property-read InternetModel|null $old_internet_profile
+ * @property-read \App\Models\Services\ServiceModel|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServicePlanChangeModel onlyTrashed()

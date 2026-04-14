@@ -6,6 +6,8 @@ use App\Enums\v1\Billing\DocumentTypes;
 use App\Models\Billing\PaymentModel;
 use App\Models\Clients\ClientModel;
 use Illuminate\Support\Collection;
+use Random\RandomException;
+use InvalidArgumentException;
 
 class FacturaStrategy extends BaseDTEStrategy
 {
@@ -34,7 +36,7 @@ class FacturaStrategy extends BaseDTEStrategy
      *  Router principal: detecta el escenario según los datos recibidos.
      * @param array $data
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     protected function buildBody(array $data): array
     {
@@ -46,7 +48,7 @@ class FacturaStrategy extends BaseDTEStrategy
             return $this->buildFromManualData($data);
         }
 
-        throw new \InvalidArgumentException("Datos insuficientes");
+        throw new InvalidArgumentException("Datos insuficientes");
     }
 
     /***
@@ -57,7 +59,7 @@ class FacturaStrategy extends BaseDTEStrategy
      *
      * @param int $paymentId
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     private function buildFromPayment(int $paymentId): array
     {
@@ -99,7 +101,7 @@ class FacturaStrategy extends BaseDTEStrategy
      *
      * @param array $data
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     private function buildFromManualData(array $data): array
     {
@@ -112,7 +114,7 @@ class FacturaStrategy extends BaseDTEStrategy
             'corporate_info',
         ]);
 
-        $retainedIva = (bool)($client->corporate_info?->retained_iva ?? false);
+        $retainedIva = $client->corporate_info?->retained_iva ?? false;
         $discount = $this->round2((float)($data['totals']['discount'] ?? 0));
         $methodCode = $this->paymentMethodCode((int)$data['payment_method'] ?? 1);
         [$body, $gravado] = $this->buildLinesFromItems($data['items']);
@@ -139,7 +141,7 @@ class FacturaStrategy extends BaseDTEStrategy
      * @param int $condition
      * @param string $method
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     private function assembleDocument(
         ClientModel $client,
@@ -189,7 +191,7 @@ class FacturaStrategy extends BaseDTEStrategy
                     'codigo' => null,
                     'codTributo' => null,
                     'uniMedida' => 99,
-                    'descripcion' => "{$item->description} ({$invoice->period?->name})",
+                    'descripcion' => "$item->description ({$invoice->period?->name})",
                     'precioUni' => $lineTotal,
                     'montoDescu' => 0,
                     'ventaNoSuj' => 0,
@@ -259,7 +261,7 @@ class FacturaStrategy extends BaseDTEStrategy
             'tipoDocumento' => $document?->document_type?->code,
             'numDocumento' => $this->parseNumber($document->number ?? null),
             'nrc' => null,
-            'nombre' => "{$client->name} {$client->surname}",
+            'nombre' => "$client->name $client->surname",
             'codActividad' => null,
             'descActividad' => null,
             'direccion' => [

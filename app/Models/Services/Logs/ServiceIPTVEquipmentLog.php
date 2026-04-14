@@ -20,10 +20,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<array-key, mixed>|null $after
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read InventoryModel $equipment
- * @property-read ServiceModel $service
- * @property-read ServiceIptvEquipmentModel $service_iptv
- * @property-read User $user
+ * @property-read InventoryModel|null $equipment
+ * @property-read ServiceModel|null $service
+ * @property-read ServiceIptvEquipmentModel|null $service_iptv
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceIPTVEquipmentLog query()

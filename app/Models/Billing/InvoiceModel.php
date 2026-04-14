@@ -31,17 +31,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read ClientModel $client
+ * @property-read ClientModel|null $client
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceExtensionModel> $extensions
  * @property-read int|null $extensions_count
- * @property-read StatusModel $financial_status
+ * @property-read StatusModel|null $financial_status
  * @property-read array $status
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceDetailModel> $items
  * @property-read int|null $items_count
  * @property-read \App\Models\Billing\PaymentInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\PaymentModel> $payments
  * @property-read int|null $payments_count
- * @property-read \App\Models\Billing\PeriodModel $period
+ * @property-read \App\Models\Billing\PeriodModel|null $period
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InvoiceModel onlyTrashed()

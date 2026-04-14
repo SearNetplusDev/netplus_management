@@ -18,9 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<array-key, mixed>|null $after
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read ServiceInternetModel $internet_service
- * @property-read ServiceModel $service
- * @property-read User $user
+ * @property-read ServiceInternetModel|null $internet_service
+ * @property-read ServiceModel|null $service
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|InternetServiceLogModel query()

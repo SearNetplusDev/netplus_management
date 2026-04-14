@@ -28,13 +28,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\PrepaymentInvoiceModel> $applications
  * @property-read int|null $applications_count
- * @property-read ClientModel $client
+ * @property-read ClientModel|null $client
  * @property-read array $status
  * @property-read \App\Models\Billing\PrepaymentInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceModel> $invoices
  * @property-read int|null $invoices_count
- * @property-read PaymentMethodModel $payment_method
- * @property-read User $user
+ * @property-read PaymentMethodModel|null $payment_method
+ * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PrepaymentModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PrepaymentModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PrepaymentModel onlyTrashed()
