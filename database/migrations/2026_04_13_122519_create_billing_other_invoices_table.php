@@ -13,6 +13,12 @@ return new class extends Migration {
         Schema::create('billing_other_invoices', function (Blueprint $table) {
             $table->id();
 
+            //  Tipo de DTE
+            $table->foreignId('document_type_id')
+                ->constrained('billing_document_types')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             //  Id de cliente
             $table->foreignId('client_id')
                 ->constrained('clients')
@@ -58,7 +64,12 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['client_id', 'issue_date', 'created_by']);
+            $table->index([
+                'document_type_id',
+                'client_id',
+                'issue_date',
+                'created_by'
+            ]);
         });
     }
 

@@ -40,15 +40,11 @@ class FacturaStrategy extends BaseDTEStrategy
      */
     protected function buildBody(array $data): array
     {
-        if (isset($data['payment'])) {
-            return $this->buildFromPayment((int)$data['payment']);
-        }
-
-        if (isset($data['client_id'])) {
-            return $this->buildFromManualData($data);
-        }
-
-        throw new InvalidArgumentException("Datos insuficientes");
+        return match (true) {
+            isset($data['payment']) => $this->buildFromPayment((int)$data['payment']),
+            $data['source'] === 'manual' => $this->buildFromManualData($data),
+            default => throw new InvalidArgumentException("Origen no soportado: {$data['source']}")
+        };
     }
 
     /***

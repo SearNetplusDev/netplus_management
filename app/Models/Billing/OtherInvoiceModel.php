@@ -2,6 +2,7 @@
 
 namespace App\Models\Billing;
 
+use App\Models\Billing\Options\DocumentTypeModel;
 use App\Models\Billing\Options\PaymentMethodModel;
 use App\Models\Clients\ClientModel;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
+ * @property int $document_type_id
  * @property int $client_id
  * @property int $payment_condition
  * @property int $payment_method_id
@@ -31,6 +33,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read ClientModel|null $client
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\OtherInvoiceDetailModel> $details
  * @property-read int|null $details_count
+ * @property-read DocumentTypeModel|null $dte_type
  * @property-read array $status
  * @property-read PaymentMethodModel|null $payment_method
  * @property-read User|null $user
@@ -44,6 +47,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereCreatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereDiscountAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereDocumentTypeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereIssueDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereIva($value)
@@ -66,6 +70,7 @@ class OtherInvoiceModel extends Model
     protected $table = 'billing_other_invoices';
     protected $primaryKey = 'id';
     protected $fillable = [
+        'document_type_id',
         'client_id',
         'payment_condition',
         'payment_method_id',
@@ -81,6 +86,7 @@ class OtherInvoiceModel extends Model
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = [
         'id',
+        'document_type_id',
         'client_id',
         'payment_condition',
         'payment_method_id',
@@ -90,6 +96,7 @@ class OtherInvoiceModel extends Model
     ];
     protected array $orderable = [
         'id',
+        'document_type_id',
         'client_id',
         'payment_condition',
         'payment_method_id',
@@ -108,6 +115,11 @@ class OtherInvoiceModel extends Model
         'created_by' => 'integer',
     ];
     protected $appends = ['status'];
+
+    public function dte_type(): BelongsTo
+    {
+        return $this->belongsTo(DocumentTypeModel::class, 'document_type_id', 'id');
+    }
 
     public function client(): BelongsTo
     {
