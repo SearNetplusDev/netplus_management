@@ -37,6 +37,9 @@ return new class extends Migration {
             //  Subtotal
             $table->decimal('subtotal', 16, 8)->default(0);
 
+            //  Neto
+            $table->decimal('neto', 16, 8)->default(0);
+
             //  I.V.A.
             $table->decimal('iva', 16, 8)->default(0);
 

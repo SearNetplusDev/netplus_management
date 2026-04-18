@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $payment_condition
  * @property int $payment_method_id
  * @property numeric $subtotal
+ * @property numeric $neto
  * @property numeric $iva
  * @property numeric $iva_retenido
  * @property numeric $discount_amount
@@ -52,6 +53,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereIssueDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereIva($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereIvaRetenido($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereNeto($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel wherePaymentCondition($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel wherePaymentMethodId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OtherInvoiceModel whereStatusId($value)
@@ -75,6 +77,7 @@ class OtherInvoiceModel extends Model
         'payment_condition',
         'payment_method_id',
         'subtotal',
+        'neto',
         'iva',
         'iva_retenido',
         'discount_amount',
@@ -107,6 +110,7 @@ class OtherInvoiceModel extends Model
     ];
     protected $casts = [
         'subtotal' => 'decimal:8',
+        'neto' => 'decimal:8',
         'iva' => 'decimal:8',
         'iva_retenido' => 'decimal:8',
         'discount_amount' => 'decimal:8',

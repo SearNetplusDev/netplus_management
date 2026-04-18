@@ -32,7 +32,7 @@ class DTEService
 
         if (($data['source'] ?? '') === 'manual') {
             $userId = Auth::user()->id ?? throw new \RuntimeException("Usuario no autenticado");
-            $otherInvoice = $this->otherInvoiceService->createFromManualData(
+            $this->otherInvoiceService->createFromManualData(
                 type: $documentId,
                 data: $data,
                 userId: $userId
