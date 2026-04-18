@@ -7,6 +7,8 @@ use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\PaymentModel;
 use App\Models\Clients\ClientModel;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class CreditoFiscalStrategy extends BaseDTEStrategy
 {
@@ -78,6 +80,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             ->firstOrFail();
 
         $client = $payment->client;
+        $this->assertClientCanGenerateCreditoFiscal($client);
+
         $retainedIva = (bool)($client->corporate_info?->retained_iva ?? false);
         $discount = (float)($payment->discount_amount ?? 0);
         [$body, $gravado] = $this->buildLinesFromInvoices($payment->invoices);
@@ -111,6 +115,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'mobile',
             'email',
         ]);
+        $this->assertClientCanGenerateCreditoFiscal($client);
         $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
         $discount = round((float)($data['totals']['discount'] ?? 0), 2);
         [$body, $gravado] = $this->buildLinesFromItems($data['items']);
@@ -144,11 +149,14 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'mobile',
             'email',
         ]);
+
         $invoices = InvoiceModel::query()
             ->with(['items', 'period'])
             ->whereIn('id', $data['items'])
             ->where('client_id', $data['client_id'])
             ->get();
+
+        $this->assertClientCanGenerateCreditoFiscal($client);
 
         $retainedIva = (($data['totals']['iva_retenido'] ?? 0) > 0) || (bool)($client->corporate_info?->retained_iva ?? false);
         $discount = round((float)($data['totals']['discount'] ?? 0), 2);
@@ -380,5 +388,24 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'pagos' => $this->buildPagos($method, $totales['totalPagar']),
             'numPagoElectronico' => null,
         ];
+    }
+
+    /***
+     * Politica que verifica si se cumplen las condiciones para generar crédito fiscal a ese cliente.
+     *
+     * @param ClientModel $client
+     * @return void
+     */
+    private function assertClientCanGenerateCreditoFiscal(ClientModel $client): void
+    {
+        $isValidClientType = $client->client_type_id === 2;
+        $isValidDocumentType = $client->document_type_id === 2;
+        $hasCorporateInfo = $client->relationLoaded('corporate_info')
+            ? $client->corporate_info !== null
+            : $client->corporate_info()->exists();
+
+        if (!$isValidClientType && !$isValidDocumentType && !$hasCorporateInfo) {
+            throw new \InvalidArgumentException("Este cliente no cumple con los requisitos para generarle un crédito fiscal.");
+        }
     }
 }

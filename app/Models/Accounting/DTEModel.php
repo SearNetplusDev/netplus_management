@@ -15,7 +15,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * @property int $id
+ * @property int $client_id
+ * @property int $document_type_id
+ * @property string $control_number
+ * @property string $generation_code
+ * @property string $reception_stamp
+ * @property \Illuminate\Support\Carbon $generation_datetime
+ * @property numeric $total_amount
+ * @property int|null $payment_id
  * @property InvoiceCategories $invoice_category
+ * @property int|null $invoice_id
+ * @property int|null $other_invoice_id
+ * @property int|null $user_id
+ * @property bool $status_id
+ * @property array<array-key, mixed> $json_body
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read ClientModel|null $client
  * @property-read DocumentTypeModel|null $dte_type
  * @property-read \App\Models\Billing\InvoiceModel|\App\Models\Billing\OtherInvoiceModel|null $related_invoice
@@ -28,6 +45,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereControlNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereDocumentTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereGenerationCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereGenerationDatetime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereInvoiceCategory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereInvoiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereJsonBody($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereOtherInvoiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel wherePaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereReceptionStamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereTotalAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel withoutTrashed()
  * @mixin \Eloquent

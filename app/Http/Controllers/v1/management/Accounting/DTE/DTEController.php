@@ -13,6 +13,12 @@ class DTEController extends Controller
     {
     }
 
+    /***
+     * @param Request $request
+     * @param int $documentId
+     * @return JsonResponse
+     * @throws \Throwable
+     */
     public function store(Request $request, int $documentId): JsonResponse
     {
         return response()->json(
