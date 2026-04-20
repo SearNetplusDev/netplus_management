@@ -7,8 +7,6 @@ use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\PaymentModel;
 use App\Models\Clients\ClientModel;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Gate;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class CreditoFiscalStrategy extends BaseDTEStrategy
 {
