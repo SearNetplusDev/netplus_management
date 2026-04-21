@@ -4,6 +4,8 @@ namespace App\Strategies\v1\Accounting\DTE;
 
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Models\Clients\ClientModel;
+use Random\RandomException;
+use Throwable;
 
 class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
 {
@@ -56,7 +58,7 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
      *
      * @param array $data
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     protected function buildBody(array $data): array
     {
@@ -128,7 +130,8 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
      * @param int $condition
      * @param string|null $method
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
+     * @throws Throwable
      */
     private function assembleDocument(
         ClientModel $client,

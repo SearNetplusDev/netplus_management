@@ -3,10 +3,17 @@
 namespace App\Libraries\Accounting\DTE;
 
 use App\Enums\v1\Billing\DocumentTypes;
+use App\Models\Accounting\DTEModel;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HeaderUtils
 {
+    protected const FACTURA_INCREMENT = 1;
+    protected const CCF_INCREMENT = 1;
+    protected const FSE_INCREMENT = 1;
+    protected const MAX_CORRELATIVE_LENGTH = 15;
+
     /***
      * Ambiente de producción del DTE
      * @return string
@@ -18,12 +25,57 @@ class HeaderUtils
 
     /***
      * Genera el número de control según documento a emitir.
+     *
      * @param DocumentTypes $type
      * @return string
+     * @throws \Throwable
      */
     public function controlNumber(DocumentTypes $type): string
     {
-        return 'DTE-' . $type->code() . '-NTPS2026-123456789012345';
+        $year = Carbon::now()->format('Y');
+
+        $correlative = DB::transaction(function () use ($type) {
+            $lastDTE = DTEModel::query()
+                ->where('document_type_id', $type->value)
+                ->orderBy('id', 'desc')
+                ->lockForUpdate()
+                ->first();
+
+            $lastNumber = 0;
+
+            if ($lastDTE && preg_match('/-(\d{15})$/', $lastDTE->control_number, $matches)) {
+                $lastNumber = (int)$matches[1];
+            }
+
+            $startNumber = $this->getStartNumberForType($type);
+            $newNumber = $lastNumber > 0 ? $lastNumber + 1 : $startNumber;
+
+            if (strlen((string)$newNumber) > self::MAX_CORRELATIVE_LENGTH) {
+                throw new \RuntimeException("Se ha alcanzado el límite máximo de correlativos para {$type->label()}");
+            }
+
+            return $newNumber;
+        });
+
+        $tail = str_pad($correlative, self::MAX_CORRELATIVE_LENGTH, "0", STR_PAD_LEFT);
+
+        return "DTE-{$type->code()}-NTPS{$year}-{$tail}";
+    }
+
+    /***
+     * Obtiene el incremento según el tipo de documento.
+     *
+     * @param DocumentTypes $type
+     * @return int
+     */
+    protected function getStartNumberForType(DocumentTypes $type): int
+    {
+        return match ($type->value) {
+            DocumentTypes::FACTURA->value => self::FACTURA_INCREMENT,
+            DocumentTypes::CREDITO_FISCAL->value => self::CCF_INCREMENT,
+            DocumentTypes::FACTURA_SUJETO_EXCLUIDO->value => self::FSE_INCREMENT,
+            default => throw new \InvalidArgumentException("{$type->label()} no admitido para generar DTE"),
+        };
     }
 
     /***

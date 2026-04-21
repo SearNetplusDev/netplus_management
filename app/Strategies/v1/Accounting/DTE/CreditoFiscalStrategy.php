@@ -2,11 +2,14 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
+use App\Enums\v1\Accounting\TaxRate;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\PaymentModel;
 use App\Models\Clients\ClientModel;
 use Illuminate\Support\Collection;
+use Random\RandomException;
+use Throwable;
 
 class CreditoFiscalStrategy extends BaseDTEStrategy
 {
@@ -39,7 +42,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      *
      * @param array $data
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
+     * @throws Throwable
      */
     protected function buildBody(array $data): array
     {
@@ -57,7 +61,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      *
      * @param int $paymentId
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
+     * @throws Throwable
      */
     private function buildFromPayment(int $paymentId): array
     {
@@ -101,7 +106,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      *
      * @param array $data
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
+     * @throws Throwable
      */
     private function buildFromManual(array $data): array
     {
@@ -135,7 +141,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      *
      * @param array $data
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
+     * @throws Throwable
      */
     private function buildFromSelectedInvoices(array $data): array
     {
@@ -182,7 +189,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
      * @param int $condition
      * @param string|null $method
      * @return array
-     * @throws \Random\RandomException
+     * @throws RandomException
+     * @throws Throwable
      */
     private function assembleDocument(
         ClientModel $client,
@@ -225,7 +233,6 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
         return $this->iterateInvoiceItems($invoices, function ($item, $invoice, $numItem) {
             $precioUni = (float)$item->unit_price;
             $gravada = $precioUni * (int)$item->quantity;
-
             return [
                 $this->buildLineItem(
                     num: $numItem,
@@ -252,7 +259,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
         $body = [];
 
         foreach ($items as $item) {
-            $precioUni = (float)$item['unit_price'] / self::TASA_VALOR_NETO;
+            $precioUni = (float)$item['unit_price'] / TaxRate::VALOR_NETO->value();
             $gravada = $precioUni * (int)$item['quantity'];
 
             $body[] = $this->buildLineItem(
@@ -355,7 +362,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
     ): array
     {
         //  Total bruto con Iva antes del descuento
-        $totalConIva = $gravado * self::TASA_VALOR_NETO;
+        $totalConIva = $gravado * TaxRate::VALOR_NETO->value();
         $totales = $this->calculateTotals($totalConIva, $discount, $retainedIva);
 
         return [

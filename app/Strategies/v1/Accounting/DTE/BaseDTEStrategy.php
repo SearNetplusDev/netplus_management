@@ -3,6 +3,7 @@
 namespace App\Strategies\v1\Accounting\DTE;
 
 use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
+use App\Enums\v1\Accounting\TaxRate;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Libraries\Accounting\DTE\HeaderUtils;
 use App\Libraries\Accounting\DTE\IssuerUtils;
@@ -13,10 +14,6 @@ use Illuminate\Support\Collection;
 
 abstract class BaseDTEStrategy implements DTEGeneratorInterface
 {
-    protected const TASA_VALOR_NETO = 1.13;
-    protected const TASA_IVA = 0.13;
-    protected const TASA_IVA_RETENIDO = 0.01;
-
     /***
      * @param HeaderUtils $headerUtils
      * @param IssuerUtils $issuerUtils
@@ -70,6 +67,7 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
      * @param int $version
      * @return array
      * @throws \Random\RandomException
+     * @throws \Throwable
      */
     protected function identificacion(DocumentTypes $type, int $version = 1): array
     {
@@ -203,7 +201,8 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
      */
     protected function round2(float|int $number): float
     {
-        return bcadd((string)$number, '0.005', 2);
+        return (float)round($number, 2, PHP_ROUND_HALF_UP);
+//        return bcadd((string)$number, '0.005', 2);
     }
 
     /***
@@ -247,9 +246,9 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     ): array
     {
         $totalConDescuento = $gravado - $discount;
-        $neto = $totalConDescuento / self::TASA_VALOR_NETO;
-        $iva = $neto * self::TASA_IVA;
-        $ivaRetenido = ($retainedIva && $totalConDescuento > 100) ? $neto * self::TASA_IVA_RETENIDO : 0;
+        $neto = $totalConDescuento / TaxRate::VALOR_NETO->value();
+        $iva = $neto * TaxRate::IVA->value();
+        $ivaRetenido = ($retainedIva && $totalConDescuento > 100) ? $neto * TaxRate::IVA_RETENIDO->value() : 0;
         $totalPagar = $neto + $iva - $ivaRetenido;
 
         return compact('neto', 'iva', 'ivaRetenido', 'totalPagar', 'totalConDescuento');
@@ -300,6 +299,6 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
             }
         }
 
-        return [$body, $this->round2($acumulado)];
+        return [$body, $acumulado];
     }
 }

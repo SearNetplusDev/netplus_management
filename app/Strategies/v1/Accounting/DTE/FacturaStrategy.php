@@ -8,6 +8,7 @@ use App\Models\Clients\ClientModel;
 use Illuminate\Support\Collection;
 use Random\RandomException;
 use InvalidArgumentException;
+use Throwable;
 
 class FacturaStrategy extends BaseDTEStrategy
 {
@@ -138,6 +139,7 @@ class FacturaStrategy extends BaseDTEStrategy
      * @param string $method
      * @return array
      * @throws RandomException
+     * @throws Throwable
      */
     private function assembleDocument(
         ClientModel $client,
