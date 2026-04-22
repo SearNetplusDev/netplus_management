@@ -39,14 +39,11 @@ return new class extends Migration {
             //  Tipo de factura
             $table->tinyInteger('invoice_category')->default(1);
 
-            //  Id de Factura
-            $table->foreignId('invoice_id')->nullable()->constrained('billing_invoices')->cascadeOnUpdate()->nullOnDelete();
-
             //  Id de Otra factura
             $table->foreignId('other_invoice_id')->nullable()->constrained('billing_other_invoices')->cascadeOnUpdate()->nullOnDelete();
 
             //  Id de usuario
-            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnUpdate()->nullOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate()->nullOnDelete();
 
             //  Estado
             $table->boolean('status_id')->default(true);
@@ -61,7 +58,7 @@ return new class extends Migration {
             $table->index('control_number');
             $table->index('generation_code');
             $table->index('generation_datetime');
-            $table->index(['invoice_category', 'invoice_id', 'other_invoice_id']);
+            $table->index(['invoice_category', 'other_invoice_id']);
             $table->index('user_id');
         });
     }

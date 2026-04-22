@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Traits\DataViewer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -120,6 +121,7 @@ class DTEModel extends Model
         'total_amount' => 'decimal:2',
         'json_body' => 'array',
         'invoice_category' => InvoiceCategories::class,
+        'status_id' => 'boolean',
     ];
 
     public function client(): BelongsTo
@@ -142,9 +144,17 @@ class DTEModel extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function invoice(): BelongsTo
+    public function invoices(): BelongsToMany
     {
-        return $this->belongsTo(InvoiceModel::class, 'invoice_id', 'id');
+        return $this->belongsToMany(
+            InvoiceModel::class,
+            'accounting_dte_invoices',
+            'dte_id',
+            'invoice_id'
+        )
+            ->using(DTEInvoiceModel::class)
+            ->withTimestamps()
+            ->withTrashed();
     }
 
     public function other_invoice(): BelongsTo
@@ -155,7 +165,7 @@ class DTEModel extends Model
     public function getRelatedInvoiceAttribute(): InvoiceModel|OtherInvoiceModel|null
     {
         return match ($this->invoice_category) {
-            InvoiceCategories::INVOICE => $this->invoice,
+            InvoiceCategories::INVOICE => $this->invoices,
             InvoiceCategories::OTHER_INVOICE => $this->other_invoice,
             default => throw new \LogicException("Categoría de factura inválida."),
         };
