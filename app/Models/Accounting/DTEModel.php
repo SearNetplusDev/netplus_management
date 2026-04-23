@@ -26,9 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property numeric $total_amount
  * @property int|null $payment_id
  * @property InvoiceCategories $invoice_category
- * @property int|null $invoice_id
  * @property int|null $other_invoice_id
- * @property int|null $user_id
+ * @property int $user_id
  * @property bool $status_id
  * @property array<array-key, mixed> $json_body
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -37,7 +36,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read ClientModel|null $client
  * @property-read DocumentTypeModel|null $dte_type
  * @property-read \App\Models\Billing\InvoiceModel|\App\Models\Billing\OtherInvoiceModel|null $related_invoice
- * @property-read InvoiceModel|null $invoice
+ * @property-read \App\Models\Accounting\DTEInvoiceModel|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceModel> $invoices
+ * @property-read int|null $invoices_count
  * @property-read OtherInvoiceModel|null $other_invoice
  * @property-read PaymentModel|null $payment
  * @property-read User|null $user
@@ -55,7 +56,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereGenerationDatetime($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereInvoiceCategory($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereInvoiceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereJsonBody($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel whereOtherInvoiceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel wherePaymentId($value)

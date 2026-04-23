@@ -307,7 +307,7 @@ class PaymentService
     public function clientPayments(int $clientId): Collection
     {
         return PaymentModel::query()
-            ->with(['user', 'payment_method', 'discount'])
+            ->with(['user', 'payment_method', 'discount', 'dte'])
             ->where(['client_id' => $clientId])
             ->get();
     }

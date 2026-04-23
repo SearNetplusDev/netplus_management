@@ -2,6 +2,7 @@
 
 namespace App\Models\Billing;
 
+use App\Models\Accounting\DTEModel;
 use App\Models\Billing\Options\PaymentMethodModel;
 use App\Models\Clients\ClientModel;
 use App\Models\User;
@@ -9,6 +10,7 @@ use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -116,6 +118,11 @@ class PaymentModel extends Model
     public function discount(): BelongsTo
     {
         return $this->belongsTo(DiscountModel::class, 'discount_id', 'id');
+    }
+
+    public function dte(): HasOne
+    {
+        return $this->hasOne(DTEModel::class, 'payment_id', 'id');
     }
 
     public function getEffectiveAmountAttribute(): float

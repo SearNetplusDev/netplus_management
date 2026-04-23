@@ -38,6 +38,7 @@ class FacturaStrategy extends BaseDTEStrategy
      * @param array $data
      * @return array
      * @throws RandomException
+     * @throws Throwable
      */
     protected function buildBody(array $data): array
     {
@@ -57,6 +58,7 @@ class FacturaStrategy extends BaseDTEStrategy
      * @param int $paymentId
      * @return array
      * @throws RandomException
+     * @throws Throwable
      */
     private function buildFromPayment(int $paymentId): array
     {
@@ -99,6 +101,7 @@ class FacturaStrategy extends BaseDTEStrategy
      * @param array $data
      * @return array
      * @throws RandomException
+     * @throws Throwable
      */
     private function buildFromManualData(array $data): array
     {

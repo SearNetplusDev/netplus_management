@@ -49,7 +49,7 @@ return new class extends Migration {
             $table->boolean('status_id')->default(true);
 
             //  JSON del DTE
-            $table->jsonb('json_body');
+            $table->json('json_body');
             $table->timestamps();
             $table->softDeletes();
 

@@ -7,22 +7,19 @@ use App\DTOs\v1\management\accounting\dte\DTEDTO;
 use App\Enums\v1\Accounting\InvoiceCategories;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Models\Accounting\DTEModel;
-use App\Services\v1\management\billing\otherInvoices\OtherInvoiceService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class DTEService
 {
     public function __construct(
-        private DTEContext          $context,
-        private OtherInvoiceService $otherInvoiceService,
+        private DTEContext $context,
     )
     {
     }
 
     /***
-     * Genera el JSON con el DTE según estrategia, almacena la factura en caso de generarse manualmente.
+     * Genera el JSON con el DTE según estrategia.
      *
      * @param int $documentId
      * @param array $data
@@ -33,17 +30,7 @@ class DTEService
     {
         $type = DocumentTypes::from($documentId);
         $this->context->setStrategy($type->strategy());
-        $json = $this->context->execute($data);
-
-        if (($data['source'] ?? '') === 'manual') {
-            $userId = Auth::user()->id ?? throw new \RuntimeException("Usuario no autenticado");
-            $this->otherInvoiceService->createFromManualData(
-                type: $documentId,
-                data: $data,
-                userId: $userId
-            );
-        }
-        return $json;
+        return $this->context->execute($data);
     }
 
     /***
