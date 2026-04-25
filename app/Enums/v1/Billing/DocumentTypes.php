@@ -3,6 +3,7 @@
 namespace App\Enums\v1\Billing;
 
 use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
+use App\Contracts\v1\Accounting\DTE\DTEPrinterInterface;
 use App\Strategies\v1\Accounting\DTE\ComprobanteDonacionStrategy;
 use App\Strategies\v1\Accounting\DTE\ComprobanteLiquidacionStrategy;
 use App\Strategies\v1\Accounting\DTE\ComprobanteRetencionStrategy;
@@ -14,6 +15,9 @@ use App\Strategies\v1\Accounting\DTE\FacturaSujetoExcluidoStrategy;
 use App\Strategies\v1\Accounting\DTE\NotaCreditoStrategy;
 use App\Strategies\v1\Accounting\DTE\NotaDebitoStrategy;
 use App\Strategies\v1\Accounting\DTE\NotaRemisionStrategy;
+use App\Strategies\v1\Accounting\DTE\Prints\CreditoFiscalPrintStrategy;
+use App\Strategies\v1\Accounting\DTE\Prints\FacturaPrintStrategy;
+use App\Strategies\v1\Accounting\DTE\Prints\FacturaSujetoExcluidoPrintStrategy;
 
 enum DocumentTypes: int
 {
@@ -82,8 +86,22 @@ enum DocumentTypes: int
         };
     }
 
+    public function printStrategyClass(): string
+    {
+        return match ($this) {
+            self::FACTURA => FacturaPrintStrategy::class,
+            self::CREDITO_FISCAL => CreditoFiscalPrintStrategy::class,
+            self::FACTURA_SUJETO_EXCLUIDO => FacturaSujetoExcluidoPrintStrategy::class,
+        };
+    }
+
     public function strategy(): DTEGeneratorInterface
     {
         return app($this->strategyClass());
+    }
+
+    public function printStrategy(): DTEPrinterInterface
+    {
+        return app($this->printStrategyClass());
     }
 }

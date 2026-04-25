@@ -32,11 +32,12 @@ class HeaderUtils
      */
     public function controlNumber(DocumentTypes $type): string
     {
-        $year = Carbon::now()->format('Y');
+        $year = Carbon::now()->year;
 
-        $correlative = DB::transaction(function () use ($type) {
+        $correlative = DB::transaction(function () use ($type, $year) {
             $lastDTE = DTEModel::query()
                 ->where('document_type_id', $type->value)
+                ->whereYear('generation_datetime', $year)
                 ->orderBy('id', 'desc')
                 ->lockForUpdate()
                 ->first();
@@ -59,7 +60,7 @@ class HeaderUtils
 
         $tail = str_pad($correlative, self::MAX_CORRELATIVE_LENGTH, "0", STR_PAD_LEFT);
 
-        return "DTE-{$type->code()}-NTPS{$year}-{$tail}";
+        return "DTE-{$type->code()}-S001P001-{$tail}";
     }
 
     /***

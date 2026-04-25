@@ -5,13 +5,18 @@ namespace App\Http\Controllers\v1\management\Accounting\DTE;
 use App\Http\Controllers\Controller;
 use App\Models\Accounting\DTEModel;
 use App\Services\v1\management\accounting\DTE\DTEOrchestrator;
+use App\Services\v1\management\accounting\DTE\DTEPrintService;
 use App\Services\v1\management\DataViewerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class DTEController extends Controller
 {
-    public function __construct(private readonly DTEOrchestrator $dteOrchestrator)
+    public function __construct(
+        private readonly DTEOrchestrator $dteOrchestrator,
+        private readonly DTEPrintService $dtePrintService,
+    )
     {
 
     }
@@ -40,6 +45,8 @@ class DTEController extends Controller
     }
 
     /***
+     * Emite el documento tributario electrónico
+     *
      * @param Request $request
      * @param int $documentId
      * @return JsonResponse
@@ -50,5 +57,18 @@ class DTEController extends Controller
         return response()->json(
             $this->dteOrchestrator->process($documentId, $request->all())
         );
+    }
+
+    /***
+     * Imprime el DTE según ID
+     *
+     * @param int $dteId
+     * @return Response
+     */
+    public function printDTE(int $dteId): Response
+    {
+        $pdf = $this->dtePrintService->print($dteId);
+
+        return $pdf->stream();
     }
 }
