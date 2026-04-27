@@ -10,7 +10,7 @@
     }
 
     body {
-        font-family: 'Calibri', sans-serif;
+        font-family: Calibri, sans-serif;
         font-size: 11px;
         line-height: 1.15em;
         color: #333333;
@@ -18,42 +18,10 @@
         text-align: justify;
     }
 
-    .grid {
+    .table-full {
         width: 100%;
-        margin: 0 auto;
-    }
-
-    .grid-1 .col {
-        display: block;
-        width: 100%;
-    }
-
-    .grid-2 .col {
-        display: inline-block;
-        width: 49%;
-        vertical-align: top;
-    }
-
-    .grid-3 {
-        display: table;
-        width: 100%;
+        border-collapse: collapse;
         table-layout: fixed;
-    }
-
-    .grid-3 .col {
-        display: table-cell;
-        width: 33%;
-        vertical-align: middle;
-    }
-
-    .grid-3 .col-1 {
-        display: table-cell;
-        width: 20%;
-    }
-
-    .grid-3 .col-2 {
-        display: table-cell;
-        width: 60%;
     }
 
     .title-h1 {
@@ -62,22 +30,92 @@
         text-align: center;
     }
 
-    .mt-xs {
-        margin-top: 5px;
-    }
-
-    .align-images {
-        vertical-align: middle;
+    .header-logo {
+        width: 20%;
         text-align: center;
+        vertical-align: middle;
     }
 
-    .align-header-text {
+    .header-data {
+        width: 60%;
         vertical-align: middle;
         padding: 0 1.5em;
     }
 
+    .header-qr {
+        width: 20%;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .section-cell {
+        width: 50%;
+        vertical-align: top;
+        padding: 5px;
+    }
+
+    .section-cell:first-child {
+        padding-left: 0;
+    }
+
+    .section-cell:last-child {
+        padding-right: 0;
+    }
+
+    .section-container {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .box-cell {
+        width: 49%;
+        border: 1px solid #1a202c;
+        border-radius: 10px;
+        vertical-align: middle;
+        padding: 10px;
+    }
+
+    .box-content {
+        width: 100%;
+    }
+
+    .box {
+        border: 1px solid #1a202c;
+        border-radius: 10px;
+        padding: 5px;
+        width: 100%;
+    }
+
+    .box-inner {
+        width: 100%;
+        height: 100%;
+        border-collapse: collapse;
+    }
+
+    .box-inner td {
+        vertical-align: top;
+        padding: 0;
+    }
+
+    .mt-xs {
+        margin-top: 5px;
+    }
+
+    .mt-sm {
+        margin-top: 10px;
+    }
+
     .font-bold {
         font-weight: bold;
+    }
+
+    .center-text {
+        text-align: center;
+    }
+
+    .text-small {
+        font-size: 10px;
+        line-height: 1em;
     }
 
 </style>

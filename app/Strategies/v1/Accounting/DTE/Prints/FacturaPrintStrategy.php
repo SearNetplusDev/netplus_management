@@ -2,37 +2,48 @@
 
 namespace App\Strategies\v1\Accounting\DTE\Prints;
 
-use App\Contracts\v1\Accounting\DTE\DTEPrinterInterface;
 use App\Models\Accounting\DTEModel;
-use App\Services\v1\management\accounting\DTE\DTEPrintService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPDF;
 
-readonly class FacturaPrintStrategy implements DTEPrinterInterface
+readonly class FacturaPrintStrategy extends BasePrint
 {
-    public function __construct(private readonly DTEPrintService $printService)
+    protected function generate(DTEModel $model): DomPDF
     {
+        $client = $this->getClientInfo($model->client_id, [
+            'dui',
+            'mobile',
+            'email',
+            'address',
+        ]);
 
-    }
+        $address = $client->address?->address;
+        $address .= ", {$client->address?->district?->name}";
+        $address .= ", {$client->address?->municipality?->name}";
+        $address .= ", {$client->address?->state?->name}.";
 
-    /***
-     * Genera el PDF con los datos del documento emitido.
-     *
-     * @param DTEModel $dte
-     * @return DomPDF
-     */
-    public function print(DTEModel $dte): DomPDF
-    {
-        $qrCode = $this->printService->qrCode(
-            generationCode: $dte->generation_code,
-            date: $dte->generation_datetime,
-        );
+        $clientData = [
+            'name' => ucwords("{$client->name} {$client->surname}"),
+            'dui' => str_replace('-', '', $client->dui?->number) ?? '',
+            'address' => $address,
+            'phone' => $client->mobile?->number ?? '',
+            'email' => $client->email?->email ?? '',
+        ];
 
-        return Pdf::loadView('v1.management.pdf.accounting.dte.factura', [
-            'qrCode' => $qrCode,
-            'data' => $dte->json_body,
-            'receptionStamp' => $dte->reception_stamp,
+        return Pdf::loadView($this->getView(), [
+            'qrCode' => $this->buildQrCode(
+                generationCode: $model->generation_code,
+                date: $model->generation_datetime,
+            ),
+            'data' => $model->json_body,
+            'receptionStamp' => $model->reception_stamp,
+            'clientData' => $clientData,
         ])
             ->setPaper('A4', 'portrait');
+    }
+
+    protected function getView(): string
+    {
+        return 'v1.management.pdf.accounting.dte.factura';
     }
 }
