@@ -5,7 +5,6 @@ namespace App\Strategies\v1\Accounting\DTE\Prints;
 use App\Contracts\v1\Accounting\DTE\DTEPrinterInterface;
 use App\Models\Accounting\DTEModel;
 use App\Models\Clients\ClientModel;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPDF;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -24,31 +23,6 @@ abstract readonly class BasePrint implements DTEPrinterInterface
     }
 
     abstract protected function generate(DTEModel $model): DomPDF;
-
-    /***
-     * Nombre de la vista que se debe renderizar.
-     *
-     * @return string
-     */
-    abstract protected function getView(): string;
-
-    /***
-     * Datos que serán enviados a la vista.
-     *
-     * @param DTEModel $model
-     * @return array
-     */
-    protected function buildViewData(DTEModel $model): array
-    {
-        return [
-            'qrCode' => $this->buildQrCode(
-                generationCode: $model->generation_code,
-                date: $model->generation_datetime
-            ),
-            'data' => $model->json_body,
-            'receptionStamp' => $model->reception_stamp,
-        ];
-    }
 
     /***
      * Genera el código QR.
@@ -82,5 +56,20 @@ abstract readonly class BasePrint implements DTEPrinterInterface
         return ClientModel::query()
             ->with($relations)
             ->findOrFail($clientId);
+    }
+
+    /***
+     * Retorna la condición de la operación.
+     *
+     * @param int $condition
+     * @return string
+     */
+    protected function condition(int $condition): string
+    {
+        return match ($condition) {
+            1 => 'Contado',
+            2 => 'Crédito',
+            3 => 'Otro',
+        };
     }
 }

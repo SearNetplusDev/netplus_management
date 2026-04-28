@@ -30,6 +30,8 @@ readonly class FacturaPrintStrategy extends BasePrint
             'email' => $client->email?->email ?? '',
         ];
 
+        $condition = $this->condition($model->json_body['resumen']['condicionOperacion']);
+
         return Pdf::loadView($this->getView(), [
             'qrCode' => $this->buildQrCode(
                 generationCode: $model->generation_code,
@@ -38,6 +40,7 @@ readonly class FacturaPrintStrategy extends BasePrint
             'data' => $model->json_body,
             'receptionStamp' => $model->reception_stamp,
             'clientData' => $clientData,
+            'condition' => $condition,
         ])
             ->setPaper('A4', 'portrait');
     }

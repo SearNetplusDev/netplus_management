@@ -85,5 +85,129 @@
     </tbody>
 </table>
 <!--    Fin Emisor/Receptor     -->
+
+<!--        Contenido del documento     -->
+<table class="mt-xs section-container body-table" style="margin-top: 12px;">
+    <thead>
+    <tr class="header-row">
+        <th class="col-n">N°</th>
+        <th class="col-cant">Cant.</th>
+        {{--        <th class="col-unidad">Unidad</th>--}}
+        <th class="col-desc">Descripción</th>
+        <th class="col-precio">Precio Unitario</th>
+        <th class="col-otros">Otros montos no afectos</th>
+        <th class="col-descto">Descuento por Ítem</th>
+        <th class="col-nosuj">Ventas No Sujetas</th>
+        <th class="col-exentas">Ventas Exentas</th>
+        <th class="col-gravadas">Ventas Gravadas</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    @foreach($data['cuerpoDocumento'] as $item)
+        <tr class="data-row">
+            <td>{{ $item['numItem'] }}</td>
+            <td>{{ $item['cantidad'] }}</td>
+            {{--            <td>{{ $item['uniMedida'] }}</td>--}}
+            <td>{{ $item['descripcion'] }}</td>
+            <td>$ {{ number_format($item['precioUni'], 2) }}</td>
+            <td>$ 0.00</td>
+            <td>$ {{ number_format($item['montoDescu'], 2) }}</td>
+            <td>$ {{ number_format($item['ventaNoSuj'], 2) }}</td>
+            <td>$ {{ number_format($item['ventaExenta'], 2) }}</td>
+            <td>$ {{ number_format($item['ventaGravada'], 2) }}</td>
+        </tr>
+    @endforeach
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="3" class="summary-label"><b>Suma de ventas:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['totalNoSuj'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['totalExenta'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['totalGravada'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Sumatoria de ventas:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['totalGravada'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas no sujetas:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['descuNoSuj'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas exentas:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['descuExenta'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas gravadas:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['descuGravada'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Impuesto al Valor Agregado (13%):</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['totalIva'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Subtotal:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['subTotalVentas'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>IVA retenido:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['ivaRete1'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Retención renta:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['reteRenta'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Monto total de la operación:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['montoTotalOperacion'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Total otros montos no afectos:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['totalNoGravado'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>Total a pagar:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['totalPagar'], 2) }}</td>
+    </tr>
+    </tbody>
+</table>
+<!--        Fin contenido del documento     -->
+
+<div style="margin-top: 10px">
+    <div>
+        <p>
+            <span><b>Valor en letras:</b></span> {{ $data['resumen']['totalLetras'] }}
+        </p>
+        <p>
+            <span><b>Condición de operación:</b></span> {{ $condition }}
+        </p>
+        <p>
+            <span><b>Observaciones:</b></span>
+        </p>
+    </div>
+</div>
 </body>
 </html>

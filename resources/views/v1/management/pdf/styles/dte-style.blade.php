@@ -118,4 +118,120 @@
         line-height: 1em;
     }
 
+
+    /*
+    * Formato de tabla cuerpo documento
+    */
+    .body-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .body-table th, .body-table td {
+        border: 1px solid #999999;
+        padding: 4px 5px;
+        vertical-align: middle;
+        text-align: center;
+        word-wrap: break-word;
+    }
+
+    .header-row th {
+        background-color: #d9d9d9;
+        font-weight: bold;
+        font-size: 7pt;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .data-row td {
+        height: 18px;
+        font-size: 7pt;
+    }
+
+    .summary-label {
+        text-align: right !important;
+        font-size: 8pt;
+        font-weight: normal;
+        border: 1px solid #999999;
+        padding: 3px 5px;
+    }
+
+    .summary-label-bold {
+        text-align: right;
+        font-size: 8pt;
+        font-weight: bold;
+        border: 1px solid #999999;
+        padding: 3px 5px;
+    }
+
+    .summary-value {
+        border: 1px solid #999999;
+        width: 80px;
+        height: 16px;
+    }
+
+    .tribute-header {
+        background-color: #d9d9d9;
+        font-weight: bold;
+        font-size: 8pt;
+        text-align: right;
+        border: 1px solid #999999;
+        padding: 3px 5px;
+    }
+
+    .tribute-header-val {
+        background-color: #d9d9d9;
+        font-weight: bold;
+        font-size: 8pt;
+        text-align: center;
+        border: 1px solid #999999;
+        padding: 3px 5px;
+    }
+
+    .col-n {
+        width: 4%;
+    }
+
+    .col-cant {
+        width: 7%;
+    }
+
+    .col-unidad {
+        width: 7%;
+    }
+
+    .col-desc {
+        width: 30%;
+    }
+
+    .col-precio {
+        width: 9%;
+    }
+
+    .col-otros {
+        /*width: 10%;*/
+        width: 9%;
+    }
+
+    .col-descto {
+        width: 9%;
+    }
+
+    .col-nosuj {
+        width: 9%;
+    }
+
+    .col-exentas {
+        width: 9%;
+    }
+
+    .col-gravadas {
+        width: 10%;
+    }
+
+    .borderless {
+        border: none !important;
+    }
+
 </style>
