@@ -368,11 +368,11 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
         return [
             'totalNoSuj' => 0,
             'totalExenta' => 0,
-            'totalGravado' => $this->round2($totales['neto']),
+            'totalGravada' => $this->round2($totales['neto']),
             'subTotalVentas' => $this->round2($totales['neto']),
             'descuNoSuj' => 0,
             'descuExenta' => 0,
-            'descuGravado' => $discount,
+            'descuGravada' => $discount,
             'porcentajeDescuento' => 0,
             'totalDescu' => $discount,
             'tributos' => [
@@ -385,6 +385,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'subTotal' => $this->round2($totales['neto']),
             'ivaPerci1' => 0,
             'ivaRete1' => $this->round2($totales['ivaRetenido']),
+            'reteRenta' => 0,
+            'montoTotalOperacion' => $this->round2($totalConIva),
             'totalNoGravado' => 0,
             'totalPagar' => $this->round2($totales['totalPagar']),
             'totalLetras' => $this->numberToLetter->convert($this->round2($totales['totalPagar'])),

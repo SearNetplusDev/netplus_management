@@ -4,25 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Factura</title>
+    <title>Document</title>
     @include('v1.management.pdf.styles.dte-style')
 </head>
 <body>
-
 <p class="title-h1">Documento Tributario Electrónico</p>
-<p class="title-h1 mt-xs">Factura</p>
+<p class="title-h1 mt-xs">Comprobante de Crédito Fiscal</p>
 
 <!--        Encabezado: Logo | Datos | QR       -->
 <table class="table-full mt-xs">
     <tbody>
     <tr>
         <td class="header-logo">
-            <img src="{{ public_path('assets/img/logos/color.png') }}" alt="LOGO GOES HERE" style="width: 95%">
+            <img src="{{ public_path('assets/img/logos/color.png') }}" alt="LOGO GOES HERE" style="width: 95%"/>
         </td>
 
         <td class="header-data">
             <p>
-                <span class="font-bold">Número de control: </span>{{ $data['identificacion']['numeroControl'] }}
+                <span class="font-bold">Número de control:</span> {{ $data['identificacion']['numeroControl'] }}
             </p>
             <p>
                 <span class="font-bold">Código de generación: </span>{{ $data['identificacion']['codigoGeneracion'] }}
@@ -46,7 +45,7 @@
 </table>
 <!--        Fin Encabezado      -->
 
-<!--    Emisor/Receptor     -->
+<!--        Emisor/Receptor     -->
 <table class="table-full mt-xs section-container">
     <tbody>
     <tr>
@@ -75,7 +74,9 @@
                 <p class="font-bold center-text">Receptor</p>
                 <div class="text-small">
                     <p><span class="font-bold">Nombre o razón social: </span>{{ $clientData['name'] }}</p>
-                    <p><span class="font-bold">DUI: </span>{{ $clientData['dui'] }}</p>
+                    <p><span class="font-bold">NIT: </span>{{ $clientData['nit'] }}</p>
+                    <p><span class="font-bold">NRC: </span>{{ $clientData['nrc'] }}</p>
+                    <p><span class="font-bold">Actividad: </span>{{ $clientData['giro'] }}</p>
                     <p><span class="font-bold">Dirección: </span>{{ $clientData['address'] }}</p>
                     <p><span class="font-bold">Número de teléfono: </span>{{ $clientData['phone'] }}</p>
                     <p><span class="font-bold">Correo electrónico: </span>{{ $clientData['email'] }}</p>
@@ -85,7 +86,7 @@
     </tr>
     </tbody>
 </table>
-<!--    Fin Emisor/Receptor     -->
+<!--        Fin Emisor/Receptor     -->
 
 <!--        Contenido del documento     -->
 <table class="mt-xs section-container body-table" style="margin-top: 12px;">
@@ -93,12 +94,11 @@
     <tr class="header-row">
         <th class="col-n">N°</th>
         <th class="col-cant">Cant.</th>
-        {{--        <th class="col-unidad">Unidad</th>--}}
         <th class="col-desc">Descripción</th>
         <th class="col-precio">Precio Unitario</th>
-        <th class="col-otros">Otros montos no afectos</th>
         <th class="col-descto">Descuento por Ítem</th>
-        <th class="col-nosuj">Ventas No Sujetas</th>
+        <th class="col-otros">Otros Montos no Afectos</th>
+        <th class="col-nosuj">Ventas no Sujetas</th>
         <th class="col-exentas">Ventas Exentas</th>
         <th class="col-gravadas">Ventas Gravadas</th>
     </tr>
@@ -109,11 +109,10 @@
         <tr class="data-row">
             <td>{{ $item['numItem'] }}</td>
             <td>{{ $item['cantidad'] }}</td>
-            {{--            <td>{{ $item['uniMedida'] }}</td>--}}
             <td>{{ $item['descripcion'] }}</td>
             <td>$ {{ number_format($item['precioUni'], 2) }}</td>
-            <td>$ 0.00</td>
             <td>$ {{ number_format($item['montoDescu'], 2) }}</td>
+            <td>$ 0.00</td>
             <td>$ {{ number_format($item['ventaNoSuj'], 2) }}</td>
             <td>$ {{ number_format($item['ventaExenta'], 2) }}</td>
             <td>$ {{ number_format($item['ventaGravada'], 2) }}</td>
@@ -155,13 +154,19 @@
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="5" class="summary-label"><b>Impuesto al Valor Agregado (13%):</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['totalIva'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['tributos'][0]['valor'], 2) }}</td>
     </tr>
 
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="5" class="summary-label"><b>Subtotal:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['subTotalVentas'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['subTotal'], 2) }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="3" class="borderless"></td>
+        <td colspan="5" class="summary-label"><b>IVA percibido:</b></td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['ivaPerci1'], 2) }}</td>
     </tr>
 
     <tr>
@@ -195,7 +200,7 @@
     </tr>
     </tbody>
 </table>
-<!--        Fin contenido del documento     -->
+<!--        Fin Contenido del documento     -->
 
 <div style="margin-top: 10px">
     <div>

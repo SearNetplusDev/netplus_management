@@ -8,6 +8,12 @@ use Barryvdh\DomPDF\PDF as DomPDF;
 
 readonly class FacturaPrintStrategy extends BasePrint
 {
+    /***
+     * Genera el pdf basado en el ID del DTE generado.
+     *
+     * @param DTEModel $model
+     * @return DomPDF
+     */
     protected function generate(DTEModel $model): DomPDF
     {
         $client = $this->getClientInfo($model->client_id, [
@@ -45,6 +51,11 @@ readonly class FacturaPrintStrategy extends BasePrint
             ->setPaper('A4', 'portrait');
     }
 
+    /***
+     * Ruta de la vista a renderizar
+     *
+     * @return string
+     */
     protected function getView(): string
     {
         return 'v1.management.pdf.accounting.dte.factura';
