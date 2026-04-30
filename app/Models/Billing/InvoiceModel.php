@@ -2,6 +2,8 @@
 
 namespace App\Models\Billing;
 
+use App\Models\Accounting\DTEInvoiceModel;
+use App\Models\Accounting\DTEModel;
 use App\Models\Billing\Options\StatusModel;
 use App\Models\Clients\ClientModel;
 use App\Observers\Billing\InvoiceObserver;
@@ -142,5 +144,15 @@ class InvoiceModel extends Model
             ->withPivot(['amount_applied'])
             ->withTimestamps()
             ->withTrashed();
+    }
+
+    public function dtes(): BelongsToMany
+    {
+        return $this->belongsToMany(DTEModel::class,
+            'accounting_dte_invoices',
+            'invoice_id',
+            'dte_id')
+            ->using(DTEInvoiceModel::class)
+            ->withTimestamps();
     }
 }

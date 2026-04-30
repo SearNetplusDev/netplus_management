@@ -2,7 +2,6 @@
 
 namespace App\Strategies\v1\Accounting\DTE\Prints;
 
-use App\Contracts\v1\Accounting\DTE\DTEPrinterInterface;
 use App\Models\Accounting\DTEModel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPDF;

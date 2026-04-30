@@ -9,6 +9,15 @@ use Illuminate\Support\Collection;
 
 class AccountingService
 {
+    /****
+     * Retorna las facturas pertenecientes al cliente durante el año en curso, cumpliendo estas condiciones:
+     * - Debe ser credito fiscal.
+     * - No debe tener DTE generados activos.
+     *
+     * @param int $clientId
+     * @param int $year
+     * @return Collection
+     */
     public function clientInvoices(int $clientId, int $year): Collection
     {
         return InvoiceModel::query()
@@ -21,6 +30,9 @@ class AccountingService
                     $q->where('client_type_id', ClientTypes::CORPORATE->value)
                         ->orWhere('document_type_id', DocumentTypes::CREDITO_FISCAL->value);
                 });
+            })
+            ->whereDoesntHave('dtes', function ($q) {
+                $q->where('status_id', true);
             })
             ->with(['period', 'items'])
             ->get();
