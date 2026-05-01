@@ -7,6 +7,8 @@ use App\DTOs\v1\management\accounting\dte\DTEDTO;
 use App\Enums\v1\Accounting\InvoiceCategories;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Models\Accounting\DTEModel;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -54,5 +56,24 @@ class DTEService
         } catch (Throwable $e) {
             throw new \InvalidArgumentException("Error al crear DTE", 500, $e);
         }
+    }
+
+
+    /***
+     * Realiza la búsqueda de DTE basado en el número de control.
+     *
+     * @param string $controlNumber
+     * @return Collection
+     */
+    public function search(string $controlNumber): Collection
+    {
+        $year = Carbon::now()->year;
+
+        return DTEModel::query()
+            ->select(['id', 'control_number as label'])
+            ->where('control_number', 'ILIKE', '%' . $controlNumber . '%')
+            ->whereYear('generation_datetime', $year)
+            ->where('status_id', true)
+            ->get();
     }
 }

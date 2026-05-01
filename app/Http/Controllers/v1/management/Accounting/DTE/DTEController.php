@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Accounting\DTEModel;
 use App\Services\v1\management\accounting\DTE\DTEOrchestrator;
 use App\Services\v1\management\accounting\DTE\DTEPrintService;
+use App\Services\v1\management\accounting\DTE\DTEService;
 use App\Services\v1\management\DataViewerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,5 +71,19 @@ class DTEController extends Controller
         $pdf = $this->dtePrintService->print($dteId);
 
         return $pdf->stream();
+    }
+
+    /***
+     * Busca DTE con base en número de control.
+     *
+     * @param Request $request
+     * @param DTEService $service
+     * @return JsonResponse
+     */
+    public function search(Request $request, DTEService $service): JsonResponse
+    {
+        return response()->json([
+            'documents' => $service->search($request->control_number)
+        ]);
     }
 }

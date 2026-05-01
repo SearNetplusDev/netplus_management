@@ -15,6 +15,7 @@ Route::prefix('v1/accounting')
             Route::post('data', [DTEController::class, 'data']);
             Route::post('create/{documentId}', [DTEController::class, 'store']);
             Route::get('print/{dteId}', [DTEController::class, 'printDTE']);
+            Route::post('search', [DTEController::class, 'search']);
         });
 
     });

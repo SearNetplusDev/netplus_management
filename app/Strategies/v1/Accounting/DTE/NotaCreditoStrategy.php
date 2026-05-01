@@ -42,8 +42,9 @@ class NotaCreditoStrategy extends BaseDTEStrategy
 
     /***
      * @param array $data
-     * @return array[]
+     * @return array
      * @throws \Random\RandomException
+     * @throws \Throwable
      */
     protected function buildBody(array $data): array
     {
