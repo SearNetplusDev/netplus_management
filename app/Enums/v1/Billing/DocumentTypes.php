@@ -104,4 +104,9 @@ enum DocumentTypes: int
     {
         return app($this->printStrategyClass());
     }
+
+    public function folderName(): string
+    {
+        return $this->name;
+    }
 }

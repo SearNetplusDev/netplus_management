@@ -156,6 +156,17 @@ return [
             'path' => storage_path('logs/import_clients.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+
+        'dte_storage' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/dte/store_json.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+        'dte_mail' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/dte/dte_mails.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
     ],
 
 ];
