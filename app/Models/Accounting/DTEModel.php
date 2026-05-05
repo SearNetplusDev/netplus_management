@@ -103,6 +103,8 @@ class DTEModel extends Model
         'invoice_category',
         'user_id',
         'status_id',
+        'client.name',
+        'client.surname',
     ];
     protected array $orderable = [
         'id',

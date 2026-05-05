@@ -113,7 +113,12 @@ readonly class DTEOrchestrator
             $folderType = $type->folderName();
             $path = "dte/json/{$year}/{$folderType}/{$filename}";
             $content = json_encode($dteModel->json_body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            Storage::disk('local')->put($path, $content);
+            $store = Storage::disk('s3')->put($path, $content);
+
+            if (!$store) {
+                Log::channel('dte_storage')
+                    ->error("[DTE] Error al guardar el archivo {$path}");
+            }
 
 //            return $path;
         } catch (Throwable $e) {
