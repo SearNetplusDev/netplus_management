@@ -47,7 +47,7 @@
 <!--        Fin Encabezado      -->
 
 <!--    Emisor/Receptor     -->
-<table class="table-full mt-xs section-container">
+<table class="table-full mt-md section-container">
     <tbody>
     <tr>
         <td class="box-cell">
@@ -88,7 +88,7 @@
 <!--    Fin Emisor/Receptor     -->
 
 <!--        Contenido del documento     -->
-<table class="mt-xs section-container body-table" style="margin-top: 12px;">
+<table class="mt-xs section-container body-table">
     <thead>
     <tr class="header-row">
         <th class="col-n">N°</th>

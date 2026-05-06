@@ -105,6 +105,10 @@
         margin-top: 10px;
     }
 
+    .mt-md {
+        margin-top: 15px;
+    }
+
     .font-bold {
         font-weight: bold;
     }
@@ -126,6 +130,8 @@
         width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
+        border: 1px solid #999999;
+        margin-top: 12px;
     }
 
     .body-table th, .body-table td {
@@ -134,6 +140,7 @@
         vertical-align: middle;
         text-align: center;
         word-wrap: break-word;
+        margin-top: 15px;
     }
 
     .header-row th {

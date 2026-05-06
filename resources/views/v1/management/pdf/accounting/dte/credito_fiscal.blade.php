@@ -46,7 +46,7 @@
 <!--        Fin Encabezado      -->
 
 <!--        Emisor/Receptor     -->
-<table class="table-full mt-xs section-container">
+<table class="table-full mt-md section-container">
     <tbody>
     <tr>
         <td class="box-cell">
