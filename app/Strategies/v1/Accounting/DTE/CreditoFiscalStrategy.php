@@ -206,7 +206,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'identificacion' => $this->identificacion(DocumentTypes::CREDITO_FISCAL, 3),
             'documentoRelacionado' => null,
             'emisor' => $this->emisorBase(),
-            'receptor' => $this->buildReceptor($client),
+            'receptor' => $this->buildReceptorBase($client),
             'otrosDocumentos' => null,
             'ventaTercero' => null,
             'cuerpoDocumento' => $body,
@@ -314,32 +314,6 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'tributos' => ['20'],
             'psv' => 0,
             'noGravado' => 0,
-        ];
-    }
-
-    /***
-     * Construye el bloque "receptor" a partir de ClientModel.
-     * @param ClientModel $client
-     * @return array
-     */
-    private function buildReceptor(ClientModel $client): array
-    {
-        $fi = $client->corporate_info;
-
-        return [
-            'nit' => $fi ? $this->parseNumber($fi->nit) : null,
-            'nrc' => $fi ? $this->parseNumber($fi->nrc) : null,
-            'nombre' => $fi?->invoice_alias ?? "{$client->name} {$client->surname}",
-            'codActividad' => $fi?->activity?->code,
-            'descActividad' => $fi?->activity?->name,
-            'nombreComercial' => $fi?->invoice_alias ?? "{$client->name} {$client->surname}",
-            'direccion' => [
-                'departamento' => $fi?->state?->code ?? $client->address?->state?->code,
-                'municipio' => $fi?->municipality?->code ?? $client->address?->municipality?->code,
-                'complemento' => $fi?->address ?? $client->address?->address,
-            ],
-            'telefono' => $this->phoneFormatter($fi?->phone_number ?? $client->mobile?->number) ?? null,
-            'correo' => $client->email?->email,
         ];
     }
 

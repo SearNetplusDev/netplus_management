@@ -38,6 +38,8 @@ class OtherInvoiceService
 
 
         return DB::transaction(function () use ($type, $data, $userId, $iva, $ivaRetenido, $total, $neto) {
+            if (empty($data['payment_method'])) $data['payment_method'] = 1;
+
             $otherInvoice = OtherInvoiceModel::create([
                 'document_type_id' => $type,
                 'client_id' => $data['client_id'],

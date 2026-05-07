@@ -112,7 +112,7 @@
             <div class="help-section">
                 <p>
                     ¿Tiene alguna duda sobre este documento? Contáctenos a
-                    <a href="mailto:netplus.desarrollo@gmail.com">netplus.desarrollo@gmail.com</a>
+                    <a href="mailto:netplus.facturacion@gmail.com">netplus.facturacion@gmail.com</a>
                     o llámenos al <strong>(503) 7626 6022</strong> en horario de lunes a viernes de 8:00 a.m. a 5:00
                     p.m.
                 </p>

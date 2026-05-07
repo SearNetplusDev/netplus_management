@@ -8,6 +8,7 @@ use App\Enums\v1\Billing\DocumentTypes;
 use App\Libraries\Accounting\DTE\HeaderUtils;
 use App\Libraries\Accounting\DTE\IssuerUtils;
 use App\Libraries\NumberToLetter;
+use App\Models\Accounting\DTEModel;
 use App\Models\Billing\Options\PaymentMethodModel;
 use App\Models\Clients\ClientModel;
 use Illuminate\Support\Collection;
@@ -125,6 +126,36 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
     protected function emisor(): array
     {
         return $this->applyFieldSchema($this->emisorBase(), $this->emisorSchema());
+    }
+
+    /***
+     * Construye el bloque 'emisor' para los siguientes tipos de documentos:
+     * - Crédito Fiscal
+     * - Nota de Crédito
+     * - Nota de Débito
+     *
+     * @param ClientModel $clientModel
+     * @return array
+     */
+    protected function buildReceptorBase(ClientModel $clientModel): array
+    {
+        $fi = $clientModel->corporate_info;
+
+        return [
+            'nit' => $fi ? $this->parseNumber($fi->nit) : null,
+            'nrc' => $fi ? $this->parseNumber($fi->nrc) : null,
+            'nombre' => $fi?->invoice_alias ?? "{$clientModel->name} {$clientModel->surname}",
+            'codActividad' => $fi?->activity?->code,
+            'descActividad' => $fi?->activity?->name,
+            'nombreComercial' => $fi?->invoice_alias ?? "{$clientModel->name} {$clientModel->surname}",
+            'direccion' => [
+                'departamento' => $fi?->state?->code ?? $clientModel->address?->state?->code,
+                'municipio' => $fi?->municipality?->code ?? $clientModel->address?->municipality?->code,
+                'complemento' => $fi?->address ?? $clientModel->address?->address,
+            ],
+            'telefono' => $this->phoneFormatter($fi?->phone_number ?? $clientModel->mobile?->number) ?? null,
+            'correo' => $clientModel->email?->email,
+        ];
     }
 
     /***
@@ -300,5 +331,18 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
         }
 
         return [$body, $acumulado];
+    }
+
+    /***
+     * Retorna el número de control del documento relacionado.
+     *
+     * @param int $dteId
+     * @return DTEModel
+     */
+    protected function getRelatedDoc(int $dteId): DTEModel
+    {
+        return DTEModel::query()
+            ->with('dte_type')
+            ->findOrFail($dteId);
     }
 }

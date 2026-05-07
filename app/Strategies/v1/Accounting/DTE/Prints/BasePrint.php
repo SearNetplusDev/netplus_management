@@ -7,6 +7,7 @@ use App\Models\Accounting\DTEModel;
 use App\Models\Clients\ClientModel;
 use Barryvdh\DomPDF\PDF as DomPDF;
 use Carbon\Carbon;
+use http\Client;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 abstract readonly class BasePrint implements DTEPrinterInterface
@@ -56,6 +57,31 @@ abstract readonly class BasePrint implements DTEPrinterInterface
         return ClientModel::query()
             ->with($relations)
             ->findOrFail($clientId);
+    }
+
+    protected function baseReceptor(int $clientId): array
+    {
+        $client = $this->getClientInfo($clientId, [
+            'corporate_info.activity',
+            'corporate_info.district',
+            'corporate_info.municipality',
+            'corporate_info.state',
+            'email',
+        ]);
+        $address = $client->corporate_info?->address;
+        $address .= ", {$client->corporate_info?->district?->name}";
+        $address .= ", {$client->corporate_info?->municipality?->name}";
+        $address .= ", {$client->corporate_info?->state?->name}.";
+
+        return [
+            'name' => ucwords($client->corporate_info?->invoice_alias),
+            'nit' => str_replace('-', '', $client->corporate_info?->nit),
+            'nrc' => str_replace('-', '', $client->corporate_info?->nrc),
+            'giro' => $client->corporate_info?->activity?->name,
+            'address' => $address,
+            'phone' => str_replace('-', '', $client->corporate_info?->phone_number),
+            'email' => $client->email?->email,
+        ];
     }
 
     /***

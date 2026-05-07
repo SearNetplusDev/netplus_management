@@ -12,6 +12,9 @@ class HeaderUtils
     protected const FACTURA_INCREMENT = 1;
     protected const CCF_INCREMENT = 1;
     protected const FSE_INCREMENT = 1;
+
+    protected const NC_INCREMENT = 1;
+    protected const ND_INCREMENT = 1;
     protected const MAX_CORRELATIVE_LENGTH = 15;
 
     /***
@@ -75,6 +78,8 @@ class HeaderUtils
             DocumentTypes::FACTURA->value => self::FACTURA_INCREMENT,
             DocumentTypes::CREDITO_FISCAL->value => self::CCF_INCREMENT,
             DocumentTypes::FACTURA_SUJETO_EXCLUIDO->value => self::FSE_INCREMENT,
+            DocumentTypes::NOTA_CREDITO->value => self::NC_INCREMENT,
+            DocumentTypes::NOTA_DEBITO->value => self::ND_INCREMENT,
             default => throw new \InvalidArgumentException("{$type->label()} no admitido para generar DTE"),
         };
     }

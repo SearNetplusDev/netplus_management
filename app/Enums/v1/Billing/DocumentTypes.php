@@ -18,6 +18,8 @@ use App\Strategies\v1\Accounting\DTE\NotaRemisionStrategy;
 use App\Strategies\v1\Accounting\DTE\Prints\CreditoFiscalPrintStrategy;
 use App\Strategies\v1\Accounting\DTE\Prints\FacturaPrintStrategy;
 use App\Strategies\v1\Accounting\DTE\Prints\FacturaSujetoExcluidoPrintStrategy;
+use App\Strategies\v1\Accounting\DTE\Prints\NotaCreditoPrintStrategy;
+use App\Strategies\v1\Accounting\DTE\Prints\NotaDebitoPrintStrategy;
 
 enum DocumentTypes: int
 {
@@ -91,6 +93,8 @@ enum DocumentTypes: int
         return match ($this) {
             self::FACTURA => FacturaPrintStrategy::class,
             self::CREDITO_FISCAL => CreditoFiscalPrintStrategy::class,
+            self::NOTA_CREDITO => NotaCreditoPrintStrategy::class,
+            self::NOTA_DEBITO => NotaDebitoPrintStrategy::class,
             self::FACTURA_SUJETO_EXCLUIDO => FacturaSujetoExcluidoPrintStrategy::class,
         };
     }
@@ -108,5 +112,13 @@ enum DocumentTypes: int
     public function folderName(): string
     {
         return $this->name;
+    }
+
+    public function totalAmountKey(): string
+    {
+        return match ($this) {
+            self::NOTA_CREDITO, self::NOTA_DEBITO => 'montoTotalOperacion',
+            default => 'totalPagar',
+        };
     }
 }

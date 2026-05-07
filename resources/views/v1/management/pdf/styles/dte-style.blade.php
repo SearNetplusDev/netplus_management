@@ -241,4 +241,22 @@
         border: none !important;
     }
 
+    .related-docs-header {
+        border-top: #ffffff 1px solid;
+        border-left: #ffffff 1px solid;
+        border-right: #ffffff 1px solid;
+    }
+
+    .col-dtype {
+        width: 20%;
+    }
+
+    .col-control {
+        width: 60%;
+    }
+
+    .col-date {
+        width: 20%;
+    }
+
 </style>

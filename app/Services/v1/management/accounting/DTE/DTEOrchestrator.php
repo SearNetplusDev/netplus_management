@@ -43,6 +43,7 @@ readonly class DTEOrchestrator
         $otherInvoiceId = null;
         $category = InvoiceCategories::INVOICE;
         $userId = Auth::id() ?? throw new \RuntimeException("Usuario no autenticado");
+        $type = DocumentTypes::from($documentId);
 
         switch ($source) {
             //  Escenario 1: Pago registrado.
@@ -80,7 +81,7 @@ readonly class DTEOrchestrator
             generation_code: $json['identificacion']['codigoGeneracion'],
             reception_stamp: strtoupper(Str::random(40)),
             generation_datetime: Carbon::now(),
-            total_amount: (float)$json['resumen']['totalPagar'],
+            total_amount: (float)$json['resumen'][$type->totalAmountKey()],
             payment_id: $paymentId,
             invoice_category: $category,
             invoice_ids: $invoiceIds,
