@@ -177,7 +177,7 @@
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="4" class="summary-label"><b>Impuesto al Valor Agregado (13%):</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['tributos']['valor'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['tributos'][0]['valor'], 2) }}</td>
     </tr>
 
     <tr>

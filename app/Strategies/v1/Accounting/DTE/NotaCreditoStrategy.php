@@ -188,9 +188,11 @@ class NotaCreditoStrategy extends BaseDTEStrategy
             'descuGravada' => $discount,
             'totalDescu' => $discount,
             'tributos' => [
-                'codigo' => '20',
-                'descripcion' => 'Impuesto al Valor Agregado 13%',
-                'valor' => $this->round2($totales['iva']),
+                [
+                    'codigo' => '20',
+                    'descripcion' => 'Impuesto al Valor Agregado 13%',
+                    'valor' => $this->round2($totales['iva']),
+                ]
             ],
             'subTotal' => $this->round2($totales['neto']),
             'ivaPerci1' => 0,
