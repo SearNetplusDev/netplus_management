@@ -4,6 +4,7 @@ namespace App\Enums\v1\Billing;
 
 use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
 use App\Contracts\v1\Accounting\DTE\DTEPrinterInterface;
+use App\Strategies\v1\Accounting\DTE\AnulacionStrategy;
 use App\Strategies\v1\Accounting\DTE\ComprobanteDonacionStrategy;
 use App\Strategies\v1\Accounting\DTE\ComprobanteLiquidacionStrategy;
 use App\Strategies\v1\Accounting\DTE\ComprobanteRetencionStrategy;
@@ -34,6 +35,7 @@ enum DocumentTypes: int
     case FACTURA_EXPORTACION = 9;
     case FACTURA_SUJETO_EXCLUIDO = 10;
     case COMPROBANTE_DONACION = 11;
+    case ANULACION = 12;
 
     public function label(): string
     {
@@ -49,6 +51,7 @@ enum DocumentTypes: int
             self::FACTURA_EXPORTACION => 'Factura de exportación',
             self::FACTURA_SUJETO_EXCLUIDO => 'Factura de sujeto excluído',
             self::COMPROBANTE_DONACION => 'Comprobante de donación',
+            self::ANULACION => 'Anulación',
             default => 'No identificado',
         };
     }
@@ -67,6 +70,7 @@ enum DocumentTypes: int
             self::FACTURA_EXPORTACION => '11',
             self::FACTURA_SUJETO_EXCLUIDO => '14',
             self::COMPROBANTE_DONACION => '15',
+            self::ANULACION => '99',
             default => '00',
         };
     }
@@ -85,6 +89,7 @@ enum DocumentTypes: int
             self::FACTURA_EXPORTACION => FacturaExportacionStrategy::class,
             self::FACTURA_SUJETO_EXCLUIDO => FacturaSujetoExcluidoStrategy::class,
             self::COMPROBANTE_DONACION => ComprobanteDonacionStrategy::class,
+            self::ANULACION => AnulacionStrategy::class,
         };
     }
 

@@ -2,86 +2,155 @@
 
 namespace App\Strategies\v1\Accounting\DTE;
 
-use App\Contracts\v1\Accounting\DTE\DTEGeneratorInterface;
-use App\Libraries\Accounting\DTE\HeaderUtils;
-use App\Libraries\Accounting\DTE\IssuerUtils;
+use App\Enums\v1\Accounting\TaxRate;
+use App\Models\Accounting\DTEModel;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
-class AnulacionStrategy implements DTEGeneratorInterface
+class AnulacionStrategy extends BaseDTEStrategy
 {
-    /***
-     * @param HeaderUtils $headerUtils
-     * @param IssuerUtils $issuerUtils
-     */
-    public function __construct(
-        private HeaderUtils $headerUtils,
-        private IssuerUtils $issuerUtils
-    )
+    protected function identificacionSchema(): array
     {
-
-    }
-
-    /***
-     * @param array $data
-     * @return array[]
-     * @throws \Random\RandomException
-     */
-    public function generate(array $data): array
-    {
-        return $this->buildBody($data);
-    }
-
-    /***
-     * @param array $data
-     * @return array[]
-     * @throws \Random\RandomException
-     */
-    private function buildBody(array $data): array
-    {
-        $genCode = $this->headerUtils->generationCode();
         return [
-            'identificacion' => [
-                'version' => 2,
-                'ambiente' => '01',
-                'codigoGeneracion' => $genCode,
-                'fecAnula' => $this->headerUtils->getDate(),
-                'horAnula' => $this->headerUtils->getHour(),
-            ],
-            'emisor' => [
-                'nit' => $this->issuerUtils->getNit(),
-                'nombre' => $this->issuerUtils->getName(),
-                'tipoEstablecimiento' => '02',
-                'nomEstablecimiento' => 'Casa Matriz',
-                'codEstableMH' => null,
-                'codEstable' => null,
-                'codPuntoVentaMH' => null,
-                'codPuntoVenta' => null,
-                'telefono' => $this->issuerUtils->getPhoneNumber(),
-                'correo' => $this->issuerUtils->getEmail(),
-            ],
-            'documento' => [
-                'tipoDte' => '',
-                'codigoGeneracion' => '',
-                'selloRecibido' => '',
-                'numeroControl' => '',
-                'fecEmi' => '',
-                'montoIva' => 0,
-                'codigoGeneracionR' => $genCode,
-                'tipoDocumento' => '',  // 02. Carnet Residencia, 03. Pasaporte, 13. DUI, 36. NIT, 37. Otro
-                'numDocumento' => '',
-                'nombre' => 'John Doe',
-                'telefono' => '70000000',
-                'correo' => 'johndoe@gmail.com',
-            ],
-            'motivo' => [
-                'tipoAnulacion' => 2, // 1. Error en los datos del DTE, 2. Rescindir de la operación, 3. Otro
-                'motivoAnulacion' => '',
-                'nombreResponsable' => '',
-                'tipDocResponsable' => '',  // 02. Carnet Residencia, 03. Pasaporte, 13. DUI, 36. NIT, 37. Otro
-                'numDocResponsable' => '',
-                'nombreSolicita' => '',
-                'tipDocSolicita' => '',
-                'numDocSolicita' => ''
-            ],
+            'version' => false,
+            'ambiente' => false,
+            'tipoDte' => false,
+            'numeroControl' => false,
+            'codigoGeneracion' => false,
+            'tipoModelo' => false,
+            'tipoOperacion' => false,
+            'tipoContingencia' => false,
+            'motivoContin' => false,
+            'fecEmi' => false,
+            'horEmi' => false,
+            'tipoMoneda' => false,
+        ];
+    }
+
+    protected function emisorSchema(): array
+    {
+        return [
+            'nrc' => false,
+            'codActividad' => false,
+            'descActividad' => false,
+            'nombreComercial' => false,
+            'codEstableMH' => false,
+            'codEstable' => false,
+            'codPuntoVentaMH' => false,
+            'codPuntoVenta' => false,
+        ];
+    }
+
+    /***
+     * Construye el json de la anulación.
+     *
+     * @param array $data
+     * @return array
+     * @throws \Random\RandomException
+     */
+    protected function buildBody(array $data): array
+    {
+        $relatedDoc = $this->getRelatedDoc((int)$data['dte_id']);
+        $genCode = $this->headerUtils->generationCode();
+
+        return [
+            'identificacion' => $this->buildIdentificacion($genCode),
+            'emisor' => $this->buildEmisor(),
+            'documento' => $this->buildDocumento(dteModel: $relatedDoc, genCode: $genCode),
+            'motivo' => $this->buildMotivo(data: $data, dteModel: $relatedDoc),
+        ];
+    }
+
+    /***
+     * Construye el bloque 'identificacion'.
+     *
+     * @param string $genCode
+     * @return array
+     */
+    private function buildIdentificacion(string $genCode): array
+    {
+        return [
+            'version' => 2,
+            'ambiente' => $this->headerUtils->ambient(),
+            'codigoGeneracion' => $genCode,
+            'fecAnula' => $this->headerUtils->getDate(),
+            'horAnula' => $this->headerUtils->getHour(),
+        ];
+    }
+
+    /***
+     * Construye el bloque 'emisor'.
+     *
+     * @return array
+     */
+    private function buildEmisor(): array
+    {
+        return [
+            'nit' => '12170206211014',
+            'nombre' => 'NETPLUS COMPANY WORK S.A. DE C.V',
+            'tipoEstablecimiento' => '02',
+            'nomEstablecimiento' => 'Casa Matriz',
+            'codEstableMH' => null,
+            'codEstable' => null,
+            'codPuntoVentaMH' => null,
+            'codPuntoVenta' => null,
+            'telefono' => '76266022',
+            'correo' => 'netpluscompanywork@gmail.com',
+        ];
+    }
+
+    /****
+     * Construye el bloque 'documento' referencia al DTE que se anula.
+     *
+     * @param DTEModel $dteModel
+     * @param string $genCode
+     * @return array
+     */
+    private function buildDocumento(DTEModel $dteModel, string $genCode): array
+    {
+        $json = $dteModel->json_body;
+        $receptor = $json['receptor'] ?? $json['sujetoExcluido'] ?? [];
+        $totalAmount = (float)$dteModel->total_amount;
+        $netoAmount = $totalAmount / TaxRate::VALOR_NETO->value();
+        $iva = $netoAmount * TaxRate::IVA->value();
+
+        return [
+            'tipoDte' => $dteModel->dte_type?->code,
+            'codigoGeneracion' => $dteModel->generation_code,
+            'selloRecibido' => $dteModel->reception_stamp,
+            'numeroControl' => $dteModel->control_number,
+            'fecEmi' => Carbon::parse($dteModel->generation_datetime)->format('Y-m-d'),
+            'montoIva' => $this->round2($iva),
+            'codigoGeneracionR' => $genCode,
+            'tipoDocumento' => $receptor['tipoDocumento'] ?? null,
+            'numDocumento' => $receptor['numDocumento'] ?? null,
+            'nombre' => $receptor['nombre'] ?? null,
+            'telefono' => $receptor['telefono'] ?? null,
+            'correo' => $receptor['correo'] ?? null,
+        ];
+    }
+
+    /***
+     * Construye el bloque 'motivo'.
+     *
+     * @param array $data
+     * @param DTEModel $dteModel
+     * @return array
+     */
+    private function buildMotivo(array $data, DTEModel $dteModel): array
+    {
+        $dte = $dteModel->json_body;
+        $receptor = $dte['receptor'] ?? $dte['sujetoExcluido'] ?? [];
+
+        return [
+            'tipoAnulacion' => (int)$data['invalidation_type'],
+            'motivoAnulacion' => $data['invalidation_reason'] ?? '',
+            'nombreResponsable' => Auth::user()->name ?? '',
+            'tipoDocResponsable' => '13',
+            'numDocResponsable' => $this->parseNumber($data['responsible_dui']),
+            'nombreSolicita' => $receptor['nombre'] ?? '',
+            'tipoDocSolicita' => $receptor['tipoDocumento'] ?? null,
+            'numDocSolicita' => $receptor['numDocumento'] ?? null,
         ];
     }
 }

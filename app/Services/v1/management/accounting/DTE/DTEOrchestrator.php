@@ -33,9 +33,11 @@ readonly class DTEOrchestrator
      * @return DTEModel
      * @throws Throwable
      */
-    public function process(int $documentId, array $data): DTEModel
+    public function process(int $documentId, array $data)/*: DTEModel*/
     {
         $json = $this->dteService->generate($documentId, $data);
+
+        return $json;
         $source = $data['source'] ?? 'payment';
         $paymentId = null;
         $clientId = $data['client_id'] ?? null;
@@ -68,6 +70,9 @@ readonly class DTEOrchestrator
                 );
                 $otherInvoiceId = $otherInvoice->id;
                 $category = InvoiceCategories::OTHER_INVOICE;
+                break;
+
+            case 'invalidation':
                 break;
 
             default:
