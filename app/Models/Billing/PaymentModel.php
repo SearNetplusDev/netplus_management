@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property numeric|null $discount_amount
  * @property-read ClientModel|null $client
  * @property-read \App\Models\Billing\DiscountModel|null $discount
+ * @property-read DTEModel|null $dte
  * @property-read float $effective_amount
  * @property-read array $status
  * @property-read \App\Models\Billing\PaymentInvoiceModel|null $pivot

@@ -13,6 +13,7 @@ use App\Traits\DataViewer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read ClientModel|null $client
  * @property-read DocumentTypeModel|null $dte_type
  * @property-read \App\Models\Billing\InvoiceModel|\App\Models\Billing\OtherInvoiceModel|null $related_invoice
+ * @property-read \App\Models\Accounting\CancelDTEModel|null $invalidation
  * @property-read \App\Models\Accounting\DTEInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceModel> $invoices
  * @property-read int|null $invoices_count
@@ -176,5 +178,10 @@ class DTEModel extends Model
          * Uso
          * $dte->related_invoice
          */
+    }
+
+    public function invalidation(): HasOne
+    {
+        return $this->hasOne(CancelDTEModel::class, 'dte_id', 'id');
     }
 }

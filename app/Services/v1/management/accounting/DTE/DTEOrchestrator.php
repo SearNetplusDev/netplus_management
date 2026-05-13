@@ -2,10 +2,13 @@
 
 namespace App\Services\v1\management\accounting\DTE;
 
+use App\DTOs\v1\management\accounting\dte\CancelDTEDTO;
 use App\DTOs\v1\management\accounting\dte\DTEDTO;
 use App\Enums\v1\Accounting\InvoiceCategories;
 use App\Enums\v1\Billing\DocumentTypes;
+use App\Mail\DTE\SendCancelDTEMail;
 use App\Mail\DTE\SendDTEMail;
+use App\Models\Accounting\CancelDTEModel;
 use App\Models\Accounting\DTEModel;
 use App\Models\Billing\PaymentModel;
 use App\Services\v1\management\billing\otherInvoices\OtherInvoiceService;
@@ -28,24 +31,42 @@ readonly class DTEOrchestrator
     }
 
     /***
+     * Punto de entrada principal. Enruta al escenario correspondiente según el source.
+     *
      * @param int $documentId
      * @param array $data
+     * @return DTEModel|CancelDTEModel
+     * @throws Throwable
+     */
+    public function process(int $documentId, array $data): DTEModel|CancelDTEModel
+    {
+        $source = $data['source'] ?? 'payment';
+
+        if ($source === 'invalidation') return $this->processInvalidation($data);
+
+        return $this->processDTE(documentId: $documentId, data: $data, source: $source);
+    }
+
+    /****
+     * Genera json, almacena DTE y envía correo de notificación.
+     *
+     * @param int $documentId
+     * @param array $data
+     * @param string $source
      * @return DTEModel
      * @throws Throwable
      */
-    public function process(int $documentId, array $data)/*: DTEModel*/
+    private function processDTE(int $documentId, array $data, string $source): DTEModel
     {
-        $json = $this->dteService->generate($documentId, $data);
+        $json = $this->dteService->generate(documentId: $documentId, data: $data);
+        $userId = Auth::id() ?? throw new \RuntimeException("Usuario no autenticado");
+        $type = DocumentTypes::from($documentId);
 
-        return $json;
-        $source = $data['source'] ?? 'payment';
         $paymentId = null;
         $clientId = $data['client_id'] ?? null;
         $invoiceIds = null;
         $otherInvoiceId = null;
         $category = InvoiceCategories::INVOICE;
-        $userId = Auth::id() ?? throw new \RuntimeException("Usuario no autenticado");
-        $type = DocumentTypes::from($documentId);
 
         switch ($source) {
             //  Escenario 1: Pago registrado.
@@ -70,9 +91,6 @@ readonly class DTEOrchestrator
                 );
                 $otherInvoiceId = $otherInvoice->id;
                 $category = InvoiceCategories::OTHER_INVOICE;
-                break;
-
-            case 'invalidation':
                 break;
 
             default:
@@ -101,6 +119,40 @@ readonly class DTEOrchestrator
         $this->sendNotificationMail($dte);
 
         return $dte;
+    }
+
+    /***
+     * Genera el json para anulación, lo almacena, y notifica mediante email
+     *
+     * @param array $data
+     * @return CancelDTEModel
+     * @throws Throwable
+     */
+    private function processInvalidation(array $data): CancelDTEModel
+    {
+        $userId = Auth::id() ?? throw new \RuntimeException("Usuario no autenticado");
+        $json = $this->dteService->generate(documentId: DocumentTypes::ANULACION->value, data: $data);
+
+        $dto = new CancelDTEDTO(
+            dte_id: (int)$data['dte_id'],
+            generation_code: $json['identificacion']['codigoGeneracion'],
+            reception_stamp: strtoupper(Str::random(40)),
+            generation_datetime: Carbon::now(),
+            user_id: $userId,
+            json_body: $json,
+            status_id: true,
+        );
+
+        $invalidation = $this->dteService->storeInvalidationDTE($dto);
+
+        DTEModel::query()
+            ->where('id', (int)$data['dte_id'])
+            ->update(['status_id' => false]);
+
+        $this->storeInvalidationJsonFile(cancelDTEModel: $invalidation);
+//        $this->sendInvalidationMail(cancelDTEModel: $invalidation);
+
+        return $invalidation;
     }
 
     /***
@@ -139,6 +191,30 @@ readonly class DTEOrchestrator
     }
 
     /***
+     * Almacena el json de anulación en AWS.
+     *
+     * @param CancelDTEModel $cancelDTEModel
+     * @return void
+     */
+    private function storeInvalidationJsonFile(CancelDTEModel $cancelDTEModel): void
+    {
+        try {
+            $year = $cancelDTEModel->generation_datetime->year;
+            $filename = $this->safeFileName($cancelDTEModel->generation_code) . '.json';
+            $path = "dte/json/{$year}/ANULACION/{$filename}";
+            $content = json_encode($cancelDTEModel->json_body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if (!Storage::disk('s3')->put($path, $content)) {
+                Log::channel('dte_storage')->error("[DTE] Error al guardar el archivo de anulación {$path}");
+            }
+        } catch (Throwable $e) {
+            Log::channel('dte_storage')->error("[DTE] Error al guardar el JSON de anulación", [
+                'cance_dte_id' => $cancelDTEModel->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /***
      * Genera el pdf, construye el Mailable y lo despacha a cola.
      *
      * @param DTEModel $dteModel
@@ -171,6 +247,41 @@ readonly class DTEOrchestrator
                     'dte_id' => $dteModel->id,
                     'error' => $e->getMessage(),
                 ]);
+        }
+    }
+
+    /***
+     * Envía el correo de notificación cuando ocurre una anulación.
+     *
+     * @param CancelDTEModel $cancelDTEModel
+     * @return void
+     */
+    private function sendInvalidationMail(CancelDTEModel $cancelDTEModel): void
+    {
+        try {
+            $originalDte = DTEModel::query()
+                ->with('client.email')
+                ->findOrFail($cancelDTEModel->dte_id);
+
+            $recipientEmail = $this->resolveRecipientEmail($originalDte);
+
+            if (!$recipientEmail) {
+                Log::channel('dte_mail')->warning("[DTE] Sin correo para notificar anulación", [
+                    'invalidation_id' => $cancelDTEModel->id
+                ]);
+                return;
+            }
+
+            Mail::to($recipientEmail)
+                ->send(new SendCancelDTEMail(
+                    invalidation: $cancelDTEModel,
+                    originalDte: $originalDte
+                ));
+        } catch (Throwable $e) {
+            Log::channel('dte_mail')->error("[DTE] Error al enviar el correo de anulación", [
+                'invalidation_id' => $cancelDTEModel->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
