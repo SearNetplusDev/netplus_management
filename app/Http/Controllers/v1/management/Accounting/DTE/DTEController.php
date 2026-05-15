@@ -36,6 +36,7 @@ class DTEController extends Controller
                 'client',
                 'dte_type',
                 'user',
+                'invalidation',
             ]);
 
         return $dataViewerService->handle($request, $query, [

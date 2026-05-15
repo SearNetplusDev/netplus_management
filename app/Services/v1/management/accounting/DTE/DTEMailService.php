@@ -4,11 +4,9 @@ namespace App\Services\v1\management\accounting\DTE;
 
 use App\Jobs\accounting\SendDTEMailJob;
 use App\Jobs\accounting\SendInvalidationMailJob;
-use App\Mail\DTE\SendCancelDTEMail;
 use App\Models\Accounting\CancelDTEModel;
 use App\Models\Accounting\DTEModel;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 readonly class DTEMailService
