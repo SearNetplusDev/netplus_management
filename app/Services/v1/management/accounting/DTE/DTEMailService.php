@@ -20,9 +20,9 @@ readonly class DTEMailService
      * Genera el pdf, construye el mailable y lo despacha.
      *
      * @param DTEModel $dteModel
-     * @return void
+     * @return bool
      */
-    public function sendDTEMail(DTEModel $dteModel): void
+    public function sendDTEMail(DTEModel $dteModel): bool
     {
         try {
             $recipientEmail = $this->resolveRecipientEmail($dteModel);
@@ -30,7 +30,7 @@ readonly class DTEMailService
             if (!$recipientEmail) {
                 Log::channel('dte_mail')
                     ->warning("[DTE] Sin correo para notificar", ['dte_id' => $dteModel->id]);
-                return;
+                return false;
             }
 
             $pdf = $this->dtePrintService->print($dteModel->id);
@@ -43,12 +43,15 @@ readonly class DTEMailService
                     pdfOutput: $pdfRaw,
                     jsonContent: $jsonContent
                 ));
+
+            return true;
         } catch (Throwable $e) {
             Log::channel('dte_mail')
                 ->error("[DTE] Error al enviar el correo de notificación", [
                     'dte_id' => $dteModel->id,
                     'error' => $e->getMessage(),
                 ]);
+            return false;
         }
     }
 

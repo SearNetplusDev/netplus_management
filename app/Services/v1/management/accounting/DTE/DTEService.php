@@ -14,10 +14,11 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-class DTEService
+readonly class DTEService
 {
     public function __construct(
-        private DTEContext $context,
+        private DTEContext     $context,
+        private DTEMailService $mailService,
     )
     {
     }
@@ -94,5 +95,16 @@ class DTEService
             ->whereYear('generation_datetime', $year)
             ->where('status_id', true)
             ->get();
+    }
+
+    /***
+     * Reenvia el correo del DTE.
+     *
+     * @param DTEModel $dteModel
+     * @return bool
+     */
+    public function resendMail(DTEModel $dteModel): bool
+    {
+        return $this->mailService->sendDTEMail($dteModel);
     }
 }

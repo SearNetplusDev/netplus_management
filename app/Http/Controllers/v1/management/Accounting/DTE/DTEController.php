@@ -86,4 +86,21 @@ class DTEController extends Controller
             'documents' => $service->search($request->control_number)
         ]);
     }
+
+    /**
+     * Reenvía el correo con los datos del DTE emitido.
+     *
+     * @param Request $request
+     * @param DTEService $service
+     * @return JsonResponse
+     */
+    public function resendMail(Request $request, DTEService $service): JsonResponse
+    {
+        $dte = DTEModel::query()->findOrFail($request->dte_id);
+        $sent = $service->resendMail($dte);
+
+        return response()->json([
+            'send' => $sent,
+        ]);
+    }
 }
