@@ -97,10 +97,10 @@ class DTEController extends Controller
     public function resendMail(Request $request, DTEService $service): JsonResponse
     {
         $dte = DTEModel::query()->findOrFail($request->dte_id);
-        $sent = $service->resendMail($dte);
+        $service->resendMail($dte);
 
         return response()->json([
-            'send' => $sent,
+            'send' => true,
         ]);
     }
 }

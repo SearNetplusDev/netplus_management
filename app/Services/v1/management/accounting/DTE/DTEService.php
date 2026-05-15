@@ -101,10 +101,10 @@ readonly class DTEService
      * Reenvia el correo del DTE.
      *
      * @param DTEModel $dteModel
-     * @return bool
+     * @return void
      */
-    public function resendMail(DTEModel $dteModel): bool
+    public function resendMail(DTEModel $dteModel): void
     {
-        return $this->mailService->sendDTEMail($dteModel);
+        $this->mailService->sendDTEMail($dteModel);
     }
 }

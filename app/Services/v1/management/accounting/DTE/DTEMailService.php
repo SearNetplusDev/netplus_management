@@ -2,8 +2,9 @@
 
 namespace App\Services\v1\management\accounting\DTE;
 
+use App\Jobs\accounting\SendDTEMailJob;
+use App\Jobs\accounting\SendInvalidationMailJob;
 use App\Mail\DTE\SendCancelDTEMail;
-use App\Mail\DTE\SendDTEMail;
 use App\Models\Accounting\CancelDTEModel;
 use App\Models\Accounting\DTEModel;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +13,7 @@ use Throwable;
 
 readonly class DTEMailService
 {
-    public function __construct(private DTEPrintService $dtePrintService)
+    public function __construct()
     {
     }
 
@@ -20,9 +21,9 @@ readonly class DTEMailService
      * Genera el pdf, construye el mailable y lo despacha.
      *
      * @param DTEModel $dteModel
-     * @return bool
+     * @return void
      */
-    public function sendDTEMail(DTEModel $dteModel): bool
+    public function sendDTEMail(DTEModel $dteModel): void
     {
         try {
             $recipientEmail = $this->resolveRecipientEmail($dteModel);
@@ -30,28 +31,22 @@ readonly class DTEMailService
             if (!$recipientEmail) {
                 Log::channel('dte_mail')
                     ->warning("[DTE] Sin correo para notificar", ['dte_id' => $dteModel->id]);
-                return false;
+                return;
             }
 
-            $pdf = $this->dtePrintService->print($dteModel->id);
-            $pdfRaw = $pdf->output();
             $jsonContent = $this->encodeJson($dteModel->json_body);
 
-            Mail::to($recipientEmail)
-                ->send(new SendDTEMail(
-                    dteModel: $dteModel,
-                    pdfOutput: $pdfRaw,
-                    jsonContent: $jsonContent
-                ));
-
-            return true;
+            SendDteMailJob::dispatch(
+                dteModel: $dteModel,
+                recipientEmail: $recipientEmail,
+                jsonContent: $jsonContent,
+            );
         } catch (Throwable $e) {
             Log::channel('dte_mail')
                 ->error("[DTE] Error al enviar el correo de notificación", [
                     'dte_id' => $dteModel->id,
                     'error' => $e->getMessage(),
                 ]);
-            return false;
         }
     }
 
@@ -78,11 +73,11 @@ readonly class DTEMailService
                 return;
             }
 
-            Mail::to($recipientEmail)
-                ->send(new SendCancelDTEMail(
-                    invalidation: $cancelDTEModel,
-                    originalDte: $originalDte
-                ));
+            SendInvalidationMailJob::dispatch(
+                cancelDte: $cancelDTEModel,
+                dteModel: $originalDte,
+                recipientEmail: $recipientEmail,
+            );
         } catch (Throwable $e) {
             Log::channel('dte_mail')
                 ->error("[DTE] Error al enviar el correo de anulación", [
