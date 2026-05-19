@@ -19,6 +19,7 @@ readonly class DTEOrchestrator
 {
     public function __construct(
         private DTEService          $dteService,
+        private DTESignatureService $dteSignatureService,
         private DTEStorageService   $dteStorageService,
         private DTEMailService      $dteMailService,
         private OtherInvoiceService $otherInvoiceService,
@@ -34,7 +35,7 @@ readonly class DTEOrchestrator
      * @return DTEModel|CancelDTEModel
      * @throws Throwable
      */
-    public function process(int $documentId, array $data): DTEModel|CancelDTEModel
+    public function process(int $documentId, array $data)/*: DTEModel|CancelDTEModel*/
     {
         $source = $data['source'] ?? 'payment';
 
@@ -52,9 +53,10 @@ readonly class DTEOrchestrator
      * @return DTEModel
      * @throws Throwable
      */
-    private function processDTE(int $documentId, array $data, string $source): DTEModel
+    private function processDTE(int $documentId, array $data, string $source)/*: DTEModel*/
     {
         $json = $this->dteService->generate(documentId: $documentId, data: $data);
+        return $this->dteSignatureService->signDocument(dte: $json);
         $userId = Auth::id() ?? throw new  \RuntimeException("Usuario no autenticado");
         $type = DocumentTypes::from($documentId);
 
