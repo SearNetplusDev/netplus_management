@@ -56,7 +56,8 @@ readonly class DTEOrchestrator
     private function processDTE(int $documentId, array $data, string $source)/*: DTEModel*/
     {
         $json = $this->dteService->generate(documentId: $documentId, data: $data);
-        return $this->dteSignatureService->signDocument(dte: $json);
+        return $this->dteSignatureService->auth();
+//        return $this->dteSignatureService->signDocument(dte: $json);
         $userId = Auth::id() ?? throw new  \RuntimeException("Usuario no autenticado");
         $type = DocumentTypes::from($documentId);
 

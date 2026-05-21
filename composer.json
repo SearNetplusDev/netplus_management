@@ -20,6 +20,7 @@
         "laravel/tinker": "^3.0",
         "league/flysystem-aws-s3-v3": "^3.32",
         "maatwebsite/excel": "^3.1",
+        "predis/predis": "^3.4",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-data": "^4.17",
         "spatie/laravel-permission": "^6.21"

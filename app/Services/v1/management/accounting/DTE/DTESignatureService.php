@@ -5,6 +5,7 @@ namespace App\Services\v1\management\accounting\DTE;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use RuntimeException;
 
 class DTESignatureService
@@ -26,9 +27,10 @@ class DTESignatureService
             $request = $this->httpClient->request('POST', $uri, [
                 'headers' => [
                     'Content-Type' => 'application/x-www-form-urlencoded',
+                    'User-Agent' => 'netplus-isp',
                 ],
                 'form_params' => [
-                    'user' => config('dte.user'),
+                    'user' => config('dte.nit'),
                     'pwd' => config('dte.password'),
                 ],
             ]);
@@ -52,6 +54,8 @@ class DTESignatureService
      */
     public function signDocument(array $dte): object
     {
+//        Redis::set('nombre', 'Sear');
+//        dd(Redis::get('nombre'));
         $uri = config('dte.signer_url');
         try {
             $request = $this->httpClient->request('POST', $uri, [
@@ -61,7 +65,7 @@ class DTESignatureService
                 'json' => [
                     'nit' => config('dte.nit'),
                     'activo' => true,
-                    'passwordPri' => config('dte.password'),
+                    'passwordPri' => config('dte.crt_key'),
                     'dteJson' => $dte,
                 ],
             ]);
