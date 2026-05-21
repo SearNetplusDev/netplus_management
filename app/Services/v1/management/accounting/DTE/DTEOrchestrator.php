@@ -13,6 +13,7 @@ use App\Services\v1\management\billing\otherInvoices\OtherInvoiceService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 readonly class DTEOrchestrator
@@ -51,14 +52,17 @@ readonly class DTEOrchestrator
      * @param array $data
      * @param string $source
      * @return DTEModel
-     * @throws Throwable
+     * @throws Throwable|RuntimeException
      */
     private function processDTE(int $documentId, array $data, string $source)/*: DTEModel*/
     {
-        $json = $this->dteService->generate(documentId: $documentId, data: $data);
         return $this->dteSignatureService->auth();
-//        return $this->dteSignatureService->signDocument(dte: $json);
-        $userId = Auth::id() ?? throw new  \RuntimeException("Usuario no autenticado");
+        $json = $this->dteService->generate(documentId: $documentId, data: $data);
+        $haciendaResponse = $this->dteSignatureService->singAndSend(dte: $json, documentId: $documentId);
+        $receptionStamp = $haciendaResponse->selloRecibido
+            ?? throw new RuntimeException("Hacienda no devolvió sello de recepción");
+
+        $userId = Auth::id() ?? throw new  RuntimeException("Usuario no autenticado");
         $type = DocumentTypes::from($documentId);
 
         [$clientId, $paymentId, $invoiceIds, $otherInvoiceId, $category] = $this->resolveSourceContext(
@@ -73,7 +77,8 @@ readonly class DTEOrchestrator
             document_type_id: $documentId,
             control_number: $json['identificacion']['numeroControl'],
             generation_code: $json['identificacion']['codigoGeneracion'],
-            reception_stamp: strtoupper(Str::random(40)),
+//            reception_stamp: strtoupper(Str::random(40)),
+            reception_stamp: $receptionStamp,
             generation_datetime: Carbon::now(),
             total_amount: (float)$json['resumen'][$type->totalAmountKey()],
             payment_id: $paymentId,
@@ -97,17 +102,25 @@ readonly class DTEOrchestrator
      *
      * @param array $data
      * @return CancelDTEModel
-     * @throws Throwable
+     * @throws Throwable|RuntimeException
      */
     private function processInvalidation(array $data): CancelDTEModel
     {
-        $userId = Auth::id() ?? throw new \RuntimeException("Usuario no autenticado");
+        $userId = Auth::id() ?? throw new RuntimeException("Usuario no autenticado");
         $json = $this->dteService->generate(documentId: DocumentTypes::ANULACION->value, data: $data);
+
+        $haciendaResponse = $this->dteSignatureService->singAndSend(
+            dte: $json,
+            documentId: DocumentTypes::ANULACION->value
+        );
+        $receptionStamp = $haciendaResponse->selloRecibido
+            ?? throw new RuntimeException("Hacienda no devolvió sello de recepción");
 
         $dto = new CancelDTEDTO(
             dte_id: (int)$data['dte_id'],
             generation_code: $json['identificacion']['codigoGeneracion'],
-            reception_stamp: strtoupper(Str::random(40)),
+//            reception_stamp: strtoupper(Str::random(40)),
+            reception_stamp: $receptionStamp,
             generation_datetime: Carbon::now(),
             user_id: $userId,
             json_body: $json,

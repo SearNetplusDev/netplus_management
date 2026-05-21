@@ -2,13 +2,15 @@
 
 namespace App\Services\v1\management\accounting\DTE;
 
+use App\Enums\v1\Billing\DocumentTypes;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
+use Random\RandomException;
 use RuntimeException;
 
-class DTESignatureService
+readonly class DTESignatureService
 {
     public function __construct(
         private readonly Client $httpClient,
@@ -17,7 +19,9 @@ class DTESignatureService
     }
 
     /****
-     * @return object|mixed
+     * Genera auth Token y lo almacena en redis (vigencia de 24 horas)
+     *
+     * @return object
      */
     public function auth(): object
     {
@@ -30,12 +34,14 @@ class DTESignatureService
                     'User-Agent' => 'netplus-isp',
                 ],
                 'form_params' => [
-                    'user' => config('dte.nit'),
+                    'user' => config('dte.user'),
                     'pwd' => config('dte.password'),
                 ],
             ]);
 
             $decoded = json_decode($request->getBody()->getContents());
+
+//            Redis::setex('dte_auth_token', 86400, $decoded->body->token);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new RuntimeException('Respuesta de auth inválida: ', json_last_error_msg());
@@ -48,19 +54,67 @@ class DTESignatureService
         }
     }
 
-    /***
+    /****
+     * Firma y envía el dte a hacienda según su tipo.
+     *
      * @param array $dte
-     * @return object|mixed
+     * @param int $documentId
+     * @return object
+     * @throws RandomException|RuntimeException
      */
-    public function signDocument(array $dte): object
+    public function singAndSend(
+        array $dte,
+        int   $documentId,
+    ): object
     {
-//        Redis::set('nombre', 'Sear');
-//        dd(Redis::get('nombre'));
+        $this->ensureAuthToken();
+        $signed = $this->signDocument($dte);
+
+        if (empty($signed->body)) {
+            throw  new RuntimeException("El firmador no devolvió un doucmento firmado");
+        }
+
+        $type = DocumentTypes::from($documentId);
+
+        return $type === DocumentTypes::ANULACION
+            ? $this->invalidateDocument(signedDoc: $signed->body)
+            : $this->sendDocument(
+                version: $dte['identificacion']['version'],
+                type: $type->code(),
+                signedDocument: $signed->body,
+                genCode: $dte['identificacion']['codigoGeneracion'],
+            );
+    }
+
+
+    private function ensureAuthToken(): void
+    {
+        $ttl = Redis::ttl('dte_auth_token');
+
+        if ($ttl > 1800) return;
+
+        $auth = $this->auth();
+
+        if (empty($auth->body->token)) {
+            throw new RuntimeException("No se pudo obtener el token de autenticación.");
+        }
+
+        Redis::setex('dte_auth_token', 86400, $auth->body->token);
+    }
+
+    /***
+     * Firma (encripta el json del dte).
+     *
+     * @param array $dte
+     * @return object
+     */
+    private function signDocument(array $dte): object
+    {
         $uri = config('dte.signer_url');
         try {
             $request = $this->httpClient->request('POST', $uri, [
                 'headers' => [
-                    'Content-Type' => 'application/json',
+                    'Content-Type' => 'application/JSON',
                 ],
                 'json' => [
                     'nit' => config('dte.nit'),
@@ -80,6 +134,94 @@ class DTESignatureService
         } catch (GuzzleException $e) {
             Log::error('Fallo la firma del documento: ', ['error' => $e->getMessage()]);
             throw new RuntimeException('No se pudo firmar el documento.', previous: $e);
+        }
+    }
+
+    /****
+     * Envía el documento a hacienda para ser aprobado o no.
+     *
+     * @param int $version
+     * @param string $type
+     * @param string $signedDocument
+     * @param string $genCode
+     * @return object
+     * @throws RandomException
+     */
+    private function sendDocument(
+        int    $version,
+        string $type,
+        string $signedDocument,
+        string $genCode
+    ): object
+    {
+        $uri = config('dte.reception_url');
+        try {
+            $request = $this->httpClient->request('POST', $uri, [
+                'headers' => [
+                    'Authorization' => Redis::get('dte_auth_token'),
+                    'User-Agent' => 'netplus-isp',
+                    'Content-Type' => 'application/JSON',
+                ],
+                'json' => [
+                    'ambiente' => '01',
+                    'idEnvio' => random_int(100000, 999999),
+                    'version' => $version,
+                    'tipoDte' => $type,
+                    'documento' => $signedDocument,
+                    'codigoGeneracion' => $genCode,
+                ],
+            ]);
+
+            $decoded = json_decode($request->getBody()->getContents());
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new RuntimeException('Respuesta del firmador inválida: ', json_last_error_msg());
+            }
+
+            return $decoded;
+        } catch (GuzzleException $e) {
+            Log::error('Fallo el envío del documento : ', ['error' => $e->getMessage()]);
+            throw new RuntimeException('No se pudo enviar el documento.', previous: $e);
+        }
+    }
+
+    /****
+     * Envía a hacienda la invalidación para ser aprobada o rechazada.
+     *
+     * @param string $signedDoc
+     * @return object
+     * @throws RandomException
+     */
+    private function invalidateDocument(string $signedDoc): object
+    {
+        $uri = config('dte.invalidation_url');
+
+        try {
+            $request = $this->httpClient->request('POST', $uri, [
+                'headers' => [
+                    'Authorization' => Redis::get('dte_auth_token'),
+                    'User-Agent' => 'netplus-isp',
+                    'Content-Type' => 'application/JSON',
+                ],
+                'json' => [
+                    'ambiente' => '01',
+                    'idEnvio' => random_int(100000, 999999),
+                    'version' => 2,
+                    'documento' => $signedDoc,
+                ]
+            ]);
+
+            $decoded = json_decode($request->getBody()->getContents());
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new RuntimeException('Fallo al enviar la invalidación: ', json_last_error_msg());
+            }
+
+            return $decoded;
+
+        } catch (GuzzleException $e) {
+            Log::error('Fallo el envío de la invalidación : ', ['error' => $e->getMessage()]);
+            throw new RuntimeException('No se pudo enviar el documento invalidado.', previous: $e);
         }
     }
 }
