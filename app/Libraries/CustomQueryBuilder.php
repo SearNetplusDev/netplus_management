@@ -133,6 +133,7 @@ class CustomQueryBuilder
             try {
                 $startDate = Carbon::parse($f['query_1'])->startOfDay();
                 $endDate = Carbon::parse($f['query_2'])->endOfDay();
+
                 return $q->whereBetween($f['column'], [$startDate, $endDate], $boolean);
             } catch (\Exception $e) {
                 return $q->whereBetween($f['column'], [$f['query_1'], $f['query_2']], $boolean);
@@ -237,6 +238,7 @@ class CustomQueryBuilder
             'created_at',
             'updated_at',
             'due_date',
+            'generation_datetime'
         ];
     }
 }
