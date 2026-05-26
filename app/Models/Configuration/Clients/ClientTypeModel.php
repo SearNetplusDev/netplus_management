@@ -16,6 +16,8 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ClientModel> $clients
+ * @property-read int|null $clients_count
  * @property-read array $status
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientTypeModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClientTypeModel newModelQuery()

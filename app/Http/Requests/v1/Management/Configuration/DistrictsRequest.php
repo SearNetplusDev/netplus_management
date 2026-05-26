@@ -24,6 +24,7 @@ class DistrictsRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'code' => 'required|string',
             'municipality' => 'required|integer',
             'state' => 'required|integer',
             'status' => 'required|boolean',
@@ -35,6 +36,8 @@ class DistrictsRequest extends FormRequest
         return [
             'name.required' => 'El campo nombre es obligatorio',
             'name.string' => 'El campo nombre debe ser un texto',
+            'code.required' => 'El campo código es obligatorio',
+            'code.string' => 'El campo código debe ser un texto',
             'municipality.required' => 'El campo municipio es obligatorio',
             'municipality.integer' => 'El campo municipio debe ser un número',
             'state.required' => 'El campo departamento es obligatorio',
@@ -51,6 +54,7 @@ class DistrictsRequest extends FormRequest
             municipality_id: $this->input('municipality'),
             state_id: $this->input('state'),
             status_id: $this->input('status'),
+            code: $this->input('code'),
         );
     }
 }

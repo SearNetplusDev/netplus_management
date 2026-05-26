@@ -9,12 +9,22 @@ use Spatie\LaravelData\Attributes\Validation\StringType;
 
 class DistrictsDTO extends Data
 {
-    #[Required, StringType]
-    public ?string $name;
-    #[Required, IntegerType]
-    public ?int $municipality_id;
-    #[Required, IntegerType]
-    public ?int $state_id;
-    #[Required, IntegerType]
-    public ?int $status_id;
+    public function __construct(
+        #[Required, StringType]
+        public readonly ?string $name,
+
+        #[Required, IntegerType]
+        public readonly ?int    $municipality_id,
+
+        #[Required, IntegerType]
+        public readonly ?int    $state_id,
+
+        #[Required, IntegerType]
+        public readonly ?int    $status_id,
+
+        #[Required, StringType]
+        public readonly string  $code,
+    )
+    {
+    }
 }

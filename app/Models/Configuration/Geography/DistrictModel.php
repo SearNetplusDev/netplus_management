@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string $code
  * @property-read \App\Models\Configuration\Geography\MunicipalityModel|null $municipality
  * @property-read \App\Models\Configuration\Geography\StateModel|null $state
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel advancedFilter()
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel whereCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DistrictModel whereId($value)
@@ -42,9 +44,9 @@ class DistrictModel extends Model
     protected $connection = 'pgsql';
     protected $table = 'config_districts';
     protected $primaryKey = 'id';
-    protected $fillable = ['name', 'municipality_id', 'state_id', 'status_id'];
+    protected $fillable = ['name', 'municipality_id', 'state_id', 'status_id', 'code'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
-    protected array $allowedFilters = ['id', 'name', 'municipality_id', 'state_id', 'status_id'];
+    protected array $allowedFilters = ['id', 'name', 'municipality_id', 'state_id', 'status_id', 'code'];
     protected array $orderable = ['id', 'name', 'municipality_id', 'state_id', 'status_id'];
 
     public function municipality(): belongsTo
