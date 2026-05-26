@@ -2,7 +2,9 @@
 
 namespace App\Models\Configuration\Clients;
 
+use App\Models\Clients\ClientModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
@@ -42,4 +44,9 @@ class ClientTypeModel extends Model
     protected array $allowedFilters = ['id', 'name', 'status_id'];
     protected array $orderable = ['id', 'name', 'status_id'];
     protected $appends = ['status'];
+
+    public function clients(): HasMany
+    {
+        return $this->hasMany(ClientModel::class, 'client_type_id', 'id');
+    }
 }

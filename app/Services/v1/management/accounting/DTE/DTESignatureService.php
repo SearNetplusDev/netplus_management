@@ -108,9 +108,10 @@ readonly class DTESignatureService
      * @param array $dte
      * @return object
      */
-    private function signDocument(array $dte): object
+    public function signDocument(array $dte): object
     {
         $uri = config('dte.signer_url');
+
         try {
             $request = $this->httpClient->request('POST', $uri, [
                 'headers' => [
