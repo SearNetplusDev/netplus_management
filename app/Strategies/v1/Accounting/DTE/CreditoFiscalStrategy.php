@@ -71,6 +71,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
                 'client.corporate_info.activity',
                 'client.corporate_info.state',
                 'client.corporate_info.municipality',
+                'client.corporate_info.district',
                 'client.nit',
                 'client.mobile',
                 'client.email',
@@ -203,7 +204,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
     ): array
     {
         return [
-            'identificacion' => $this->identificacion(DocumentTypes::CREDITO_FISCAL, 3),
+            'identificacion' => $this->identificacion(DocumentTypes::CREDITO_FISCAL, 4),
             'documentoRelacionado' => null,
             'emisor' => $this->emisorBase(),
             'receptor' => $this->buildReceptorBase($client),
@@ -217,7 +218,6 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
                 condition: $condition,
                 method: $method ?? '01',
             ),
-            'extension' => null,
             'apendice' => null,
         ];
     }
@@ -357,9 +357,8 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
                 ],
             ],
             'subTotal' => $this->round2($totales['neto']),
-            'ivaPerci1' => 0,
-            'ivaRete1' => $this->round2($totales['ivaRetenido']),
-            'reteRenta' => 0,
+            'ivaPerci' => 0,
+            'ivaRete' => $this->round2($totales['ivaRetenido']),
             'montoTotalOperacion' => $this->round2($totalConIva),
             'totalNoGravado' => 0,
             'totalPagar' => $this->round2($totales['totalPagar']),
@@ -368,6 +367,7 @@ class CreditoFiscalStrategy extends BaseDTEStrategy
             'condicionOperacion' => $condition,
             'pagos' => $this->buildPagos($method, $totales['totalPagar']),
             'numPagoElectronico' => null,
+            'observaciones' => null,
         ];
     }
 
