@@ -107,13 +107,12 @@ abstract class BaseDTEStrategy implements DTEGeneratorInterface
             'direccion' => [
                 'departamento' => $this->issuerUtils->getState(),
                 'municipio' => $this->issuerUtils->getMunicipality(),
+                'distrito' => $this->issuerUtils->getDistrict(),
                 'complemento' => $this->issuerUtils->getAddress(),
             ],
             'telefono' => $this->issuerUtils->getPhoneNumber(),
             'correo' => $this->issuerUtils->getEmail(),
-            'codEstableMH' => null,
             'codEstable' => null,
-            'codPuntoVentaMH' => null,
             'codPuntoVenta' => null,
         ];
     }

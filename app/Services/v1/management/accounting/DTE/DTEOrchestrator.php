@@ -58,7 +58,8 @@ readonly class DTEOrchestrator
     {
 //        return $this->dteSignatureService->auth();
         $json = $this->dteService->generate(documentId: $documentId, data: $data);
-        return $this->dteSignatureService->signDocument(dte: $json);
+        return $json;
+//        return $this->dteSignatureService->signDocument(dte: $json);
 //        $haciendaResponse = $this->dteSignatureService->singAndSend(dte: $json, documentId: $documentId);
 //        $receptionStamp = $haciendaResponse->selloRecibido
 //            ?? throw new RuntimeException("Hacienda no devolvió sello de recepción");

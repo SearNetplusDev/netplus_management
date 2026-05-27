@@ -68,12 +68,21 @@ class IssuerUtils
     }
 
     /***
+     * Código del distrito.
+     * @return int
+     */
+    public function getDistrict(): int
+    {
+        return 17;
+    }
+
+    /***
      * Dirección de la empresa.
      * @return string
      */
     public function getAddress(): string
     {
-        return 'Calle principal, Col. San Francisco, #34, San Miguel';
+        return 'Calle principal, Col. San Francisco, #34';
     }
 
     /***

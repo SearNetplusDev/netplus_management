@@ -155,7 +155,7 @@ class FacturaStrategy extends BaseDTEStrategy
     ): array
     {
         return [
-            'identificacion' => $this->identificacion(DocumentTypes::FACTURA),
+            'identificacion' => $this->identificacion(DocumentTypes::FACTURA, 2),
             'documentoRelacionado' => null,
             'emisor' => $this->emisor(),
             'receptor' => $this->buildReceptor($client),
@@ -168,7 +168,8 @@ class FacturaStrategy extends BaseDTEStrategy
                 discount: $discount,
                 condition: $condition,
                 method: $method,
-            )
+            ),
+            'apendice' => null,
         ];
     }
 
@@ -266,8 +267,9 @@ class FacturaStrategy extends BaseDTEStrategy
             'codActividad' => null,
             'descActividad' => null,
             'direccion' => [
-                'departamento' => $client->address?->state_id,
-                'municipio' => $client->address?->municipality_id,
+                'departamento' => $client->address?->state?->code,
+                'municipio' => $client->address?->municipality?->code,
+                'distrito' => $client->address?->district?->code,
                 'complemento' => $client->address?->address,
             ],
             'telefono' => $this->phoneFormatter($client->mobile->number ?? null),
@@ -305,10 +307,9 @@ class FacturaStrategy extends BaseDTEStrategy
             'descuGravada' => $discount,
             'porcentajeDescuento' => 0,
             'totalDescu' => $discount,
-            'tributos' => [],
+            'tributos' => /*[]*/ null,
             'subTotal' => $this->round2($totales['totalConDescuento']),
-            'ivaRete1' => $this->round2($totales['ivaRetenido']),
-            'reteRenta' => 0,
+            'ivaRete' => $this->round2($totales['ivaRetenido']),
             'montoTotalOperacion' => $this->round2($totales['totalPagar']),
             'totalNoGravado' => 0,
             'totalPagar' => $this->round2($totales['totalPagar']),
@@ -318,6 +319,7 @@ class FacturaStrategy extends BaseDTEStrategy
             'condicionOperacion' => $condition,
             'pagos' => $this->buildPagos($method, $totales['totalPagar']),
             'numPagoElectronico' => null,
+            'observaciones' => null,
         ];
     }
 }
