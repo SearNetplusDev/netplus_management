@@ -70,11 +70,12 @@ class AnulacionStrategy extends BaseDTEStrategy
     private function buildIdentificacion(string $genCode): array
     {
         return [
-            'version' => 2,
+            'version' => 3,
             'ambiente' => $this->headerUtils->ambient(),
             'codigoGeneracion' => $genCode,
-            'fecAnula' => $this->headerUtils->getDate(),
-            'horAnula' => $this->headerUtils->getHour(),
+            'fecEmi' => $this->headerUtils->getDate(),
+            'horEmi' => $this->headerUtils->getHour(),
+            'fusion' => null,
         ];
     }
 
@@ -88,11 +89,9 @@ class AnulacionStrategy extends BaseDTEStrategy
         return [
             'nit' => '12170206211014',
             'nombre' => 'NETPLUS COMPANY WORK S.A. DE C.V',
-            'tipoEstablecimiento' => '02',
-            'nomEstablecimiento' => 'Casa Matriz',
-            'codEstableMH' => null,
+            'codEstableMH' => 'M001',
             'codEstable' => null,
-            'codPuntoVentaMH' => null,
+            'codPuntoVentaMH' => 'M001',
             'codPuntoVenta' => null,
             'telefono' => '76266022',
             'correo' => 'netpluscompanywork@gmail.com',
@@ -110,9 +109,6 @@ class AnulacionStrategy extends BaseDTEStrategy
     {
         $json = $dteModel->json_body;
         $receptor = $json['receptor'] ?? $json['sujetoExcluido'] ?? [];
-        $totalAmount = (float)$dteModel->total_amount;
-        $netoAmount = $totalAmount / TaxRate::VALOR_NETO->value();
-        $iva = $netoAmount * TaxRate::IVA->value();
 
         return [
             'tipoDte' => $dteModel->dte_type?->code,
@@ -120,7 +116,6 @@ class AnulacionStrategy extends BaseDTEStrategy
             'selloRecibido' => $dteModel->reception_stamp,
             'numeroControl' => $dteModel->control_number,
             'fecEmi' => Carbon::parse($dteModel->generation_datetime)->format('Y-m-d'),
-            'montoIva' => $this->round2($iva),
             'codigoGeneracionR' => $genCode,
             'tipoDocumento' => $receptor['tipoDocumento'] ?? null,
             'numDocumento' => $receptor['numDocumento'] ?? null,
