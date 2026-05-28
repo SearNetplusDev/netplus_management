@@ -46,7 +46,24 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
             'fecEmi' => true,
             'horEmi' => true,
             'tipoMoneda' => true,
+            'fusion' => true,
         ];
+    }
+
+    /***
+     * Añade campos adicionales al bloque identificación.
+     *
+     * @param DocumentTypes $type
+     * @param int $version
+     * @return array
+     * @throws RandomException
+     * @throws Throwable
+     */
+    protected function identificacion(DocumentTypes $type, int $version = 4): array
+    {
+        $identificacion = parent::identificacion($type, $version);
+        $identificacion['fusion'] = null;
+        return $identificacion;
     }
 
     protected function emisorSchema(): array
@@ -56,6 +73,36 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
             'codEstable' => false,
             'codPuntoVentaMH' => false,
             'codPuntoVenta' => false,
+        ];
+    }
+
+    /***
+     * Construye el bloque "receptor" de las notas de crédito/débito.
+     *
+     * @param ClientModel $clientModel
+     * @return array
+     */
+    protected function buildReceptor(ClientModel $clientModel): array
+    {
+        $fi = $clientModel->corporate_info;
+        $number = $fi->dui ?? $fi->nit;
+
+        return [
+            'tipoDocumento' => $fi->dui ? '13' : '36',
+            'numDocumento' => $this->parseNumber($number),
+            'nrc' => $this->parseNumber($fi->nrc),
+            'nombre' => $fi?->invoice_alias ?? "{$clientModel->name} {$clientModel->surname}",
+            'codActividad' => $fi?->activity?->code,
+            'descActividad' => $fi?->activity?->name,
+            'nombreComercial' => $fi?->invoice_alias ?? "{$clientModel->name} {$clientModel->surname}",
+            'direccion' => [
+                'departamento' => $fi?->state?->code ?? $clientModel->address?->state?->code,
+                'municipio' => $fi?->municipality?->code ?? $clientModel->address?->municipality?->code,
+                'distrito' => $fi?->district?->code ?? $clientModel->address?->district?->code,
+                'complemento' => $fi?->address ?? $clientModel->address?->address,
+            ],
+            'telefono' => $this->phoneFormatter($fi?->phone_number ?? $clientModel->mobile?->number) ?? null,
+            'correo' => $clientModel->email?->email,
         ];
     }
 
@@ -133,6 +180,8 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
         foreach ($items as $item) {
             $unitPrice = (float)$item['unit_price'] / TaxRate::VALOR_NETO->value();
             $gravadoRow = $unitPrice * (int)$item['quantity'];
+            $ivaRow = $gravadoRow * TaxRate::IVA->value();
+
             $body[] = [
                 'numItem' => (int)$item['_line'],
                 'tipoItem' => (int)$item['item_type'],
@@ -148,6 +197,10 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
                 'ventaExenta' => 0,
                 'ventaGravada' => $gravadoRow,
                 'tributos' => ['20'],
+                'noGravado' => 0,
+                'ivaPerci' => 0,
+                'totalIva' => $ivaRow,
+                'ivaRete' => 0,
             ];
 
             $gravado += $gravadoRow;
@@ -250,10 +303,10 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
     ): array
     {
         return [
-            'identificacion' => $this->identificacion($this->documentType(), 3),
+            'identificacion' => $this->identificacion($this->documentType(), 4),
             'documentoRelacionado' => $this->buildRelatedDoc($dteModel),
-            'emisor' => $this->emisorBase(),
-            'receptor' => $this->buildReceptorBase($clientModel),
+            'emisor' => $this->emisor(),
+            'receptor' => $this->buildReceptor($clientModel),
             'ventaTercero' => null,
             'cuerpoDocumento' => $body,
             'resumen' => $this->buildResumen(
