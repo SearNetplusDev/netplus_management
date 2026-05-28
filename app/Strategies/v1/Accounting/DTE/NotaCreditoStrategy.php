@@ -10,4 +10,31 @@ class NotaCreditoStrategy extends BaseNotaStrategy
     {
         return DocumentTypes::NOTA_CREDITO;
     }
+
+    /***
+     * Elementos requeridos en el bloque "resumen".
+     *
+     * @return string[]
+     */
+    protected function resumenSchema(): array
+    {
+        return [
+            'totalNoSuj',
+            'totalExenta',
+            'totalGravada',
+            'subTotalVentas',
+            'totalDescu',
+            'tributos',
+            'montoTotalOperacion',
+            'ivaPerci',
+            'totalIva',
+            'ivaRete',
+            'totalNoGravado',
+            'totalPagar',
+            'totalLetras',
+            'condicionOperacion',
+            'observaciones',
+            'codigoRetencionMH'
+        ];
+    }
 }

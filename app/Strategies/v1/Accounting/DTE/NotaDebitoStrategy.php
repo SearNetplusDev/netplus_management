@@ -11,10 +11,31 @@ class NotaDebitoStrategy extends BaseNotaStrategy
         return DocumentTypes::NOTA_DEBITO;
     }
 
-    protected function extraResumenFields(): array
+    /***
+     * Elementos requeridos en el bloque 'resumen'.
+     *
+     * @return array
+     */
+    protected function resumenSchema(): array
     {
         return [
-            'numPagoElectronico' => null
+            'totalNoSuj',
+            'totalExenta',
+            'totalGravada',
+            'subTotalVentas',
+            'totalDescu',
+            'tributos',
+            'ivaPerci',
+            'totalIva',
+            'ivaRete',
+            'montoTotalOperacion',
+            'totalNoGravado',
+            'totalPagar',
+            'totalLetras',
+            'condicionOperacion',
+            'numPagoElectronico',
+            'observaciones',
+            'codigoRetencionMH'
         ];
     }
 }

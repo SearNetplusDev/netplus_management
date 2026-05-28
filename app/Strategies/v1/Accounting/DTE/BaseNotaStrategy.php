@@ -21,15 +21,12 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
      */
     abstract protected function documentType(): DocumentTypes;
 
-    /***
-     * Campos adicionales exclusivos del resumen de la nota a emitir.
+    /****
+     * Define el orden y los campos que se incluirán en el bloque 'resumen'
      *
      * @return array
      */
-    protected function extraResumenFields(): array
-    {
-        return [];
-    }
+    abstract protected function resumenSchema(): array;
 
     protected function identificacionSchema(): array
     {
@@ -129,7 +126,7 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
         $discount = (float)($data['totals']['discount'] ?? 0);
         [$body, $gravado] = $this->buildLinesFromItems(
             items: $data['items'],
-            relatedDoc: $relatedDoc->control_number,
+            relatedDoc: $relatedDoc->generation_code,
         );
 
         return $this->assembleDocument(
@@ -191,15 +188,15 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
                 'codTributo' => null,
                 'uniMedida' => 99,
                 'descripcion' => $item['description'],
-                'precioUni' => $unitPrice,
+                'precioUni' => round($unitPrice, 8),
                 'montoDescu' => 0,
                 'ventaNoSuj' => 0,
                 'ventaExenta' => 0,
-                'ventaGravada' => $gravadoRow,
+                'ventaGravada' => round($gravadoRow, 8),
                 'tributos' => ['20'],
                 'noGravado' => 0,
                 'ivaPerci' => 0,
-                'totalIva' => $ivaRow,
+                'totalIva' => round($ivaRow, 8),
                 'ivaRete' => 0,
             ];
 
@@ -221,7 +218,7 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
             [
                 'tipoDocumento' => $dteModel->dte_type?->code,
                 'tipoGeneracion' => 2,
-                'numeroDocumento' => $dteModel->control_number,
+                'numeroDocumento' => $dteModel->generation_code,
                 'fechaEmision' => Carbon::parse($dteModel->generation_datetime)->format('Y-m-d'),
             ]
         ];
@@ -250,14 +247,11 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
             retainedIva: $retainedIva,
         );
 
-        $base = [
+        $pool = [
             'totalNoSuj' => 0,
             'totalExenta' => 0,
             'totalGravada' => $this->round2($totales['neto']),
             'subTotalVentas' => $this->round2($totales['neto']),
-            'descuNoSuj' => 0,
-            'descuExenta' => 0,
-            'descuGravada' => $discount,
             'totalDescu' => $discount,
             'tributos' => [
                 [
@@ -266,16 +260,20 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
                     'valor' => $this->round2($totales['iva']),
                 ]
             ],
-            'subTotal' => $this->round2($totales['neto']),
-            'ivaPerci1' => 0,
-            'ivaRete1' => $this->round2($totales['ivaRetenido']),
-            'reteRenta' => 0,
+            'ivaPerci' => 0,
+            'totalIva' => $this->round2($totales['iva']),
+            'ivaRete' => $this->round2($totales['ivaRetenido']),
             'montoTotalOperacion' => $this->round2($totales['totalPagar']),
+            'totalNoGravado' => 0,
+            'totalPagar' => $this->round2($totales['totalPagar']),
             'totalLetras' => $this->numberToLetter->convert($this->round2($totales['totalPagar'])),
             'condicionOperacion' => $condition,
+            'numPagoElectronico' => null,
+            'observaciones' => null,
+            'codigoRetencionMH' => null,
         ];
 
-        return array_merge($base, $this->extraResumenFields());
+        return $this->applyResumenSchema($pool, $this->resumenSchema());
     }
 
     /***
@@ -315,8 +313,27 @@ abstract class BaseNotaStrategy extends BaseDTEStrategy
                 discount: $discount,
                 condition: $condition,
             ),
-            'extension' => null,
             'apendice' => null,
         ];
+    }
+
+    /****
+     * Filtra y reordena el pool de campos del resumen según el schema declarado por cada subclase.
+     *
+     * @param array $pool
+     * @param array $schema
+     * @return array
+     */
+    private function applyResumenSchema(array $pool, array $schema): array
+    {
+        $result = [];
+
+        foreach ($schema as $key) {
+            if (array_key_exists($key, $pool)) {
+                $result[$key] = $pool[$key];
+            }
+        }
+
+        return $result;
     }
 }
