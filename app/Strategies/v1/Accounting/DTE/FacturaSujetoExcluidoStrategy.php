@@ -59,6 +59,7 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
      * @param array $data
      * @return array
      * @throws RandomException
+     * @throws Throwable
      */
     protected function buildBody(array $data): array
     {
@@ -109,9 +110,9 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
                 'codigo' => null,
                 'uniMedida' => 99,
                 'descripcion' => $item['description'],
-                'precioUni' => $precioUni,
+                'precioUni' => round($precioUni, 8),
                 'montoDescu' => 0,
-                'compra' => $purchase,
+                'compra' => round($purchase, 8),
             ];
             $compra += $purchase;
         }
@@ -144,9 +145,9 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
     ): array
     {
         return [
-            'identificacion' => $this->identificacion(DocumentTypes::FACTURA_SUJETO_EXCLUIDO),
+            'identificacion' => $this->identificacion(DocumentTypes::FACTURA_SUJETO_EXCLUIDO, 2),
             'emisor' => $this->emisor(),
-            'sujetoExcluido' => $this->buildSujetoExcluido($client),
+            'receptor' => $this->buildReceptor($client),
             'cuerpoDocumento' => $body,
             'resumen' => $this->buildResumen(
                 compra: $compra,
@@ -160,12 +161,12 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
     }
 
     /***
-     * Construye el bloque "sujetoExcluido" con los datos del cliente.
+     * Construye el bloque "receptor" con los datos del cliente.
      *
      * @param ClientModel $client
      * @return array
      */
-    private function buildSujetoExcluido(ClientModel $client): array
+    private function buildReceptor(ClientModel $client): array
     {
         $fi = $client->corporate_info;
 
@@ -178,6 +179,7 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
             'direccion' => [
                 'departamento' => $fi?->state?->code ?? $client->address?->state?->code,
                 'municipio' => $fi?->municipality?->code ?? $client->address?->municipality?->code,
+                'distrito' => $fi?->district?->code ?? $client->address?->district?->code,
                 'complemento' => $fi?->address ?? $client->address?->address,
             ],
             'telefono' => $this->phoneFormatter($fi?->phone_number ?? $client->mobile?->number) ?? null,
@@ -210,7 +212,6 @@ class FacturaSujetoExcluidoStrategy extends BaseDTEStrategy
             'descu' => $this->round2($discount),
             'totalDescu' => $this->round2($discount),
             'subTotal' => $this->round2($compra),
-            'ivaRete1' => $this->round2($totales['ivaRetenido']),
             'reteRenta' => 0,
             'totalPagar' => $this->round2($totales['totalPagar']),
             'totalLetras' => $this->numberToLetter->convert($this->round2($totales['totalPagar'])),
