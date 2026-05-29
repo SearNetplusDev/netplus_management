@@ -11,6 +11,12 @@
 <p class="title-h1">Documento Tributario Electrónico</p>
 <p class="title-h1 mt-xs">Nota de Débito</p>
 
+@if($invalidated)
+    <div class="watermark">
+        INVALIDADO
+    </div>
+@endif
+
 <!--        Encabezado: Logo | Datos | QR       -->
 <table class="table-full mt-xs">
     <tbody>
@@ -156,23 +162,23 @@
         <td class="summary-value">$ {{ number_format($data['resumen']['totalGravada'], 2) }}</td>
     </tr>
 
-    <tr>
-        <td colspan="3" class="borderless"></td>
-        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas no sujetas:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['descuNoSuj'], 2) }}</td>
-    </tr>
+{{--    <tr>--}}
+{{--        <td colspan="3" class="borderless"></td>--}}
+{{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas no sujetas:</b></td>--}}
+{{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuNoSuj'], 2) }}</td>--}}
+{{--    </tr>--}}
 
-    <tr>
-        <td colspan="3" class="borderless"></td>
-        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas exentas:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['descuExenta'], 2) }}</td>
-    </tr>
+{{--    <tr>--}}
+{{--        <td colspan="3" class="borderless"></td>--}}
+{{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas exentas:</b></td>--}}
+{{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuExenta'], 2) }}</td>--}}
+{{--    </tr>--}}
 
-    <tr>
-        <td colspan="3" class="borderless"></td>
-        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas gravadas:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['descuGravada'], 2) }}</td>
-    </tr>
+{{--    <tr>--}}
+{{--        <td colspan="3" class="borderless"></td>--}}
+{{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas gravadas:</b></td>--}}
+{{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuGravada'], 2) }}</td>--}}
+{{--    </tr>--}}
 
     <tr>
         <td colspan="3" class="borderless"></td>
@@ -183,19 +189,19 @@
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="4" class="summary-label"><b>Subtotal:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['subTotal'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['subTotalVentas'], 2) }}</td>
     </tr>
 
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="4" class="summary-label"><b>IVA percibido:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['ivaPerci1'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['ivaPerci'], 2) }}</td>
     </tr>
 
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="4" class="summary-label"><b>IVA retenido:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['ivaRete1'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['ivaRete'], 2) }}</td>
     </tr>
 
     <tr>

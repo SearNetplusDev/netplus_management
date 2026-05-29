@@ -5,6 +5,7 @@ namespace App\Jobs\accounting;
 use App\Mail\DTE\SendCancelDTEMail;
 use App\Models\Accounting\CancelDTEModel;
 use App\Models\Accounting\DTEModel;
+use App\Services\v1\management\accounting\DTE\DTEPrintService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -26,6 +27,7 @@ class SendInvalidationMailJob implements ShouldQueue
         private readonly CancelDTEModel $cancelDte,
         private readonly DTEModel       $dteModel,
         private readonly string         $recipientEmail,
+        private readonly string         $jsonContent,
     )
     {
         //
@@ -34,12 +36,17 @@ class SendInvalidationMailJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public
+    function handle(DTEPrintService $printService): void
     {
+        $pdfOutput = $printService->print($this->dteModel->id)->output();
+
         Mail::to($this->recipientEmail)
             ->send(new SendCancelDTEMail(
                 invalidation: $this->cancelDte,
                 originalDte: $this->dteModel,
+                pdfOutput: $pdfOutput,
+                jsonContent: $this->jsonContent,
             ));
     }
 }

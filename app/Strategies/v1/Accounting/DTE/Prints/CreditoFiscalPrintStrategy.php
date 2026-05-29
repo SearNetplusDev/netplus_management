@@ -27,6 +27,7 @@ readonly class CreditoFiscalPrintStrategy extends BasePrint
             'receptionStamp' => $model->reception_stamp,
             'clientData' => $this->baseReceptor($model->client_id),
             'condition' => $condition,
+            'invalidated' => $model->invalidation()->exists(),
         ])
             ->setPaper('A4', 'portrait');
     }

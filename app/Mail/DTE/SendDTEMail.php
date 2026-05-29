@@ -34,7 +34,7 @@ class SendDTEMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Documento Tributario Electrónico - {$this->dteModel->control_number}",
+            subject: "Documento Tributario Electrónico - {$this->dteModel->generation_code}",
         );
     }
 
@@ -106,7 +106,7 @@ class SendDTEMail extends Mailable
     private function buildFileName(): string
     {
 //        $controlSafe = str_replace(['/', '\\', ' '], '-', $this->dteModel->generation_code);
-        return $this->dteModel->control_number;
+        return $this->dteModel->generation_code;
     }
 
     /***

@@ -47,6 +47,7 @@ readonly class FacturaPrintStrategy extends BasePrint
             'receptionStamp' => $model->reception_stamp,
             'clientData' => $clientData,
             'condition' => $condition,
+            'invalidated' => $model->invalidation()->exists(),
         ])
             ->setPaper('A4', 'portrait');
     }

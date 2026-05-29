@@ -8,7 +8,11 @@
     @include('v1.management.pdf.styles.dte-style')
 </head>
 <body>
-
+@if($invalidated)
+    <div class="watermark">
+        INVALIDADO
+    </div>
+@endif
 <p class="title-h1">Documento Tributario Electrónico</p>
 <p class="title-h1 mt-xs">Factura</p>
 
@@ -167,14 +171,14 @@
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="5" class="summary-label"><b>IVA retenido:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['ivaRete1'], 2) }}</td>
+        <td class="summary-value">$ {{ number_format($data['resumen']['ivaRete'], 2) }}</td>
     </tr>
 
-    <tr>
-        <td colspan="3" class="borderless"></td>
-        <td colspan="5" class="summary-label"><b>Retención renta:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['reteRenta'], 2) }}</td>
-    </tr>
+{{--    <tr>--}}
+{{--        <td colspan="3" class="borderless"></td>--}}
+{{--        <td colspan="5" class="summary-label"><b>Retención renta:</b></td>--}}
+{{--        <td class="summary-value">$ {{ number_format($data['resumen']['reteRenta'], 2) }}</td>--}}
+{{--    </tr>--}}
 
     <tr>
         <td colspan="3" class="borderless"></td>

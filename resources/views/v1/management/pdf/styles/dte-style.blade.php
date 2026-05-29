@@ -16,12 +16,16 @@
         color: #333333;
         margin: 1.0cm 1.5cm;
         text-align: justify;
+        position: relative;
+        z-index: 1;
     }
 
     .table-full {
         width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
+        position: relative;
+        z-index: 1;
     }
 
     .title-h1 {
@@ -65,6 +69,8 @@
     .section-container {
         border-collapse: separate;
         border-spacing: 0;
+        position: relative;
+        z-index: 1;
     }
 
     .box-cell {
@@ -132,6 +138,8 @@
         table-layout: fixed;
         border: 1px solid #999999;
         margin-top: 12px;
+        position: relative;
+        z-index: 1;
     }
 
     .body-table th, .body-table td {
@@ -259,4 +267,16 @@
         width: 20%;
     }
 
+    .watermark {
+        position: fixed;
+        top: 38%;
+        left: -10%;
+        width: 120%;
+        text-align: center;
+        font-size: 110px;
+        font-weight: bold;
+        color: rgba(231, 76, 60, 0.1);
+        transform: rotate(-30deg);
+        z-index: 2;
+    }
 </style>

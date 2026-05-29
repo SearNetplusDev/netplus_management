@@ -11,6 +11,12 @@
 <p class="title-h1">Documento Tributario Electrónico</p>
 <p class="title-h1 mt-xs">Factura de Sujeto Excluido</p>
 
+@if($invalidated)
+    <div class="watermark">
+        INVALIDADO
+    </div>
+@endif
+
 <!--        Encabezado: Logo | Datos | QR       -->
 <table class="table-full mt-xs">
     <tbody>

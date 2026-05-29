@@ -36,7 +36,7 @@ readonly class DTEOrchestrator
      * @return DTEModel|CancelDTEModel
      * @throws Throwable
      */
-    public function process(int $documentId, array $data)/*: DTEModel|CancelDTEModel*/
+    public function process(int $documentId, array $data): DTEModel|CancelDTEModel
     {
         $source = $data['source'] ?? 'payment';
 
@@ -54,11 +54,10 @@ readonly class DTEOrchestrator
      * @return DTEModel
      * @throws Throwable|RuntimeException
      */
-    private function processDTE(int $documentId, array $data, string $source)/*: DTEModel*/
+    private function processDTE(int $documentId, array $data, string $source): DTEModel
     {
 //        return $this->dteSignatureService->auth();
         $json = $this->dteService->generate(documentId: $documentId, data: $data);
-        return $json;
 //        return $this->dteSignatureService->signDocument(dte: $json);
 //        $haciendaResponse = $this->dteSignatureService->singAndSend(dte: $json, documentId: $documentId);
 //        $receptionStamp = $haciendaResponse->selloRecibido

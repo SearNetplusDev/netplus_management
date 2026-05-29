@@ -62,6 +62,7 @@ readonly class DTEMailService
                 ->findOrFail($cancelDTEModel->dte_id);
 
             $recipientEmail = $this->resolveRecipientEmail($originalDte);
+            $jsonContent = $this->encodeJson($cancelDTEModel->json_body);
 
             if (!$recipientEmail) {
                 Log::channel('dte_mail')
@@ -75,6 +76,7 @@ readonly class DTEMailService
                 cancelDte: $cancelDTEModel,
                 dteModel: $originalDte,
                 recipientEmail: $recipientEmail,
+                jsonContent: $jsonContent,
             );
         } catch (Throwable $e) {
             Log::channel('dte_mail')

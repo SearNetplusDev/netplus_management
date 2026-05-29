@@ -23,6 +23,8 @@ class SendCancelDTEMail extends Mailable
     public function __construct(
         public readonly CancelDTEModel $invalidation,
         public readonly DTEModel       $originalDte,
+        public readonly string         $pdfOutput,
+        public readonly string         $jsonContent,
     )
     {
         //
@@ -34,7 +36,7 @@ class SendCancelDTEMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Anulación de Documento Tributario Electrónico - {$this->originalDte->control_number}",
+            subject: "Anulación de Documento Tributario Electrónico - {$this->originalDte->generation_code}",
         );
     }
 
@@ -66,7 +68,19 @@ class SendCancelDTEMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        $filename = $this->buildFilename();
+
+        return [
+            Attachment::fromData(
+                fn() => $this->pdfOutput,
+                "{$filename}.pdf"
+            )->withMime('application/pdf'),
+
+            Attachment::fromData(
+                fn() => $this->jsonContent,
+                "{$filename}.json"
+            )->withMime('application/json')
+        ];
     }
 
     /***
@@ -97,4 +111,14 @@ class SendCancelDTEMail extends Mailable
         return Carbon::parse($date)->format('Y-m-d');
     }
 
+
+    /***
+     * Nombre del pdf y del json adjunto.
+     *
+     * @return string
+     */
+    private function buildFilename(): string
+    {
+        return $this->invalidation->generation_code;
+    }
 }
