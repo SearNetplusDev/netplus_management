@@ -76,7 +76,7 @@ readonly class DTESignatureService
 
         $type = DocumentTypes::from($documentId);
 
-        return $type === DocumentTypes::ANULACION
+        $haciendaResponse = $type === DocumentTypes::ANULACION
             ? $this->invalidateDocument(signedDoc: $signed->body)
             : $this->sendDocument(
                 version: $dte['identificacion']['version'],
@@ -84,6 +84,11 @@ readonly class DTESignatureService
                 signedDocument: $signed->body,
                 genCode: $dte['identificacion']['codigoGeneracion'],
             );
+
+        return (object)[
+            'haciendaResponse' => $haciendaResponse,
+            'signedDocument' => $signed->body,
+        ];
     }
 
 

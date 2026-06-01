@@ -56,12 +56,16 @@ readonly class DTEOrchestrator
      */
     private function processDTE(int $documentId, array $data, string $source): DTEModel
     {
-//        return $this->dteSignatureService->auth();
         $json = $this->dteService->generate(documentId: $documentId, data: $data);
-//        return $this->dteSignatureService->signDocument(dte: $json);
-//        $haciendaResponse = $this->dteSignatureService->singAndSend(dte: $json, documentId: $documentId);
-//        $receptionStamp = $haciendaResponse->selloRecibido
+        $signDocument = $this->dteSignatureService->signDocument($json);
+//        $result = $this->dteSignatureService->singAndSend(dte: $json, documentId: $documentId);
+//        $receptionStamp = $result->haciendaResponse->selloRecibido
 //            ?? throw new RuntimeException("Hacienda no devolvió sello de recepción");
+        $receptionStamp = strtoupper(Str::random(40));
+
+        $json['firmaElectronica'] = $signDocument->body;
+//        $json['firmaElectronica'] = $result->signedDocument;
+        $json['selloRecibido'] = $receptionStamp;
 
         $userId = Auth::id() ?? throw new  RuntimeException("Usuario no autenticado");
         $type = DocumentTypes::from($documentId);
@@ -78,8 +82,7 @@ readonly class DTEOrchestrator
             document_type_id: $documentId,
             control_number: $json['identificacion']['numeroControl'],
             generation_code: $json['identificacion']['codigoGeneracion'],
-            reception_stamp: strtoupper(Str::random(40)),
-//            reception_stamp: $receptionStamp,
+            reception_stamp: $receptionStamp,
             generation_datetime: Carbon::now(),
             total_amount: (float)$json['resumen'][$type->totalAmountKey()],
             payment_id: $paymentId,
@@ -109,6 +112,17 @@ readonly class DTEOrchestrator
     {
         $userId = Auth::id() ?? throw new RuntimeException("Usuario no autenticado");
         $json = $this->dteService->generate(documentId: DocumentTypes::ANULACION->value, data: $data);
+        $signDocument = $this->dteSignatureService->signDocument($json);
+//        $result = $this->dteSignatureService->singAndSend(
+//            dte: $json,
+//            documentId: DocumentTypes::ANULACION->value
+//        );
+//        $receptionStamp = $result->haciendaResponse->selloRecibido
+//            ?? throw new  RuntimeException("Hacienda no retorno el sello de recepción");
+        $receptionStamp = strtoupper(Str::random(40));
+        $json['firmaElectronica'] = $signDocument->body;
+//        $json['firmaElectronica'] = $result->signedDocument;
+        $json['selloRecibido'] = $receptionStamp;
 
 //        $haciendaResponse = $this->dteSignatureService->singAndSend(
 //            dte: $json,
@@ -120,8 +134,7 @@ readonly class DTEOrchestrator
         $dto = new CancelDTEDTO(
             dte_id: (int)$data['dte_id'],
             generation_code: $json['identificacion']['codigoGeneracion'],
-            reception_stamp: strtoupper(Str::random(40)),
-//            reception_stamp: $receptionStamp,
+            reception_stamp: $receptionStamp,
             generation_datetime: Carbon::now(),
             user_id: $userId,
             json_body: $json,
