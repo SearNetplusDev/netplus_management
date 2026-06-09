@@ -7,6 +7,7 @@ use App\Models\Accounting\DTEModel;
 use App\Services\v1\management\accounting\DTE\DTEOrchestrator;
 use App\Services\v1\management\accounting\DTE\DTEPrintService;
 use App\Services\v1\management\accounting\DTE\DTEService;
+use App\Services\v1\management\accounting\DTE\events\RefundService;
 use App\Services\v1\management\DataViewerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -102,6 +103,24 @@ class DTEController extends Controller
 
         return response()->json([
             'send' => true,
+        ]);
+    }
+
+    /****
+     * Realiza las devoluciones en facturas.
+     *
+     * @param Request $request
+     * @param RefundService $refundService
+     * @return JsonResponse
+     */
+    public function refund(Request $request, RefundService $refundService): JsonResponse
+    {
+        return response()->json([
+            'refund' => $refundService->apply(
+                dteId: $request->dte_id,
+                dteType: $request->dte_type,
+                items: $request->items,
+            ),
         ]);
     }
 }

@@ -17,5 +17,6 @@ Route::prefix('v1/accounting')
             Route::get('print/{dteId}', [DTEController::class, 'printDTE']);
             Route::post('search', [DTEController::class, 'search']);
             Route::post('resend/mail', [DTEController::class, 'resendMail']);
+            Route::post('refund', [DTEController::class, 'refund']);
         });
     });
