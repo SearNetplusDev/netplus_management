@@ -3,7 +3,7 @@
 namespace App\Services\v1\management\accounting\DTE;
 
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Models\Accounting\CancelDTEModel;
+use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -42,10 +42,10 @@ readonly class DTEStorageService
     /****
      * Almacena el JSON de anulación en S3.
      *
-     * @param CancelDTEModel $cancelDTEModel
+     * @param DTEEventModel $cancelDTEModel
      * @return void
      */
-    public function storeInvalidationJson(CancelDTEModel $cancelDTEModel): void
+    public function storeInvalidationJson(DTEEventModel $cancelDTEModel): void
     {
         try {
             $dte = $cancelDTEModel->dte;
@@ -66,6 +66,11 @@ readonly class DTEStorageService
                     'error' => $e->getMessage(),
                 ]);
         }
+    }
+
+    public function storeEvent(): void
+    {
+
     }
 
     /***

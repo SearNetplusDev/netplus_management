@@ -3,11 +3,11 @@
 namespace App\Services\v1\management\accounting\DTE;
 
 use App\Contexts\Accounting\DTEContext;
-use App\DTOs\v1\management\accounting\dte\CancelDTEDTO;
+use App\DTOs\v1\management\accounting\dte\DTEEventsDTO;
 use App\DTOs\v1\management\accounting\dte\DTEDTO;
 use App\Enums\v1\Accounting\InvoiceCategories;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Models\Accounting\CancelDTEModel;
+use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -64,14 +64,14 @@ readonly class DTEService
     /***
      * Almacena la invalidación en su tabla.
      *
-     * @param CancelDTEDTO $cancelDTEDTO
-     * @return CancelDTEModel
+     * @param DTEEventsDTO $cancelDTEDTO
+     * @return DTEEventModel
      */
-    public function storeInvalidationDTE(CancelDTEDTO $cancelDTEDTO): CancelDTEModel
+    public function storeInvalidationDTE(DTEEventsDTO $cancelDTEDTO): DTEEventModel
     {
         try {
             return DB::transaction(function () use ($cancelDTEDTO) {
-                return CancelDTEModel::create($cancelDTEDTO->toArray());
+                return DTEEventModel::create($cancelDTEDTO->toArray());
             });
         } catch (Throwable $e) {
             throw new \InvalidArgumentException("Error al almacenar la anulación.", 500, $e);

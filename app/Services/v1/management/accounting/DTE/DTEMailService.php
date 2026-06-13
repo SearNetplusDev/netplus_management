@@ -4,7 +4,7 @@ namespace App\Services\v1\management\accounting\DTE;
 
 use App\Jobs\accounting\SendDTEMailJob;
 use App\Jobs\accounting\SendInvalidationMailJob;
-use App\Models\Accounting\CancelDTEModel;
+use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -51,10 +51,10 @@ readonly class DTEMailService
     /***
      * Envía el correo de notificación cuando ocurre una anulación.
      *
-     * @param CancelDTEModel $cancelDTEModel
+     * @param DTEEventModel $cancelDTEModel
      * @return void
      */
-    public function sendInvalidationMail(CancelDTEModel $cancelDTEModel): void
+    public function sendInvalidationMail(DTEEventModel $cancelDTEModel): void
     {
         try {
             $originalDte = DTEModel::query()

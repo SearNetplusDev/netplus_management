@@ -2,11 +2,11 @@
 
 namespace App\Services\v1\management\accounting\DTE;
 
-use App\DTOs\v1\management\accounting\dte\CancelDTEDTO;
+use App\DTOs\v1\management\accounting\dte\DTEEventsDTO;
 use App\DTOs\v1\management\accounting\dte\DTEDTO;
 use App\Enums\v1\Accounting\InvoiceCategories;
 use App\Enums\v1\Billing\DocumentTypes;
-use App\Models\Accounting\CancelDTEModel;
+use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
 use App\Models\Billing\PaymentModel;
 use App\Services\v1\management\billing\otherInvoices\OtherInvoiceService;
@@ -33,10 +33,10 @@ readonly class DTEOrchestrator
      *
      * @param int $documentId
      * @param array $data
-     * @return DTEModel|CancelDTEModel
+     * @return DTEModel|DTEEventModel
      * @throws Throwable
      */
-    public function process(int $documentId, array $data): DTEModel|CancelDTEModel
+    public function process(int $documentId, array $data): DTEModel|DTEEventModel
     {
         $source = $data['source'] ?? 'payment';
 
@@ -105,10 +105,10 @@ readonly class DTEOrchestrator
      * Genera el json para anulación, lo almacena, y notifica mediante email
      *
      * @param array $data
-     * @return CancelDTEModel
+     * @return DTEEventModel
      * @throws Throwable|RuntimeException
      */
-    private function processInvalidation(array $data): CancelDTEModel
+    private function processInvalidation(array $data): DTEEventModel
     {
         $userId = Auth::id() ?? throw new RuntimeException("Usuario no autenticado");
         $json = $this->dteService->generate(documentId: DocumentTypes::ANULACION->value, data: $data);
@@ -131,7 +131,7 @@ readonly class DTEOrchestrator
 //        $receptionStamp = $haciendaResponse->selloRecibido
 //            ?? throw new RuntimeException("Hacienda no devolvió sello de recepción");
 
-        $dto = new CancelDTEDTO(
+        $dto = new DTEEventsDTO(
             dte_id: (int)$data['dte_id'],
             generation_code: $json['identificacion']['codigoGeneracion'],
             reception_stamp: $receptionStamp,
@@ -139,6 +139,7 @@ readonly class DTEOrchestrator
             user_id: $userId,
             json_body: $json,
             status_id: true,
+            event_type_id: 1,
         );
 
         $invalidation = $this->dteService->storeInvalidationDTE($dto);

@@ -2,7 +2,7 @@
 
 namespace App\Mail\DTE;
 
-use App\Models\Accounting\CancelDTEModel;
+use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -21,10 +21,10 @@ class SendCancelDTEMail extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public readonly CancelDTEModel $invalidation,
-        public readonly DTEModel       $originalDte,
-        public readonly string         $pdfOutput,
-        public readonly string         $jsonContent,
+        public readonly DTEEventModel $invalidation,
+        public readonly DTEModel      $originalDte,
+        public readonly string        $pdfOutput,
+        public readonly string        $jsonContent,
     )
     {
         //

@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\v1\management\Accounting\AccountingController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\Accounting\DTE\DTEController;
+use App\Http\Controllers\v1\management\Accounting\DTE\Options\EventController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/accounting')
     ->middleware(['auth:sanctum'])
@@ -18,5 +19,17 @@ Route::prefix('v1/accounting')
             Route::post('search', [DTEController::class, 'search']);
             Route::post('resend/mail', [DTEController::class, 'resendMail']);
             Route::post('refund', [DTEController::class, 'refund']);
+        });
+
+        //  Options
+        Route::group(['prefix' => 'options'], function () {
+
+            //  Events
+            Route::group(['prefix' => 'events'], function () {
+                Route::post('data', [EventController::class, 'data']);
+                Route::post('/', [EventController::class, 'store']);
+                Route::post('edit', [EventController::class, 'edit']);
+                Route::put('update', [EventController::class, 'update']);
+            });
         });
     });

@@ -10,7 +10,7 @@ use App\Libraries\NumberToLetter;
 use App\Models\Accounting\DTEModel;
 use Carbon\Carbon;
 
-readonly class RefundService
+readonly class RefundStructureService
 {
     public function __construct(
         private readonly HeaderUtils    $headerUtils,
@@ -30,7 +30,7 @@ readonly class RefundService
      * @return array[]
      * @throws \Random\RandomException
      */
-    public function apply(int $dteId, int $dteType, array $items): array
+    public function createJson(int $dteId, int $dteType, array $items): array
     {
         $relatedDoc = $this->getRelatedDoc(dteId: $dteId);
         [$body, $gravado] = $this->buildBodyFromItems(

@@ -11,7 +11,7 @@ use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Data;
 
-class CancelDTEDTO extends Data
+class DTEEventsDTO extends Data
 {
     public function __construct(
         #[Required, IntegerType]
@@ -34,6 +34,9 @@ class CancelDTEDTO extends Data
 
         #[Required, BooleanType]
         public readonly bool   $status_id,
+
+        #[Required, IntegerType]
+        public readonly int    $event_type_id,
     )
     {
     }

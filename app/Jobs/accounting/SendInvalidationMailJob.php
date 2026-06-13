@@ -3,7 +3,7 @@
 namespace App\Jobs\accounting;
 
 use App\Mail\DTE\SendCancelDTEMail;
-use App\Models\Accounting\CancelDTEModel;
+use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
 use App\Services\v1\management\accounting\DTE\DTEPrintService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,10 +24,10 @@ class SendInvalidationMailJob implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        private readonly CancelDTEModel $cancelDte,
-        private readonly DTEModel       $dteModel,
-        private readonly string         $recipientEmail,
-        private readonly string         $jsonContent,
+        private readonly DTEEventModel $cancelDte,
+        private readonly DTEModel      $dteModel,
+        private readonly string        $recipientEmail,
+        private readonly string        $jsonContent,
     )
     {
         //

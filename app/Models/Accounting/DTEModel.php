@@ -37,7 +37,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read ClientModel|null $client
  * @property-read DocumentTypeModel|null $dte_type
  * @property-read \App\Models\Billing\InvoiceModel|\App\Models\Billing\OtherInvoiceModel|null $related_invoice
- * @property-read \App\Models\Accounting\CancelDTEModel|null $invalidation
+ * @property-read \App\Models\Accounting\DTEEventModel|null $invalidation
  * @property-read \App\Models\Accounting\DTEInvoiceModel|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceModel> $invoices
  * @property-read int|null $invoices_count
@@ -182,6 +182,28 @@ class DTEModel extends Model
 
     public function invalidation(): HasOne
     {
-        return $this->hasOne(CancelDTEModel::class, 'dte_id', 'id');
+        return $this->hasOne(DTEEventModel::class, 'dte_id', 'id')
+            ->where('event_type_id', 1);
     }
+
+    public function scopeInvalidated($query)
+    {
+        return $query->whereHas('invalidation');
+    }
+
+    /***
+     * // Solo invalidados
+     * DTEModel::invalidated()->get();
+     *
+     * // Con datos del evento cargados
+     * DTEModel::invalidated()
+     * ->with('invalidation')
+     * ->get();
+     *
+     * // Combinado con otros filtros
+     * DTEModel::invalidated()
+     * ->with(['invalidation', 'client', 'dte_type'])
+     * ->where('document_type_id', 1)
+     * ->paginate(20);
+     */
 }
