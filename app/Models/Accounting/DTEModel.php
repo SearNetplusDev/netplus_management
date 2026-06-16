@@ -45,6 +45,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read PaymentModel|null $payment
  * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel advancedFilter()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel invalidated()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel onlyTrashed()

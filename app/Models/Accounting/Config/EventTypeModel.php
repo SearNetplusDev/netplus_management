@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, DTEModel> $invalidated_dtes
+ * @property-read int|null $invalidated_dtes_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventTypeModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventTypeModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventTypeModel newQuery()

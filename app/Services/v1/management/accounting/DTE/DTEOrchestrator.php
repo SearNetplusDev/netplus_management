@@ -24,6 +24,7 @@ readonly class DTEOrchestrator
         private DTEStorageService   $dteStorageService,
         private DTEMailService      $dteMailService,
         private OtherInvoiceService $otherInvoiceService,
+        private DTELogService       $dteLogService,
     )
     {
     }
@@ -95,6 +96,7 @@ readonly class DTEOrchestrator
         );
 
         $dte = $this->dteService->storeDTE($dto);
+//        $this->dteLogService->logHaciendaResponse($dte, $result->haciendaResponse);
         $this->dteStorageService->storeDTEJson($dte);
         $this->dteMailService->sendDTEMail($dte);
 
@@ -147,7 +149,8 @@ readonly class DTEOrchestrator
         DTEModel::query()
             ->where('id', (int)$data['dte_id'])
             ->update(['status_id' => false]);
-
+        
+//        $this->dteLogService->logHaciendaResponse($invalidation, $result->haciendaResponse);
         $this->dteStorageService->storeInvalidationJson($invalidation);
         $this->dteMailService->sendInvalidationMail($invalidation);
 
