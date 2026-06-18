@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\v1\management\dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Clients\ClientModel;
+use App\Http\Resources\v1\management\general\GeneralResource;
 use App\Models\Configuration\Clients\ClientTypeModel;
+use App\Models\Infrastructure\Network\AuthServerModel;
+use App\Services\v1\management\dashboard\DashboardMikrotikService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -37,5 +38,98 @@ class DashboardController extends Controller
             'labels' => $types->pluck('name'),
             'data' => $types->pluck('total_clients'),
         ]);
+    }
+
+    /**
+     * Información del hardware del servidor de autenticación.
+     *
+     * @param DashboardMikrotikService $mikrotikService
+     * @return JsonResponse
+     */
+    public function systemResources(DashboardMikrotikService $mikrotikService): JsonResponse
+    {
+        $server = $this->authServer();
+
+        $data = $mikrotikService->getSystemResources(
+            host: $server->ip,
+            user: $server->user,
+            pass: $server->secret,
+            port: $server->port,
+        );
+
+        return response()->json([
+            'data' => new GeneralResource($data),
+        ]);
+    }
+
+    /**
+     * Datos de tráfico de las interfaces.
+     *
+     * @param DashboardMikrotikService $mikrotikService
+     * @return JsonResponse
+     */
+    public function interfaceTraffic(DashboardMikrotikService $mikrotikService): JsonResponse
+    {
+        $server = $this->authServer();
+        $data = $mikrotikService->getMultipleInterfacesTraffic(
+            host: $server->ip,
+            user: $server->user,
+            pass: $server->secret,
+            port: $server->port,
+        );
+
+        return response()->json([
+            'data' => new GeneralResource($data),
+        ]);
+    }
+
+    /**
+     * Obtiene las interfaces activas junto con el acumulado de ellas.
+     *
+     * @param DashboardMikrotikService $mikrotikService
+     * @return JsonResponse
+     */
+    public function interfacesList(DashboardMikrotikService $mikrotikService): JsonResponse
+    {
+        $server = $this->authServer();
+        $data = $mikrotikService->getInterfaceList(
+            host: $server->ip,
+            user: $server->user,
+            pass: $server->secret,
+            port: $server->port,
+        );
+        return response()->json([
+            'data' => new GeneralResource($data),
+        ]);
+    }
+
+    /**
+     * Listado de sesiones activas en el dispositivo.
+     *
+     * @param DashboardMikrotikService $mikrotikService
+     * @return JsonResponse
+     */
+    public function activeSessions(DashboardMikrotikService $mikrotikService): JsonResponse
+    {
+        $server = $this->authServer();
+        $data = $mikrotikService->getActiveSessions(
+            host: $server->ip,
+            user: $server->user,
+            pass: $server->secret,
+            port: $server->port,
+        );
+        return response()->json([
+            'data' => new GeneralResource($data),
+        ]);
+    }
+
+    /**
+     * Datos del servidor de autenticación.
+     *
+     * @return AuthServerModel
+     */
+    private function authServer(): AuthServerModel
+    {
+        return AuthServerModel::query()->findOrFail(9);
     }
 }

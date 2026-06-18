@@ -319,4 +319,91 @@ class MikrotikAPI
     {
         return $this->executeQuery($host, $user, $pass, '/ppp/secret/print', ['name' => $secretName], $port);
     }
+
+    /**
+     * Recursos del sistema: CPU, Memoria, Uptime, versión, etc.
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function getSystemResources(string $host, string $user, string $pass, int $port = self::DEFAULT_PORT): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) {
+            return $client->query(new Query('/system/resource/print'))->read();
+        }, $port);
+    }
+
+    /**
+     * Monitor de tráfico de una interfaz
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $interface
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function getInterfaceTraffic(
+        string $host,
+        string $user,
+        string $pass,
+        string $interface = 'eth1',
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($interface) {
+            $query = (new Query('/interface/monitor-traffic'))
+                ->equal('interface', $interface)
+                ->equal('once', '');
+            return $client->query($query)->read();
+        }, $port);
+    }
+
+    /**
+     * Listado de interfaces con sus contadores acumulados.
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function getInterfaces(string $host, string $user, string $pass, int $port = self::DEFAULT_PORT): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) {
+            return $client->query(new Query('/interface/print'))->read();
+        }, $port);
+    }
+
+    /**
+     * Sesiones PPPoE activas.
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function getActivePPPConnections(
+        string $host,
+        string $user,
+        string $pass,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) {
+            return $client->query(new Query('/ppp/active/print'))->read();
+        }, $port);
+    }
 }

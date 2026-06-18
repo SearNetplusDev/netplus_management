@@ -7,4 +7,8 @@ Route::prefix('v1/dashboard')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('client-types', [DashboardController::class, 'clientsByType']);
+        Route::get('resources', [DashboardController::class, 'systemResources']);
+        Route::get('interfaces/traffic', [DashboardController::class, 'interfaceTraffic']);
+        Route::get('interfaces/list', [DashboardController::class, 'interfacesList']);
+        Route::get('active/sessions', [DashboardController::class, 'activeSessions']);
     });
