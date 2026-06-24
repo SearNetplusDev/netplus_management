@@ -167,7 +167,7 @@ return [
             'path' => storage_path('logs/dte/dte_mails.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
-        'dte_log' => [
+        'dte_logger' => [
             'driver' => 'single',
             'path' => storage_path('logs/dte/store_log.log'),
             'level' => env('LOG_LEVEL', 'debug'),

@@ -2,6 +2,7 @@
 
 namespace App\Services\v1\management\accounting\DTE\events;
 
+use App\Enums\v1\Accounting\DTE\EventTypes;
 use App\Enums\v1\Accounting\TaxRate;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Libraries\Accounting\DTE\HeaderUtils;
@@ -87,7 +88,7 @@ readonly class RefundStructureService
             'ambiente' => $this->headerUtils->ambient(),
             'tipoModelo' => 1,
             'tipoOperacion' => 1,
-            'tipoEvento' => '18',
+            'tipoEvento' => EventTypes::RETORNO->code(),
             'tipoContingencia' => null,
             'motivoContin' => null,
             'codigoGeneracion' => $this->headerUtils->generationCode(),
