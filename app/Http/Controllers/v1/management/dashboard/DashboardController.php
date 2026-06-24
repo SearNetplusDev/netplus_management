@@ -130,6 +130,6 @@ class DashboardController extends Controller
      */
     private function authServer(): AuthServerModel
     {
-        return AuthServerModel::query()->findOrFail(9);
+        return AuthServerModel::query()->findOrFail(env('MK_MAIN'));
     }
 }
