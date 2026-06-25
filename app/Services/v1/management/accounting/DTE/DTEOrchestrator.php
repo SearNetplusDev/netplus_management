@@ -144,14 +144,14 @@ readonly class DTEOrchestrator
             event_type_id: 1,
         );
 
-        $invalidation = $this->dteService->storeInvalidationDTE($dto);
+        $invalidation = $this->dteService->storeEvent($dto);
 
         DTEModel::query()
             ->where('id', (int)$data['dte_id'])
             ->update(['status_id' => false]);
-        
+
 //        $this->dteLogService->logHaciendaResponse($invalidation, $result->haciendaResponse);
-        $this->dteStorageService->storeInvalidationJson($invalidation);
+        $this->dteStorageService->storeEventJson($invalidation);
         $this->dteMailService->sendInvalidationMail($invalidation);
 
         return $invalidation;

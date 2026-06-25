@@ -2,6 +2,7 @@
 
 namespace App\Services\v1\management\accounting\DTE;
 
+use App\Enums\v1\Accounting\DTE\EventTypes;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
@@ -40,20 +41,21 @@ readonly class DTEStorageService
     }
 
     /****
-     * Almacena el JSON de anulación en S3.
+     * Almacena el JSON de cualquier evento en S3.
      *
-     * @param DTEEventModel $cancelDTEModel
+     * @param DTEEventModel $eventModel
      * @return void
      */
-    public function storeInvalidationJson(DTEEventModel $cancelDTEModel): void
+    public function storeEventJson(DTEEventModel $eventModel): void
     {
         try {
-            $dte = $cancelDTEModel->dte;
+            $dte = $eventModel->dte;
+            $eventType = EventTypes::from($eventModel->event_type_id);
             $type = DocumentTypes::from($dte->document_type_id);
-            $year = $cancelDTEModel->generation_datetime->year;
-            $filename = $this->safeFileName($cancelDTEModel->generation_code) . '.json';
-            $path = "dte/json/{$year}/ANULACIONES/{$type->folderName()}/{$filename}";
-            $content = $this->encodeJson($cancelDTEModel->json_body);
+            $year = $eventModel->generation_datetime->year;
+            $filename = $this->safeFileName($eventModel->generation_code) . '.json';
+            $path = "dte/json/{$year}/{$eventType->folderName()}/{$type->folderName()}/{$filename}";
+            $content = $this->encodeJson($eventModel->json_body);
 
             if (!Storage::disk('s3')->put($path, $content)) {
                 Log::channel('dte_storage')
@@ -62,15 +64,10 @@ readonly class DTEStorageService
         } catch (Throwable $e) {
             Log::channel('dte_storage')
                 ->error("[DTE] Error al almacenar el JSON de anulación en S3", [
-                    'invalidation_id' => $cancelDTEModel->id,
+                    'invalidation_id' => $eventModel->id,
                     'error' => $e->getMessage(),
                 ]);
         }
-    }
-
-    public function storeEvent(): void
-    {
-
     }
 
     /***

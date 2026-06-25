@@ -67,14 +67,14 @@ readonly class DTEService
      * @param DTEEventsDTO $cancelDTEDTO
      * @return DTEEventModel
      */
-    public function storeInvalidationDTE(DTEEventsDTO $cancelDTEDTO): DTEEventModel
+    public function storeEvent(DTEEventsDTO $cancelDTEDTO): DTEEventModel
     {
         try {
             return DB::transaction(function () use ($cancelDTEDTO) {
                 return DTEEventModel::create($cancelDTEDTO->toArray());
             });
         } catch (Throwable $e) {
-            throw new \InvalidArgumentException("Error al almacenar la anulación.", 500, $e);
+            throw new \InvalidArgumentException("Error al almacenar el evento.", 500, $e);
         }
     }
 
