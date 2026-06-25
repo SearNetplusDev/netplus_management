@@ -4,6 +4,8 @@ namespace App\Services\v1\management\accounting\DTE;
 
 use App\DTOs\v1\management\accounting\dte\DTEEventsDTO;
 use App\DTOs\v1\management\accounting\dte\DTEDTO;
+use App\Enums\v1\Accounting\DTE\EventTypes;
+use App\Enums\v1\Accounting\DTE\Status;
 use App\Enums\v1\Accounting\InvoiceCategories;
 use App\Enums\v1\Billing\DocumentTypes;
 use App\Models\Accounting\DTEEventModel;
@@ -91,7 +93,7 @@ readonly class DTEOrchestrator
             invoice_ids: $invoiceIds,
             other_invoice_id: $otherInvoiceId,
             user_id: $userId,
-            status_id: true,
+            status_id: Status::EMITIDO->value,
             json_body: $json,
         );
 
@@ -141,14 +143,14 @@ readonly class DTEOrchestrator
             user_id: $userId,
             json_body: $json,
             status_id: true,
-            event_type_id: 1,
+            event_type_id: EventTypes::INVALIDACION->value,
         );
 
         $invalidation = $this->dteService->storeEvent($dto);
 
         DTEModel::query()
             ->where('id', (int)$data['dte_id'])
-            ->update(['status_id' => false]);
+            ->update(['status_id' => Status::ANULADO->value]);
 
 //        $this->dteLogService->logHaciendaResponse($invalidation, $result->haciendaResponse);
         $this->dteStorageService->storeEventJson($invalidation);

@@ -3,6 +3,7 @@
 namespace App\Models\Accounting;
 
 use App\Enums\v1\Accounting\InvoiceCategories;
+use App\Models\Accounting\Config\StatusModel;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\Options\DocumentTypeModel;
 use App\Models\Billing\OtherInvoiceModel;
@@ -29,11 +30,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property InvoiceCategories $invoice_category
  * @property int|null $other_invoice_id
  * @property int $user_id
- * @property bool $status_id
  * @property array<array-key, mixed> $json_body
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int $status_id
  * @property-read ClientModel|null $client
  * @property-read DocumentTypeModel|null $dte_type
  * @property-read \App\Models\Billing\InvoiceModel|\App\Models\Billing\OtherInvoiceModel|null $related_invoice
@@ -43,6 +44,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $invoices_count
  * @property-read OtherInvoiceModel|null $other_invoice
  * @property-read PaymentModel|null $payment
+ * @property-read StatusModel|null $status
  * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel invalidated()
@@ -126,7 +128,7 @@ class DTEModel extends Model
         'total_amount' => 'decimal:2',
         'json_body' => 'array',
         'invoice_category' => InvoiceCategories::class,
-        'status_id' => 'boolean',
+        'status_id' => 'integer',
     ];
 
     public function client(): BelongsTo
@@ -137,6 +139,11 @@ class DTEModel extends Model
     public function dte_type(): BelongsTo
     {
         return $this->belongsTo(DocumentTypeModel::class, 'document_type_id', 'id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(StatusModel::class, 'status_id', 'id');
     }
 
     public function payment(): BelongsTo

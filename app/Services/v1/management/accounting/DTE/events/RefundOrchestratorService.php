@@ -3,6 +3,8 @@
 namespace App\Services\v1\management\accounting\DTE\events;
 
 use App\DTOs\v1\management\accounting\dte\DTEEventsDTO;
+use App\Enums\v1\Accounting\DTE\EventTypes;
+use App\Enums\v1\Accounting\DTE\Status;
 use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
 use App\Services\v1\management\accounting\DTE\DTEService;
@@ -60,14 +62,14 @@ readonly class RefundOrchestratorService
             user_id: $user,
             json_body: $json,
             status_id: true,
-            event_type_id: 4,
+            event_type_id: EventTypes::RETORNO->value,
         );
 
         $refundTransaction = $this->dteService->storeEvent($dto);
 
         DTEModel::query()
             ->where('id', (int)$dteId)
-            ->update(['status_id' => false]);
+            ->update(['status_id' => Status::CON_DEVOLUCION->value]);
 
         $this->dteStorageService->storeEventJson($refundTransaction);
 

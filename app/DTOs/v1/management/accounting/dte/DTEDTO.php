@@ -53,8 +53,8 @@ class DTEDTO extends Data
         #[Required, IntegerType]
         public readonly int               $user_id,
 
-        #[Required, BooleanType]
-        public readonly bool              $status_id,
+        #[Required, IntegerType]
+        public readonly int               $status_id,
 
         #[Required, ArrayType]
         public readonly array             $json_body,

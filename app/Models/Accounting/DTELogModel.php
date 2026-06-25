@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int|null $dte_id
  * @property int|null $event_id
- * @property string $json_response
+ * @property array<array-key, mixed> $json_response
  * @property \Illuminate\Support\Carbon $transaction_date
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at

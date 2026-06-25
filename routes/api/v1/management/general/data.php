@@ -5,6 +5,7 @@ use App\Http\Controllers\v1\management\general\BillingController;
 use App\Http\Controllers\v1\management\general\ClientController;
 use App\Http\Controllers\v1\management\general\ConfigurationController;
 use App\Http\Controllers\v1\management\general\DataController;
+use App\Http\Controllers\v1\management\general\DTEController;
 use App\Http\Controllers\v1\management\general\InfrastructureController;
 use App\Http\Controllers\v1\management\general\InternetController;
 use App\Http\Controllers\v1\management\general\ManagementController;
@@ -82,5 +83,9 @@ Route::prefix('v1/general')
         Route::group(['prefix' => 'supports'], function () {
             Route::get('status', [SupportsController::class, 'supports_status']);
             Route::get('types', [SupportsController::class, 'supports_types']);
+        });
+
+        Route::group(['prefix' => 'dte'], function () {
+            Route::get('status', [DTEController::class, 'status']);
         });
     });

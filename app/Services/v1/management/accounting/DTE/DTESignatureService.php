@@ -90,6 +90,7 @@ readonly class DTESignatureService
      * @param array $dte
      * @param EventTypes $eventType
      * @return object
+     * @throws RandomException
      */
     public function singAndSendEvent(array $dte, EventTypes $eventType): object
     {
