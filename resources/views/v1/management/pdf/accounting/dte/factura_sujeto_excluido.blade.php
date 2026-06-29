@@ -12,8 +12,14 @@
 <p class="title-h1 mt-xs">Factura de Sujeto Excluido</p>
 
 @if($invalidated)
-    <div class="watermark">
+    <div class="watermark color-red">
         INVALIDADO
+    </div>
+@endif
+
+@if($refund)
+    <div class="watermark color-blue">
+        REEMBOLSO
     </div>
 @endif
 
@@ -118,6 +124,23 @@
         </tr>
     @endforeach
 
+    @if($refund)
+        <tr class="header-row">
+            <th class="col-n" colspan="6">Elementos reembolsados</th>
+        </tr>
+
+        @foreach($refund['cuerpoDocumento'] as $itm)
+            <tr>
+                <td>{{ $itm['numItem'] }}</td>
+                <td>{{ $itm['cantidad'] }}</td>
+                <td>{{$itm['descripcion']}}</td>
+                <td>$ {{ number_format($itm['precioUni'], 2) }}</td>
+                <td>$ {{ number_format($itm['montoDescu'], 2) }}</td>
+                <td>$ {{ number_format($itm['ventaGravada'], 2) }}</td>
+            </tr>
+        @endforeach
+    @endif
+
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="2" class="summary-label"><b>Sumatoria de ventas:</b></td>
@@ -130,10 +153,18 @@
         <td class="summary-value">$ {{ number_format($data['resumen']['subTotal'], 2) }}</td>
     </tr>
 
+    @if($refund)
+        <td colspan="3" class="borderless"></td>
+        <td colspan="2" class="summary-label"><b>Total reembolso:</b></td>
+        <td class="summary-value">$ {{ number_format($refund['resumen']['totalPagar'], 2) }}</td>
+    @endif
+
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="2" class="summary-label"><b>Total a pagar:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['totalPagar'], 2) }}</td>
+        <td class="summary-value">
+            $ {{ number_format($finalTotal, 2) }}
+        </td>
     </tr>
     </tbody>
 </table>
@@ -147,6 +178,15 @@
         <p>
             <span><b>Condición de operación:</b></span> {{ $condition }}
         </p>
+
+        @if($refund)
+            <p>
+                <span><b>Valor reembolso:</b></span> {{ $letterRefundAmount }}
+            </p>
+            <p>
+                <span><b>Monto final:</b></span> {{ $documentValue }}
+            </p>
+        @endif
         <p>
             <span><b>Observaciones:</b></span>
         </p>

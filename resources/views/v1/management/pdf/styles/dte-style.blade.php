@@ -275,8 +275,15 @@
         text-align: center;
         font-size: 110px;
         font-weight: bold;
-        color: rgba(231, 76, 60, 0.1);
         transform: rotate(-30deg);
         z-index: 2;
+    }
+
+    .color-red {
+        color: rgba(231, 76, 60, 0.1);
+    }
+
+    .color-blue {
+        color: rgba(2, 48, 71, 0.1);
     }
 </style>

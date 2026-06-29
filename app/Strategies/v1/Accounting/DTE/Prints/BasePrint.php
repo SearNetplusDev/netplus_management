@@ -98,4 +98,19 @@ abstract readonly class BasePrint implements DTEPrinterInterface
             3 => 'Otro',
         };
     }
+
+    /**
+     * Calcula el total final de un documento, restando el monto reembolsado si aplica.
+     *
+     * @param float $total
+     * @param array|null $refundResumen
+     * @param string $field
+     * @return float
+     */
+    protected function calculateFinalTotal(float $total, ?array $refundResumen, string $field): float
+    {
+        if (!$refundResumen) return $total;
+
+        return $total - ($refundResumen[$field] ?? 0.00);
+    }
 }

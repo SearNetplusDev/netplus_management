@@ -2,6 +2,7 @@
 
 namespace App\Models\Accounting;
 
+use App\Enums\v1\Accounting\DTE\EventTypes;
 use App\Enums\v1\Accounting\InvoiceCategories;
 use App\Models\Accounting\Config\StatusModel;
 use App\Models\Billing\InvoiceModel;
@@ -191,7 +192,13 @@ class DTEModel extends Model
     public function invalidation(): HasOne
     {
         return $this->hasOne(DTEEventModel::class, 'dte_id', 'id')
-            ->where('event_type_id', 1);
+            ->where('event_type_id', EventTypes::INVALIDACION->value);
+    }
+
+    public function refund(): HasOne
+    {
+        return $this->hasOne(DTEEventModel::class, 'dte_id', 'id')
+            ->where('event_type_id', EventTypes::RETORNO->value);
     }
 
     public function scopeInvalidated($query)

@@ -2,12 +2,17 @@
 
 namespace App\Strategies\v1\Accounting\DTE\Prints;
 
+use App\Libraries\NumberToLetter;
 use App\Models\Accounting\DTEModel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPDF;
 
 readonly class FacturaSujetoExcluidoPrintStrategy extends BasePrint
 {
+    public function __construct(private readonly NumberToLetter $numberToLetter)
+    {
+
+    }
 
     protected function generate(DTEModel $model): DomPDF
     {
@@ -38,6 +43,13 @@ readonly class FacturaSujetoExcluidoPrintStrategy extends BasePrint
             'email' => $client->email?->email,
         ];
         $condition = $this->condition($model->json_body['resumen']['condicionOperacion']);
+        $model->loadMissing(['invalidation', 'refund']);
+        $refundData = $model->refund?->json_body;
+        $finalTotal = $this->calculateFinalTotal(
+            total: $model->json_body['resumen']['totalPagar'],
+            refundResumen: $refundData['resumen'] ?? null,
+            field: 'totalPagar',
+        );
 
         return Pdf::loadView($this->getView(), [
             'qrCode' => $this->buildQrCode(
@@ -48,7 +60,11 @@ readonly class FacturaSujetoExcluidoPrintStrategy extends BasePrint
             'receptionStamp' => $model->reception_stamp,
             'clientData' => $clientData,
             'condition' => $condition,
-            'invalidated' => $model->invalidation()->exists(),
+            'invalidated' => $model->invalidation,
+            'refund' => $refundData,
+            'finalTotal' => $finalTotal,
+            'letterRefundAmount' => $this->numberToLetter->convert($refundData['resumen']['totalPagar']),
+            'documentValue' => $this->numberToLetter->convert($finalTotal),
         ])->setPaper('a4', 'portrait');
     }
 

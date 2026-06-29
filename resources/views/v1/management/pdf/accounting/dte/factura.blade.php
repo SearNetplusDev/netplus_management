@@ -9,8 +9,14 @@
 </head>
 <body>
 @if($invalidated)
-    <div class="watermark">
+    <div class="watermark color-red">
         INVALIDADO
+    </div>
+@endif
+
+@if($refund)
+    <div class="watermark color-blue">
+        REEMBOLSO
     </div>
 @endif
 <p class="title-h1">Documento Tributario Electrónico</p>
@@ -124,6 +130,26 @@
         </tr>
     @endforeach
 
+    @if($refund)
+        <tr class="header-row">
+            <th class="col-n" colspan="9">Elementos reembolsados</th>
+        </tr>
+
+        @foreach($refund['cuerpoDocumento'] as $item)
+            <tr>
+                <td>{{ $item['numItem'] }}</td>
+                <td>{{ $item['cantidad'] }}</td>
+                <td>{{ $item['descripcion'] }}</td>
+                <td>$ {{ number_format($item['precioUni'], 2) }}</td>
+                <td>$ 0.00</td>
+                <td>$ {{ number_format($item['montoDescu'], 2) }}</td>
+                <td>$ {{ number_format($item['ventaNoSuj'], 2) }}</td>
+                <td>$ {{ number_format($item['ventaExenta'], 2) }}</td>
+                <td>$ {{ number_format($item['ventaGravada'], 2) }}</td>
+            </tr>
+        @endforeach
+    @endif
+
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="3" class="summary-label"><b>Suma de ventas:</b></td>
@@ -174,11 +200,11 @@
         <td class="summary-value">$ {{ number_format($data['resumen']['ivaRete'], 2) }}</td>
     </tr>
 
-{{--    <tr>--}}
-{{--        <td colspan="3" class="borderless"></td>--}}
-{{--        <td colspan="5" class="summary-label"><b>Retención renta:</b></td>--}}
-{{--        <td class="summary-value">$ {{ number_format($data['resumen']['reteRenta'], 2) }}</td>--}}
-{{--    </tr>--}}
+    {{--    <tr>--}}
+    {{--        <td colspan="3" class="borderless"></td>--}}
+    {{--        <td colspan="5" class="summary-label"><b>Retención renta:</b></td>--}}
+    {{--        <td class="summary-value">$ {{ number_format($data['resumen']['reteRenta'], 2) }}</td>--}}
+    {{--    </tr>--}}
 
     <tr>
         <td colspan="3" class="borderless"></td>
@@ -192,10 +218,20 @@
         <td class="summary-value">$ {{ number_format($data['resumen']['totalNoGravado'], 2) }}</td>
     </tr>
 
+    @if($refund)
+        <tr>
+            <td colspan="3" class="borderless"></td>
+            <td colspan="5" class="summary-label"><b>Total Reembolsos:</b></td>
+            <td class="summary-value">$ {{ number_format($refund['resumen']['totalGravada'], 2) }}</td>
+        </tr>
+    @endif
+
     <tr>
         <td colspan="3" class="borderless"></td>
         <td colspan="5" class="summary-label"><b>Total a pagar:</b></td>
-        <td class="summary-value">$ {{ number_format($data['resumen']['totalPagar'], 2) }}</td>
+        <td class="summary-value">
+            $ {{ number_format($finalTotal, 2) }}
+        </td>
     </tr>
     </tbody>
 </table>
@@ -209,6 +245,14 @@
         <p>
             <span><b>Condición de operación:</b></span> {{ $condition }}
         </p>
+        @if($refund)
+            <p>
+                <span><b>Valor reembolso:</b></span> {{ $letterRefundAmount }}
+            </p>
+            <p>
+                <span><b>Monto final:</b></span> {{ $documentValue }}
+            </p>
+        @endif
         <p>
             <span><b>Observaciones:</b></span>
         </p>
