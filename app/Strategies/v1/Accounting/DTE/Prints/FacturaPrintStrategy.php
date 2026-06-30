@@ -63,7 +63,7 @@ readonly class FacturaPrintStrategy extends BasePrint
             'invalidated' => $model->invalidation,
             'refund' => $refundData,
             'finalTotal' => $finalTotal,
-            'letterRefundAmount' => $this->numberToLetter->convert($refundData['resumen']['totalPagar']),
+            'letterRefundAmount' => $refundData ? $this->numberToLetter->convert($refundData['resumen']['totalPagar']) : null,
             'documentValue' => $this->numberToLetter->convert($finalTotal),
         ])
             ->setPaper('A4', 'portrait');
