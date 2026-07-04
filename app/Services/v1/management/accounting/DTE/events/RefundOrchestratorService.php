@@ -7,6 +7,7 @@ use App\Enums\v1\Accounting\DTE\EventTypes;
 use App\Enums\v1\Accounting\DTE\Status;
 use App\Models\Accounting\DTEEventModel;
 use App\Models\Accounting\DTEModel;
+use App\Services\v1\management\accounting\DTE\DTELogService;
 use App\Services\v1\management\accounting\DTE\DTEService;
 use App\Services\v1\management\accounting\DTE\DTESignatureService;
 use App\Services\v1\management\accounting\DTE\DTEStorageService;
@@ -21,6 +22,7 @@ readonly class RefundOrchestratorService
         private readonly DTESignatureService    $dteSignatureService,
         private readonly DTEService             $dteService,
         private readonly DTEStorageService      $dteStorageService,
+        private readonly DTELogService          $dteLogService,
     )
     {
 
@@ -38,6 +40,9 @@ readonly class RefundOrchestratorService
     public function process(int $dteId, int $dteType, array $items): DTEEventModel
     {
         $user = Auth::id() ?? throw new \RuntimeException("Usuario no autenticado.");
+        $relatedDTE = DTEModel::query()
+            ->select(['id', 'client_id'])
+            ->findOrFail($dteId);
 
         // 1. Crear el JSON
         $json = $this->refundStructureService->createJson(
@@ -45,18 +50,25 @@ readonly class RefundOrchestratorService
             dteType: $dteType,
             items: $items
         );
+        $genCode = $json['identificacion']['codigoGeneracion'];
         $result = $this->dteSignatureService->signDocument($json);
         $receptionStamp = strtoupper(Str::random(40));
 //        $result = $this->dteSignatureService->singAndSendEvent(dte: $json, eventType: EventTypes::RETORNO);
 //        $receptionStamp = $result->haciendaResponse->selloRecibido
 //            ?? throw new \RuntimeException("Hacienda no retorno el sello de recepción");
 //        $json['firmaElectronica'] = $result->signedDocument;
+        $this->dteLogService->logHaciendaResponse(
+            generationCode: $genCode,
+            haciendaResponse: /*$result->haciendaResponse*/ [['saludo' => 'Hola'], ['usuario' => 'Sear']],
+            clientId: $relatedDTE->client_id,
+            json: $json,
+        );
         $json['firmaElectronica'] = $result->body;
         $json['selloRecibido'] = $receptionStamp;
 
         $dto = new DTEEventsDTO(
             dte_id: (int)$dteId,
-            generation_code: $json['identificacion']['codigoGeneracion'],
+            generation_code: $genCode,
             reception_stamp: $receptionStamp,
             generation_datetime: Carbon::now(),
             user_id: $user,
@@ -71,6 +83,7 @@ readonly class RefundOrchestratorService
             ->where('id', (int)$dteId)
             ->update(['status_id' => Status::CON_DEVOLUCION->value]);
 
+        $this->dteLogService->linkToModel(generationCode: $genCode, model: $refundTransaction);
         $this->dteStorageService->storeEventJson($refundTransaction);
 
         return $refundTransaction;

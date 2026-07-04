@@ -14,7 +14,8 @@ use RuntimeException;
 readonly class DTESignatureService
 {
     public function __construct(
-        private readonly Client $httpClient,
+        private readonly Client        $httpClient,
+        private readonly DTELogService $logService,
     )
     {
     }

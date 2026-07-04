@@ -45,6 +45,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $invoices_count
  * @property-read OtherInvoiceModel|null $other_invoice
  * @property-read PaymentModel|null $payment
+ * @property-read \App\Models\Accounting\DTEEventModel|null $refund
  * @property-read StatusModel|null $status
  * @property-read User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DTEModel advancedFilter()
