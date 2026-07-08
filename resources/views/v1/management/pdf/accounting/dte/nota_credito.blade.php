@@ -12,7 +12,7 @@
 <p class="title-h1 mt-xs">Nota de Crédito</p>
 
 @if($invalidated)
-    <div class="watermark">
+    <div class="watermark color-red">
         INVALIDADO
     </div>
 @endif

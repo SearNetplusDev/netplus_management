@@ -12,7 +12,7 @@
 <p class="title-h1 mt-xs">Nota de Débito</p>
 
 @if($invalidated)
-    <div class="watermark">
+    <div class=" color-red">
         INVALIDADO
     </div>
 @endif
@@ -162,23 +162,23 @@
         <td class="summary-value">$ {{ number_format($data['resumen']['totalGravada'], 2) }}</td>
     </tr>
 
-{{--    <tr>--}}
-{{--        <td colspan="3" class="borderless"></td>--}}
-{{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas no sujetas:</b></td>--}}
-{{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuNoSuj'], 2) }}</td>--}}
-{{--    </tr>--}}
+    {{--    <tr>--}}
+    {{--        <td colspan="3" class="borderless"></td>--}}
+    {{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas no sujetas:</b></td>--}}
+    {{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuNoSuj'], 2) }}</td>--}}
+    {{--    </tr>--}}
 
-{{--    <tr>--}}
-{{--        <td colspan="3" class="borderless"></td>--}}
-{{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas exentas:</b></td>--}}
-{{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuExenta'], 2) }}</td>--}}
-{{--    </tr>--}}
+    {{--    <tr>--}}
+    {{--        <td colspan="3" class="borderless"></td>--}}
+    {{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas exentas:</b></td>--}}
+    {{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuExenta'], 2) }}</td>--}}
+    {{--    </tr>--}}
 
-{{--    <tr>--}}
-{{--        <td colspan="3" class="borderless"></td>--}}
-{{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas gravadas:</b></td>--}}
-{{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuGravada'], 2) }}</td>--}}
-{{--    </tr>--}}
+    {{--    <tr>--}}
+    {{--        <td colspan="3" class="borderless"></td>--}}
+    {{--        <td colspan="4" class="summary-label"><b>Monto global descuentos, rebajas y otros a ventas gravadas:</b></td>--}}
+    {{--        <td class="summary-value">$ {{ number_format($data['resumen']['descuGravada'], 2) }}</td>--}}
+    {{--    </tr>--}}
 
     <tr>
         <td colspan="3" class="borderless"></td>

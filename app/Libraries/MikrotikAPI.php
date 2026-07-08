@@ -16,7 +16,7 @@ use Throwable;
 class MikrotikAPI
 {
     private const DEFAULT_PORT = 45000;
-    private const TIMEOUT = 5;
+    private const TIMEOUT = 90;
     private const ATTEMPTS = 1;
     private ?Client $client = null;
 
@@ -90,6 +90,10 @@ class MikrotikAPI
         } catch (BadCredentialsException|ConnectException|QueryException $e) {
             throw ValidationException::withMessages([
                 'operation' => "Ha ocurrido un error al conectarse al equipo de Mikrotik. {$e->getMessage()}",
+            ]);
+        } catch (ClientException $e) {
+            throw ValidationException::withMessages([
+                'operation' => "Tiempo de espera agotado al leer la respuesta del equipo Mikrotik. Verifique la conexión de red. ({$e->getMessage()})",
             ]);
         } finally {
             $this->disconnect();

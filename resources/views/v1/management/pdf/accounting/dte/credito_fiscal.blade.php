@@ -9,7 +9,7 @@
 </head>
 <body>
 @if($invalidated)
-    <div class="watermark">
+    <div class="watermark color-red">
         INVALIDADO
     </div>
 @endif

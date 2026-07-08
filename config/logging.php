@@ -172,6 +172,11 @@ return [
             'path' => storage_path('logs/dte/store_log.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+        'monitoring_sync' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/monitoring/mikrotik_active_connections.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
     ],
 
 ];
