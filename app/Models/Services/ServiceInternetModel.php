@@ -3,11 +3,13 @@
 namespace App\Models\Services;
 
 use App\Models\Management\Profiles\InternetModel;
+use App\Models\Monitoring\ActiveConnectionModel;
 use App\Models\Services\ServiceModel;
 use App\Observers\Services\InternetServiceObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
@@ -23,6 +25,7 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read ActiveConnectionModel|null $active_connections
  * @property-read array $status
  * @property-read InternetModel|null $profile
  * @property-read ServiceModel|null $service
@@ -85,5 +88,10 @@ class ServiceInternetModel extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(ServiceModel::class, 'service_id', 'id');
+    }
+
+    public function active_connections(): HasOne
+    {
+        return $this->hasOne(ActiveConnectionModel::class, 'internet_service_id', 'id');
     }
 }
