@@ -45,24 +45,24 @@ readonly class MikrotikConnectionSyncService
                 );
                 $connection = $result[0] ?? null;
 
-                if ($connection) {
-                    ActiveConnectionModel::query()
-                        ->updateOrCreate(
-                            ['pppoe_user' => $pppoeUser],
-                            [
-                                'internet_service_id' => ServiceInternetModel::query()->where('user', $pppoeUser)->first()?->id,
-                                'ip_address' => $connection['address'] ?? null,
-                                'caller_id' => $connection['caller-id'] ?? null,
-                                'uptime' => $connection['uptime'] ?? null,
-                                'uptime_seconds' => isset($connection['uptime']) ? $this->parseUptimeToSeconds($connection['uptime']) : null,
-                                'mikrotik_ref_id' => $connection['.id'] ?? null,
-                                'last_synced_at' => now(),
-                            ]
-                        );
-                    $syncedUsers[] = $pppoeUser;
-                } else {
-                    ActiveConnectionModel::query()->where('pppoe_user', $pppoeUser)->delete();
-                }
+//                if ($connection) {
+                ActiveConnectionModel::query()
+                    ->updateOrCreate(
+                        ['pppoe_user' => $pppoeUser],
+                        [
+                            'internet_service_id' => ServiceInternetModel::query()->where('user', $pppoeUser)->first()?->id,
+                            'ip_address' => $connection['address'] ?? null,
+                            'caller_id' => $connection['caller-id'] ?? null,
+                            'uptime' => $connection['uptime'] ?? null,
+                            'uptime_seconds' => isset($connection['uptime']) ? $this->parseUptimeToSeconds($connection['uptime']) : null,
+                            'mikrotik_ref_id' => $connection['.id'] ?? null,
+                            'last_synced_at' => now(),
+                        ]
+                    );
+                $syncedUsers[] = $pppoeUser;
+//                } else {
+//                    ActiveConnectionModel::query()->where('pppoe_user', $pppoeUser)->delete();
+//                }
             }
         });
 

@@ -17,10 +17,13 @@ class InternetController extends Controller
                 'internet_service.service.client.dui',
                 'internet_service.service.client.branch',
                 'internet_service.service.client.mobile',
+                'internet_service.service.client.financial_status.status',
             ]);
 
         return $service->handle($request, $query, [
-
+            'financial_status' => fn($q, $data) => $q->whereHas('internet_service.service.client.financial_status', function ($q) use ($data) {
+                return $q->whereIn('status_id', $data);
+            }),
         ]);
     }
 }
