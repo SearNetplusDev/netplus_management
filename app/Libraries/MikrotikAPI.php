@@ -16,7 +16,8 @@ use Throwable;
 class MikrotikAPI
 {
     private const DEFAULT_PORT = 45000;
-    private const TIMEOUT = 90;
+    private const TIMEOUT = 30;
+    private const SOCKET_TIMEOUT = 120;
     private const ATTEMPTS = 1;
     private ?Client $client = null;
 
@@ -37,6 +38,8 @@ class MikrotikAPI
             'port' => $port,
             'timeout' => self::TIMEOUT,
             'attempts' => self::ATTEMPTS,
+            'socket_timeout' => self::SOCKET_TIMEOUT,
+            'throw_timeout_exception' => false,
         ]);
     }
 

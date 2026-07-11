@@ -203,6 +203,9 @@ class DashboardMikrotikService
      */
     public function getActiveSessions(string $host, string $user, string $pass, int $port): array
     {
+//        $connections = $this->mkApi->getActivePPPConnectionsIterator(host: $host, user: $user, pass: $pass, port: $port);
+//        dd($connections);
+
         $cacheKey = "mikrotik.sessions.{$host}";
 
         return Cache::remember($cacheKey, self::CACHE_TTL['sessions'], function () use ($host, $user, $pass, $port) {
