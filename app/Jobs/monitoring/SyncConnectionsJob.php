@@ -36,11 +36,17 @@ class SyncConnectionsJob implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [(new WithoutOverlapping('mikrotik-sync-connections'))->releaseAfter(30)];
+        return [new WithoutOverlapping('mikrotik-sync-connections')->releaseAfter(30)];
     }
 
     /**
      * Execute the job.
+     *
+     * @param MikrotikConnectionSyncService $service
+     * @return void
+     * @throws Throwable
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
      */
     public function handle(MikrotikConnectionSyncService $service): void
     {

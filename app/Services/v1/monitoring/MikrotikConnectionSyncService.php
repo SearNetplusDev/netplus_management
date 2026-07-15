@@ -44,7 +44,7 @@ readonly class MikrotikConnectionSyncService
 
                 ActiveConnectionModel::query()
                     ->updateOrCreate(
-                        ['pppoe_user' => $pppoeUser],
+                        ['pppoe_user' => trim($pppoeUser)],
                         [
                             'internet_service_id' => $internetService?->id,
                             'ip_address' => $connection['address'] ?? null,
@@ -90,5 +90,60 @@ readonly class MikrotikConnectionSyncService
         }
 
         return $seconds;
+    }
+
+    /**
+     * Busca y retorna directamente desde la RB, los datos de una sesión PPPoE activa: conexión,
+     * perfil asignado y tráfico actual.
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $pppoeUser
+     * @param int $port
+     * @return array|null
+     * @throws \RouterOS\Exceptions\ClientException
+     * @throws \RouterOS\Exceptions\ConfigException
+     */
+    public function findActiveConnectionByUser(
+        string $host,
+        string $user,
+        string $pass,
+        string $pppoeUser,
+        int    $port = 45000,
+    ): ?array
+    {
+        $pppoeUser = trim($pppoeUser);
+        $details = $this->api->getActiveConnectionDetails(
+            host: $host,
+            user: $user,
+            pass: $pass,
+            pppoeUser: $pppoeUser,
+            port: $port,
+        );
+
+        if (empty($details['active'])) return null;
+        $connection = $details['active'];
+        $secret = $details['secret'];
+        $traffic = $details['traffic'];
+        $uptime = $connection['uptime'] ?? null;
+
+        return [
+            'pppoe_user' => $connection['name'] ?? $pppoeUser,
+            'ip_address' => $connection['address'] ?? null,
+            'caller_id' => $connection['caller-id'] ?? null,
+            'uptime' => $uptime,
+            'mikrotik_ref_id' => $connection['.id'] ?? null,
+            'profile' => $secret['profile'] ?? null,
+            'service' => $connection['service'] ?? null,
+            'traffic' => $traffic
+                ? [
+                    'rx_bps' => isset($traffic['rx-bits-per-second']) ? (int)$traffic['rx-bits-per-second'] : null,
+                    'tx_bps' => isset($traffic['tx-bits-per-second']) ? (int)$traffic['tx-bits-per-second'] : null,
+                    'rx_packets_per_second' => isset($traffic['rx-packets-per-second']) ? (int)$traffic['rx-packets-per-second'] : null,
+                    'tx_packets_per_second' => isset($traffic['tx-packets-per-second']) ? (int)$traffic['tx-packets-per-second'] : null,
+                ] : null,
+            'fetched_at' => now(),
+        ];
     }
 }

@@ -413,4 +413,54 @@ class MikrotikAPI
             return $client->query(new Query('/ppp/active/print'))->read();
         }, $port);
     }
+
+    /**
+     * Busca una sesión PPPoE activa por usuario y trae los datos de la sesión, el perfil asignado y el tráfico actual.
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $pppoeUser
+     * @param int $port
+     * @return array
+     * @throws ClientException
+     * @throws ConfigException
+     */
+    public function getActiveConnectionDetails(
+        string $host,
+        string $user,
+        string $pass,
+        string $pppoeUser,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($pppoeUser) {
+            $activeResult = $client->query(
+                new Query('/ppp/active/print')->where('name', $pppoeUser)
+            )->read();
+
+            $secretResult = $client->query(
+                new Query('/ppp/secret/print')->where('name', $pppoeUser)
+            )->read();
+
+            $traffic = null;
+
+            if (!empty($activeResult)) {
+                $interfaceName = "<pppoe-{$pppoeUser}>";
+
+                $trafficQuery = new Query('/interface/monitor-traffic')
+                    ->equal('interface', $interfaceName)
+                    ->equal('once', '');
+
+                $trafficResult = $client->query($trafficQuery)->read();
+                $traffic = $trafficResult[0] ?? null;
+            }
+
+            return [
+                'active' => $activeResult[0] ?? null,
+                'secret' => $secretResult[0] ?? null,
+                'traffic' => $traffic,
+            ];
+        }, $port);
+    }
 }
