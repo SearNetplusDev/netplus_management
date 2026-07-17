@@ -6,25 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\management\general\GeneralResource;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
+use App\Models\Management\Profiles\InternetModel;
 use App\Services\v1\management\dashboard\DashboardMikrotikService;
 use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
+    /**
+     * Conteo de clientes según la categoría de este.
+     *
+     * @return JsonResponse
+     */
     public function clientsByType(): JsonResponse
     {
-//        $data = ClientModel::query()
-//            ->where('clients.status_id', true)
-//            ->join('config_client_types', 'config_client_types.id', '=', 'clients.client_type_id')
-//            ->select('config_client_types.name', DB::raw('COUNT(clients.id) as total'))
-//            ->groupBy('config_client_types.name')
-//            ->get();
-//
-//        return response()->json([
-//            'labels' => $data->pluck('name'),
-//            'data' => $data->pluck('total'),
-//        ]);
-
         $types = ClientTypeModel::query()
             ->withCount([
                 'clients as total_clients' => function ($query) {
@@ -59,6 +53,34 @@ class DashboardController extends Controller
 
         return response()->json([
             'data' => new GeneralResource($data),
+        ]);
+    }
+
+
+    /**
+     * Obtiene los 5 perfiles con más usuarios.
+     *
+     * @return JsonResponse
+     */
+    public function topInternetProfiles(): JsonResponse
+    {
+        $profiles = InternetModel::query()
+            ->withCount([
+                'service_internet as total_services' => function ($query) {
+                    $query->where('status_id', true);
+                }
+            ])
+            ->orderByDesc('total_services')
+            ->limit(10)
+            ->get(['id', 'name', 'price']);
+
+        return response()->json([
+            'labels' => $profiles->map(fn($profile) => sprintf(
+                '%s ($%.2f)',
+                $profile->name,
+                $profile->price
+            )),
+            'data' => $profiles->pluck('total_services'),
         ]);
     }
 
@@ -130,6 +152,6 @@ class DashboardController extends Controller
      */
     private function authServer(): AuthServerModel
     {
-        return AuthServerModel::query()->findOrFail(env('MK_MAIN'));
+        return AuthServerModel::query()->findOrFail(config('mikrotik.main_server'));
     }
 }

@@ -104,6 +104,6 @@ class InternetModel extends Model
 
     public function service_internet(): HasMany
     {
-        return $this->hasMany(ServiceInternetModel::class, 'service_id', 'id');
+        return $this->hasMany(ServiceInternetModel::class, 'internet_profile_id', 'id');
     }
 }
