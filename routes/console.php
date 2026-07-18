@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::call(function () {
-    $period = now()->addMonth()->format('Ym');
+    $period = now()->format('Ym');
 
     Artisan::call('billing:generate-invoices', [
         'period' => $period,

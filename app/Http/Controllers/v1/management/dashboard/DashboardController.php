@@ -7,8 +7,12 @@ use App\Http\Resources\v1\management\general\GeneralResource;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Management\Profiles\InternetModel;
+use App\Models\Supports\SupportModel;
 use App\Services\v1\management\dashboard\DashboardMikrotikService;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -81,6 +85,74 @@ class DashboardController extends Controller
                 $profile->price
             )),
             'data' => $profiles->pluck('total_services'),
+        ]);
+    }
+
+    public function supportsByDay(): JsonResponse
+    {
+        $startDate = Carbon::now()->startOfMonth();
+        $endDate = Carbon::now();
+
+        $rows = SupportModel::query()
+            ->where('status_id', 3)
+            ->whereBetween('closed_at', [$startDate, $endDate])
+            ->whereIn('type_id', [1, 2, 3, 4, 6, 7, 8])
+            ->selectRaw("
+                DATE(closed_at) as day,
+                CASE
+                    WHEN type_id IN (1,2) THEN 'Instalaciones'
+                    WHEN type_id IN (3,4) THEN 'Soportes'
+                    WHEN type_id IN (6,7) THEN 'Renovaciones'
+                    WHEN type_id = 8 THEN 'Desinstalaciones'
+                END as category,
+                COUNT(*) AS total
+            ")
+            ->groupBy(
+                DB::raw('DATE(closed_at)'),
+                DB::raw("
+                    CASE
+                        WHEN type_id IN (1,2) THEN 'Instalaciones'
+                        WHEN type_id IN (3,4) THEN 'Soportes'
+                        WHEN type_id IN (6,7) THEN 'Renovaciones'
+                        WHEN type_id = 8 THEN 'Desinstalaciones'
+                    END
+                ")
+            )
+            ->orderBy('day')
+            ->get();
+
+        //  Fechas para el eje X
+        $period = CarbonPeriod::create(now()->startOfMonth(), now()->today());
+        $categories = collect($period)->map(fn($date) => $date->day)->values();
+
+        $period = CarbonPeriod::create($startDate, $endDate);
+
+        //  Categorías que aparecerán como series
+        $seriesName = [
+            'Instalaciones',
+            'Soportes',
+            'Renovaciones',
+            'Desinstalaciones',
+        ];
+
+        $series = collect($seriesName)->map(function ($category) use ($rows, $period) {
+            return [
+                'name' => $category,
+                'data' => collect($period)
+                    ->map(function ($date) use ($rows, $category) {
+                        $record = $rows->first(function ($item) use ($date, $category) {
+                            return $item->day === $date->format('Y-m-d') && $item->category === $category;
+                        });
+
+//                        return (int)$record?->total;
+                        return (int)random_int(1, 50);
+                    })->values()->all(),
+            ];
+        })->values();
+
+        return response()->json([
+            'categories' => $categories,
+            'series' => $series,
         ]);
     }
 
