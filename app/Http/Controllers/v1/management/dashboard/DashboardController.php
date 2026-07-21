@@ -152,8 +152,8 @@ class DashboardController extends Controller
                             return $item->day === $date->format('Y-m-d') && $item->category === $category;
                         });
 
-//                        return (int)$record?->total;
-                        return (int)random_int(0, 50);
+                        return (int)$record?->total;
+//                        return (int)random_int(0, 50);
                     })->values()->all(),
             ];
         })->values();
