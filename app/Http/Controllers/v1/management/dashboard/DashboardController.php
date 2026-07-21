@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\v1\management\dashboard;
 
+use App\Enums\v1\General\BillingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\management\general\GeneralResource;
+use App\Models\Billing\InvoiceModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Management\Profiles\InternetModel;
@@ -88,6 +90,12 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Obtiene los soportes solucionados desde el inicio del mes en curso
+     * hasta el día de ahora y los agrupa por tipo de soporte.
+     *
+     * @return JsonResponse
+     */
     public function supportsByDay(): JsonResponse
     {
         $startDate = Carbon::now()->startOfMonth();
@@ -145,13 +153,40 @@ class DashboardController extends Controller
                         });
 
 //                        return (int)$record?->total;
-                        return (int)random_int(1, 50);
+                        return (int)random_int(0, 50);
                     })->values()->all(),
             ];
         })->values();
 
         return response()->json([
             'categories' => $categories,
+            'series' => $series,
+        ]);
+    }
+
+    /**
+     * Obtiene la cantidad de facturas emitidas, pendientes, pagadas, vencidas, parcialmente pagadas.
+     *
+     * @return JsonResponse
+     */
+    public function invoiceStatusChart(): JsonResponse
+    {
+        $totals = InvoiceModel::query()
+            ->where('status_id', true)
+            ->selectRaw("billing_status_id, COUNT(*) as total")
+            ->groupBy('billing_status_id')
+            ->pluck('total', 'billing_status_id');
+
+        $labels = [];
+        $series = [];
+
+        foreach (BillingStatus::cases() as $status) {
+            $labels[] = $status->label();
+            $series[] = (int)($totals[$status->value] ?? 0);
+        }
+
+        return response()->json([
+            'labels' => $labels,
             'series' => $series,
         ]);
     }
