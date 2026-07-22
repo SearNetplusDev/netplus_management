@@ -6,6 +6,7 @@ use App\Enums\v1\General\BillingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\management\general\GeneralResource;
 use App\Models\Billing\InvoiceModel;
+use App\Models\Billing\PeriodModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Management\Profiles\InternetModel;
@@ -171,23 +172,44 @@ class DashboardController extends Controller
      */
     public function invoiceStatusChart(): JsonResponse
     {
-        $totals = InvoiceModel::query()
-            ->where('status_id', true)
-            ->selectRaw("billing_status_id, COUNT(*) as total")
-            ->groupBy('billing_status_id')
-            ->pluck('total', 'billing_status_id');
-
+        $today = Carbon::now();
+        $period = PeriodModel::query()
+            ->where([
+                ['status_id', true],
+                ['period_start', '<=', $today],
+                ['cutoff_date', '>=', $today],
+            ])
+            ->orderBy('period_start')
+            ->first();
         $labels = [];
         $series = [];
 
-        foreach (BillingStatus::cases() as $status) {
-            $labels[] = $status->label();
-            $series[] = (int)($totals[$status->value] ?? 0);
+        if ($period) {
+            $totals = InvoiceModel::query()
+                ->where([
+                    ['status_id', true],
+                    ['billing_period_id', $period->id]
+                ])
+                ->selectRaw("billing_status_id, COUNT(*) as total")
+                ->groupBy('billing_status_id')
+                ->pluck('total', 'billing_status_id');
+
+
+            foreach (BillingStatus::cases() as $status) {
+                $labels[] = $status->label();
+                $series[] = (int)($totals[$status->value] ?? 0);
+            }
+        } else {
+            foreach (BillingStatus::cases() as $status) {
+                $labels[] = $status->label();
+                $series[] = 0;
+            }
         }
 
         return response()->json([
             'labels' => $labels,
             'series' => $series,
+            'period' => $period?->name,
         ]);
     }
 
