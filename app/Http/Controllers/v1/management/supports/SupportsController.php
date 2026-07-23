@@ -30,6 +30,7 @@ class SupportsController extends Controller
                 'user:id,name',
                 'status:id,name,badge_color',
                 'details',
+                'survey'
             ]);
 
         return $dataViewer->handle($request, $query, [

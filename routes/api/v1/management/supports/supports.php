@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\v1\management\supports\SurveyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\management\supports\StatusController;
 use App\Http\Controllers\v1\management\supports\TypesController;
@@ -14,6 +15,13 @@ Route::prefix('v1/supports')
         Route::put('{id}', [SupportsController::class, 'update']);
         Route::get('print/{id}', [SupportsController::class, 'print']);
         Route::post('logs', [SupportsController::class, 'logs']);
+
+        //  Surveys
+        Route::group(['prefix' => 'survey'], function () {
+            Route::post('/', [SurveyController::class, 'store']);
+            Route::post('show', [SurveyController::class, 'read']);
+            Route::put('{id}', [SurveyController::class, 'update']);
+        });
 
 
         //  Types

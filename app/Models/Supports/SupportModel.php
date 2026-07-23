@@ -55,6 +55,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read ServiceModel|null $service
  * @property-read StateModel|null $state
  * @property-read \App\Models\Supports\StatusModel|null $status
+ * @property-read \App\Models\Supports\SupportRatingModel|null $survey
  * @property-read TechnicianModel|null $technician
  * @property-read \App\Models\Supports\TypeModel|null $type
  * @property-read User|null $user
@@ -221,5 +222,10 @@ class SupportModel extends Model
     public function contract(): BelongsTo
     {
         return $this->belongsTo(ContractModel::class, 'contract_id', 'id');
+    }
+
+    public function survey(): HasOne
+    {
+        return $this->hasOne(SupportRatingModel::class, 'support_id', 'id');
     }
 }
