@@ -29,6 +29,7 @@ Schedule::command('billing:cut-overdue-invoices')
     ->onOneServer();
 
 Schedule::command('mikrotik:sync-connections')
+    ->everyMinute()
     ->timezone('America/El_Salvador')
     ->withoutOverlapping()
     ->onOneServer();

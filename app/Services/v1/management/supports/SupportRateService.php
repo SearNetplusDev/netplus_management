@@ -24,9 +24,11 @@ class SupportRateService
      * @param int $support_id
      * @return SupportRatingModel
      */
-    public function surveyData(int $support_id): SupportRatingModel
+    public function surveyData(int $support_id): ?SupportRatingModel
     {
-        return SupportRatingModel::query()->findOrFail($support_id);
+        return SupportRatingModel::query()
+            ->with('support.technician.user')
+            ->find($support_id);
     }
 
     /**
