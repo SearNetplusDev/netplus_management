@@ -22,13 +22,14 @@ class SupportRateService
      * Obtiene los datos de una encuesta determinada.
      *
      * @param int $support_id
-     * @return SupportRatingModel
+     * @return SupportRatingModel|null
      */
     public function surveyData(int $support_id): ?SupportRatingModel
     {
         return SupportRatingModel::query()
             ->with('support.technician.user')
-            ->find($support_id);
+            ->where('support_id', $support_id)
+            ->first();
     }
 
     /**

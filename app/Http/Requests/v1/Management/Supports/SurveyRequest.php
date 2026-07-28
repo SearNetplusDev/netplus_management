@@ -28,7 +28,7 @@ class SurveyRequest extends FormRequest
             'attention_rate' => 'required|integer|between:0,5',
             'solution_rate' => 'required|integer|between:0,5',
             'punctuality_rate' => 'required|integer|between:0,5',
-            'recommendation_rate' => 'required|integer|between:0,10',
+            'recommendation_rate' => 'required|integer|between:0,5',
             'resolved' => 'required|boolean',
             'comment' => 'nullable|string|max:2000',
         ];

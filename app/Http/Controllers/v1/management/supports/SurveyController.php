@@ -59,11 +59,11 @@ class SurveyController extends Controller
      * Actualiza los datos de una encuesta determinada.
      *
      * @param SurveyRequest $request
-     * @param SupportRatingModel $model
+     * @param SupportRatingModel $id
      * @param SupportRateService $service
      * @return JsonResponse
      */
-    public function update(SurveyRequest $request, SupportRatingModel $model, SupportRateService $service): JsonResponse
+    public function update(SurveyRequest $request, SupportRatingModel $id, SupportRateService $service): JsonResponse
     {
         $dto = new RatingDTO(
             support_id: $request->support_id,
@@ -74,10 +74,10 @@ class SurveyController extends Controller
             recommendation_rate: $request->recommendation_rate,
             resolved: $request->resolved,
             comment: $request->comment,
-            survey_datetime: $model->survey_datetime,
+            survey_datetime: $id->survey_datetime,
         );
 
-        $query = $service->update($model, $dto);
+        $query = $service->update($id, $dto);
 
         return response()->json([
             'saved' => (bool)$query,

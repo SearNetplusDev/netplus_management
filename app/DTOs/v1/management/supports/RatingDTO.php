@@ -38,8 +38,8 @@ class RatingDTO extends Data
         #[Nullable, StringType]
         public readonly ?string $comment,
 
-        #[Required, Date]
-        public readonly Carbon  $survey_datetime
+        #[Nullable, Date]
+        public readonly ?Carbon $survey_datetime
     )
     {
     }
