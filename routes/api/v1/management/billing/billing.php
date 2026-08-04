@@ -22,6 +22,7 @@ Route::prefix('v1/billing')
             Route::get('print/{id}', [BillingController::class, 'printInvoice']);
             Route::get('{id}/due-date', [BillingController::class, 'invoiceDueDate']);
             Route::get('client/{id}', [BillingController::class, 'getClientPendingInvoices']);
+            Route::post('recalculate', [BillingController::class, 'recalculateInvoice']);
         });
 
         //      Options

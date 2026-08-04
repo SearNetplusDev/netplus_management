@@ -28,6 +28,7 @@ class GenericTicket implements SupportTicketInterface
                 'technician' => $support->technician?->user?->name,
                 'mobile' => $support->client?->mobile?->number,
                 'year' => Carbon::today()->format('Y'),
+                'solution' => $support->solution,
             ],
         ])->setPaper('A4', 'portrait');
 

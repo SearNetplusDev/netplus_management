@@ -4,10 +4,13 @@ namespace App\Http\Controllers\v1\management\billing;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\management\general\GeneralResource;
+use App\Jobs\billing\RecalculateInvoiceById;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Clients\ClientModel;
+use App\Services\v1\management\billing\invoices\InvoiceUpdater;
 use App\Services\v1\management\billing\InvoicesService;
 use App\Services\v1\management\DataViewerService;
+use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -99,6 +102,25 @@ class BillingController extends Controller
     {
         return response()->json([
             'response' => new GeneralResource($service->clientPendingInvoices($clientId))
+        ]);
+    }
+
+    /**
+     * Recalcula el valor de una factura según su id.
+     *
+     * @param Request $request
+     * @param InvoiceUpdater $updater
+     * @return JsonResponse
+     * @throws \Throwable
+     */
+    public function recalculateInvoice(Request $request, InvoiceUpdater $updater): JsonResponse
+    {
+//        RecalculateInvoiceById::dispatch($request->invoice_id);
+        $invoice = $updater->recalculateInvoiceById($request->invoice_id);
+
+        return response()->json([
+            'success' => (bool)$invoice,
+            'data' => new GeneralResource($invoice)
         ]);
     }
 

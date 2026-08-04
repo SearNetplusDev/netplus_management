@@ -146,12 +146,12 @@ class InvoiceUpdater
      * @throws \Throwable
      */
     private function updatePeriodInvoices(
-        ClientModel  $client,
-        ServiceModel $service,
-        PeriodModel  $period,
-        ServiceChangeEventTypesEnum          $changeType,
-        array        $changeData,
-        array        &$results
+        ClientModel                 $client,
+        ServiceModel                $service,
+        PeriodModel                 $period,
+        ServiceChangeEventTypesEnum $changeType,
+        array                       $changeData,
+        array                       &$results
     ): void
     {
         $invoice = $this->findInvoiceForService($client, $period, $service);
@@ -181,7 +181,7 @@ class InvoiceUpdater
      */
     private function recalculateInvoice(InvoiceModel $invoice, PeriodModel $period): void
     {
-        $services = $invoice->items->map(fn($i) => $i->service)->unique('id');
+        $services = $invoice->items->map(fn($i) => $i->service)->filter()->unique('id');
         $data = $this->dataCalculator->calculateForClient($invoice->client, $period, $services);
         $invoice->items()->delete();
         $this->createInvoiceItems($invoice, $data['items']);
@@ -278,5 +278,24 @@ class InvoiceUpdater
             ]);
 
         $results['recreated_invoices'][] = $memo->id;
+    }
+
+    /**
+     * Recalcula una factura puntual a partir de su ID, usando su propio período.
+     *
+     * @param int $invoiceId
+     * @return InvoiceModel
+     * @throws \Throwable
+     */
+    public function recalculateInvoiceById(int $invoiceId): InvoiceModel
+    {
+        $invoice = InvoiceModel::query()
+            ->with(['items.service', 'period', 'client'])
+            ->findOrFail($invoiceId);
+
+        return DB::transaction(function () use ($invoice) {
+            $this->recalculateInvoice(invoice: $invoice, period: $invoice->period);
+            return $invoice->fresh(['items', 'period', 'client']);
+        });
     }
 }
