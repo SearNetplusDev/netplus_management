@@ -3,6 +3,7 @@
 namespace App\Models\Billing;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -22,6 +23,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Billing\InvoiceModel> $invoices
+ * @property-read int|null $invoices_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PeriodModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PeriodModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PeriodModel onlyTrashed()
@@ -79,4 +82,9 @@ class PeriodModel extends Model
         'is_closed' => 'boolean',
         'status_id' => 'boolean',
     ];
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(InvoiceModel::class, 'billing_period_id', 'id');
+    }
 }

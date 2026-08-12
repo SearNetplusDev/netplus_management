@@ -172,38 +172,33 @@ class DashboardController extends Controller
      */
     public function invoiceStatusChart(): JsonResponse
     {
-        $today = Carbon::now();
         $period = PeriodModel::query()
-            ->where([
-                ['status_id', true],
-                ['period_start', '<=', $today],
-                ['cutoff_date', '>=', $today],
-            ])
-            ->orderBy('period_start')
+            ->where('status_id', true)
+            ->whereHas('invoices', function ($query) {
+                $query->where('status_id', true);
+            })
+            ->orderByDesc('period_start')
             ->first();
+
         $labels = [];
         $series = [];
+
+        $totals = collect();
 
         if ($period) {
             $totals = InvoiceModel::query()
                 ->where([
                     ['status_id', true],
-                    ['billing_period_id', $period->id]
+                    ['billing_period_id', $period->id],
                 ])
-                ->selectRaw("billing_status_id, COUNT(*) as total")
+                ->selectRaw('billing_status_id, COUNT(*) as total')
                 ->groupBy('billing_status_id')
                 ->pluck('total', 'billing_status_id');
+        }
 
-
-            foreach (BillingStatus::cases() as $status) {
-                $labels[] = $status->label();
-                $series[] = (int)($totals[$status->value] ?? 0);
-            }
-        } else {
-            foreach (BillingStatus::cases() as $status) {
-                $labels[] = $status->label();
-                $series[] = 0;
-            }
+        foreach (BillingStatus::cases() as $status) {
+            $labels[] = $status->label();
+            $series[] = (int)($totals[$status->value] ?? 0);
         }
 
         return response()->json([
