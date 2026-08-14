@@ -2,7 +2,9 @@
 
 namespace App\Models\Monitoring;
 
+use App\Models\Clients\ClientModel;
 use App\Models\Services\ServiceInternetModel;
+use App\Models\Services\ServiceModel;
 use App\Traits\DataViewer;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +25,11 @@ use function Pest\Laravel\get;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $client_id
+ * @property int|null $service_id
+ * @property-read ClientModel|null $client
  * @property-read ServiceInternetModel|null $internet_service
+ * @property-read ServiceModel|null $service
  * @property-read string $uptime_human
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel newModelQuery()
@@ -31,6 +37,7 @@ use function Pest\Laravel\get;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereCallerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereId($value)
@@ -39,6 +46,7 @@ use function Pest\Laravel\get;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereLastSyncedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereMikrotikRefId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel wherePppoeUser($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereServiceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereUptime($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActiveConnectionModel whereUptimeSeconds($value)
@@ -61,6 +69,8 @@ class ActiveConnectionModel extends Model
         'uptime_seconds',
         'mikrotik_ref_id',
         'last_synced_at',
+        'client_id',
+        'service_id',
     ];
     protected $primaryKey = 'id';
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
@@ -72,10 +82,16 @@ class ActiveConnectionModel extends Model
         'uptime',
         'uptime_seconds',
         'mikrotik_ref_id',
+        'client_id',
+        'service_id',
 
-        'internet_service.service.client.name',
-        'internet_service.service.client.surname',
-        'internet_service.service.client.dui.number',
+        'client.name',
+        'client.surname',
+        'client.dui.number',
+
+//        'internet_service.service.client.name',
+//        'internet_service.service.client.surname',
+//        'internet_service.service.client.dui.number',
     ];
     protected array $orderable = [
         'id',
@@ -93,6 +109,16 @@ class ActiveConnectionModel extends Model
     public function internet_service(): BelongsTo
     {
         return $this->belongsTo(ServiceInternetModel::class, 'internet_service_id', 'id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(ClientModel::class, 'client_id', 'id');
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(ServiceModel::class, 'service_id', 'id');
     }
 
     protected function uptimeHuman(): Attribute

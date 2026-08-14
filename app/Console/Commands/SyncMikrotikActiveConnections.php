@@ -16,7 +16,7 @@ class SyncMikrotikActiveConnections extends Command
      */
     public function handle(): int
     {
-        SyncConnectionsJob::dispatch((int)env('MK_MAIN'));
+        SyncConnectionsJob::dispatch(config('mikrotik.main_server'));
 
         $this->info("Job de sincronización despachado a la cola.");
         return self::SUCCESS;

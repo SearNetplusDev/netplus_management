@@ -39,7 +39,10 @@ readonly class MikrotikConnectionSyncService
 
                 if (!$pppoeUser) continue;
 
-                $internetService = ServiceInternetModel::query()->where('user', $pppoeUser)->first();
+                $internetService = ServiceInternetModel::query()
+                    ->with('service')
+                    ->where('user', $pppoeUser)
+                    ->first();
                 $uptime = $connection['uptime'] ?? null;
 
                 ActiveConnectionModel::query()
@@ -53,6 +56,8 @@ readonly class MikrotikConnectionSyncService
                             'uptime_seconds' => $uptime ? $this->parseUptimeToSeconds($uptime) : null,
                             'mikrotik_ref_id' => $connection['.id'] ?? null,
                             'last_synced_at' => now(),
+                            'client_id' => $internetService?->service?->client_id,
+                            'service_id' => $internetService?->service?->id,
                         ]
                     );
                 $syncedUsers[] = $pppoeUser;
