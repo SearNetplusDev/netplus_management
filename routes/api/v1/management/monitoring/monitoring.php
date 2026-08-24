@@ -10,5 +10,6 @@ Route::prefix('v1/monitoring')
         Route::group(['prefix' => 'internet'], function () {
             Route::post('data', [InternetController::class, 'data']);
             Route::post('pppoe', [InternetController::class, 'pppoeInfo']);
+            Route::get('print/last/support/{service_id}', [InternetController::class, 'printLastSupport']);
         });
     });

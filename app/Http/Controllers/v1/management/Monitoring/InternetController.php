@@ -7,10 +7,13 @@ use App\Http\Resources\v1\management\general\GeneralResource;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Monitoring\ActiveConnectionModel;
 use App\Models\Services\ServiceInternetModel;
+use App\Models\Services\ServiceModel;
 use App\Services\v1\management\DataViewerService;
+use App\Services\v1\management\supports\SupportService;
 use App\Services\v1\monitoring\MikrotikConnectionSyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class InternetController extends Controller
 {
@@ -60,5 +63,33 @@ class InternetController extends Controller
         return response()->json([
             'response' => new GeneralResource($data),
         ]);
+    }
+
+    public function printLastSupport(int $service_id, SupportService $service): Response
+    {
+        $query = ServiceModel::query()
+            ->with([
+                'last_support',
+                'last_support.branch.state:id,name',
+                'last_support.branch.municipality:id,name',
+                'last_support.branch.district:id,name',
+                'last_support.client.dui',
+                'last_support.client.nit',
+                'last_support.client.passport',
+                'last_support.client.residence',
+                'last_support.client.mobile',
+                'last_support.contract',
+                'last_support.state',
+                'last_support.municipality',
+                'last_support.district',
+                'last_support.details',
+                'last_support.type',
+            ])
+            ->findOrFail($service_id);
+        $binary = $service->printTicket($query->last_support);
+
+        return response($binary, 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename=ticket.pdf');
     }
 }

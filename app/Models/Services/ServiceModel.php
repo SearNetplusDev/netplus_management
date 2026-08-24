@@ -10,6 +10,7 @@ use App\Models\Configuration\Geography\StateModel;
 use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Infrastructure\Network\NodeModel;
 use App\Models\Management\TechnicianModel;
+use App\Models\Supports\SupportModel;
 use App\Observers\Services\ServiceObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
@@ -198,6 +199,17 @@ class ServiceModel extends Model
     public function uninstallation(): HasOne
     {
         return $this->hasOne(ServiceUninstallationModel::class, 'service_id', 'id');
+    }
+
+    public function supports(): HasMany
+    {
+        return $this->hasMany(SupportModel::class, 'service_id', 'id');
+    }
+
+    public function last_support(): HasOne
+    {
+        return $this->hasOne(SupportModel::class, 'service_id', 'id')
+            ->latestOfMany('creation_date');
     }
 
     public function scopeActiveOrUninstalledInPeriod($query, PeriodModel $period)
