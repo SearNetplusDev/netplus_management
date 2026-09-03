@@ -148,7 +148,7 @@ readonly class MikrotikConnectionSyncService
                     'rx_packets_per_second' => isset($traffic['rx-packets-per-second']) ? (int)$traffic['rx-packets-per-second'] : null,
                     'tx_packets_per_second' => isset($traffic['tx-packets-per-second']) ? (int)$traffic['tx-packets-per-second'] : null,
                 ] : null,
-            'fetched_at' => now(),
+            'fetched_at' => now('America/El_Salvador')->toDateTimeString(),
         ];
     }
 }

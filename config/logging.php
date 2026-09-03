@@ -177,6 +177,11 @@ return [
             'path' => storage_path('logs/monitoring/mikrotik_active_connections.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+        'expiring_contracts' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/clients/expiring_contracts.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
     ],
 
 ];
