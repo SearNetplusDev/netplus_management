@@ -11,6 +11,12 @@ Route::prefix('v1/dashboard')
         Route::get('top-profiles', [DashboardController::class, 'topInternetProfiles']);
         Route::get('supports-data', [DashboardController::class, 'supportsByDay']);
         Route::get('invoices-stats', [DashboardController::class, 'invoiceStatusChart']);
+        Route::group(['prefix' => 'stats'], function () {
+            Route::get('active-clients', [DashboardController::class, 'statsActiveClients']);
+            Route::get('active-services', [DashboardController::class, 'statsActiveServices']);
+            Route::get('incomes', [DashboardController::class, 'statsMonthlyIncomes']);
+            Route::get('pending-incomes', [DashboardController::class, 'statsMonthlyPendingIncomes']);
+        });
 
         Route::get('interfaces/traffic', [DashboardController::class, 'interfaceTraffic']);
         Route::get('interfaces/list', [DashboardController::class, 'interfacesList']);

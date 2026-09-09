@@ -3,13 +3,18 @@
 namespace App\Http\Controllers\v1\management\dashboard;
 
 use App\Enums\v1\General\BillingStatus;
+use App\Enums\v1\General\CommonStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\management\general\GeneralResource;
 use App\Models\Billing\InvoiceModel;
+use App\Models\Billing\PaymentInvoiceModel;
+use App\Models\Billing\PaymentModel;
 use App\Models\Billing\PeriodModel;
+use App\Models\Clients\ClientModel;
 use App\Models\Configuration\Clients\ClientTypeModel;
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Models\Management\Profiles\InternetModel;
+use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\management\dashboard\DashboardMikrotikService;
 use Carbon\CarbonPeriod;
@@ -172,13 +177,7 @@ class DashboardController extends Controller
      */
     public function invoiceStatusChart(): JsonResponse
     {
-        $period = PeriodModel::query()
-            ->where('status_id', true)
-            ->whereHas('invoices', function ($query) {
-                $query->where('status_id', true);
-            })
-            ->orderByDesc('period_start')
-            ->first();
+        $period = $this->getPeriod();
 
         $labels = [];
         $series = [];
@@ -270,6 +269,86 @@ class DashboardController extends Controller
     }
 
     /**
+     * Cantidad de clientes activos.
+     *
+     * @return JsonResponse
+     */
+    public function statsActiveClients(): JsonResponse
+    {
+        return response()->json([
+            'data' => ClientModel::query()
+                ->where('status_id', CommonStatus::ACTIVE->value)
+                ->count()
+        ]);
+    }
+
+    /**
+     * Cantidad de servicios activos.
+     *
+     * @return JsonResponse
+     */
+    public function statsActiveServices(): JsonResponse
+    {
+        return response()->json([
+            'data' => ServiceModel::query()
+                ->where('status_id', CommonStatus::ACTIVE->value)
+                ->count()
+        ]);
+    }
+
+    /**
+     * Retorna los ingresos de facturas pagadas durante el mes en curso.
+     *
+     * @return JsonResponse
+     */
+    public function statsMonthlyIncomes(): JsonResponse
+    {
+        $startDate = Carbon::now()->startOfMonth()->toDateString();
+        $endDate = Carbon::now()->endOfMonth()->toDateString();
+        $total = PaymentModel::query()
+            ->where('status_id', CommonStatus::ACTIVE->value)
+            ->whereBetween('payment_date', [$startDate, $endDate])
+            ->sum('amount');
+
+        return response()->json([
+            'data' => number_format((float)$total, 2, '.', ','),
+        ]);
+    }
+
+    /**
+     * Obtiene el monto de las facturas, emitidas, pendientes y vencidas.
+     *
+     * @return JsonResponse
+     */
+    public function statsMonthlyPendingIncomes(): JsonResponse
+    {
+        $period = $this->getPeriod();
+
+        if (!$period) {
+            return response()->json([
+                'data' => '0.00',
+                'period' => 'Periodo indefinido',
+            ]);
+        }
+        $total = InvoiceModel::query()
+            ->where('status_id', CommonStatus::ACTIVE->value)
+            ->where('billing_period_id', $period->id)
+            ->whereIn('billing_status_id', [
+                BillingStatus::ISSUED->value,
+                BillingStatus::PENDING->value,
+                BillingStatus::OVERDUE->value,
+                BillingStatus::PARTIALLY_PAID->value,
+            ])
+            ->sum('balance_due');
+        $amount = round((float)$total, 2);
+
+        return response()->json([
+            'data' => number_format((float)$amount, 2, '.', ','),
+            'period' => $period?->name,
+        ]);
+    }
+
+    /**
      * Datos del servidor de autenticación.
      *
      * @return AuthServerModel
@@ -277,5 +356,21 @@ class DashboardController extends Controller
     private function authServer(): AuthServerModel
     {
         return AuthServerModel::query()->findOrFail(config('mikrotik.main_server'));
+    }
+
+    /**
+     * Obtiene el último periodo con facturas generadas.
+     *
+     * @return PeriodModel
+     */
+    private function getPeriod(): PeriodModel
+    {
+        return PeriodModel::query()
+            ->where('status_id', true)
+            ->whereHas('invoices', function ($query) {
+                $query->where('status_id', true);
+            })
+            ->orderByDesc('period_start')
+            ->first();
     }
 }
