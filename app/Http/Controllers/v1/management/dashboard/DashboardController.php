@@ -276,7 +276,7 @@ class DashboardController extends Controller
     public function statsActiveClients(): JsonResponse
     {
         return response()->json([
-            'data' => ClientModel::query()
+            'response' => ClientModel::query()
                 ->where('status_id', CommonStatus::ACTIVE->value)
                 ->count()
         ]);
@@ -290,7 +290,7 @@ class DashboardController extends Controller
     public function statsActiveServices(): JsonResponse
     {
         return response()->json([
-            'data' => ServiceModel::query()
+            'response' => ServiceModel::query()
                 ->where('status_id', CommonStatus::ACTIVE->value)
                 ->count()
         ]);
@@ -311,7 +311,7 @@ class DashboardController extends Controller
             ->sum('amount');
 
         return response()->json([
-            'data' => number_format((float)$total, 2, '.', ','),
+            'response' => (float)$total,
         ]);
     }
 
@@ -340,11 +340,9 @@ class DashboardController extends Controller
                 BillingStatus::PARTIALLY_PAID->value,
             ])
             ->sum('balance_due');
-        $amount = round((float)$total, 2);
 
         return response()->json([
-            'data' => number_format((float)$amount, 2, '.', ','),
-            'period' => $period?->name,
+            'response' => (float)$total,
         ]);
     }
 
