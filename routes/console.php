@@ -33,3 +33,9 @@ Schedule::command('mikrotik:sync-connections')
     ->timezone('America/El_Salvador')
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('background:notify-expiring-contracts')
+    ->dailyAt('08:10')
+    ->timezone('America/El_Salvador')
+    ->withoutOverlapping()
+    ->onOneServer();
