@@ -2,6 +2,7 @@
 
 namespace App\Libraries;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use RouterOS\Client;
 use RouterOS\Config;
@@ -13,6 +14,10 @@ use RouterOS\Exceptions\QueryException;
 use RouterOS\Query;
 use Throwable;
 
+/**
+ * Clase cliente para interactuar con la API de RouterOS.
+ * Permite gestionar conexiones, perfiles PPP, secrets y monitorear el estado del hardware.
+ */
 class MikrotikAPI
 {
     private const DEFAULT_PORT = 45000;
@@ -21,7 +26,9 @@ class MikrotikAPI
     private const ATTEMPTS = 1;
     private ?Client $client = null;
 
-    /***
+    /**
+     * Crea y retorna un objeto de configuración para la conexión con el RouterOS.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
@@ -43,25 +50,34 @@ class MikrotikAPI
         ]);
     }
 
-    /***
+    /**
+     * Establece la conexión con la API del equipo Mikrotik e inicializa la propiedad $client.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param int $port
      * @return void
+     * @throws BadCredentialsException
      * @throws ClientException
      * @throws ConfigException
-     * @throws BadCredentialsException
      * @throws ConnectException
      * @throws QueryException
      */
     private function connect(string $host, string $user, string $pass, int $port = self::DEFAULT_PORT): void
     {
-        $config = $this->createConfig($host, $user, $pass, $port);
+        $config = $this->createConfig(
+            host: $host,
+            user: $user,
+            pass: $pass,
+            port: $port
+        );
         $this->client = new Client($config);
     }
 
-    /***
+    /**
+     * Cierra la sesión limpia restableciendo la propiedad $client a null.
+     *
      * @return void
      */
     private function disconnect(): void
@@ -69,7 +85,10 @@ class MikrotikAPI
         $this->client = null;
     }
 
-    /***
+    /**
+     * Ejecuta una acción enviada mediante una función callback sobre la conexión Mikrotik
+     * y garantiza el cierre del socket al finalizar.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
@@ -77,7 +96,6 @@ class MikrotikAPI
      * @param int $port
      * @return mixed
      * @throws ConfigException
-     * @throws ClientException
      */
     public function performActionAndClose(
         string   $host,
@@ -88,7 +106,7 @@ class MikrotikAPI
     ): mixed
     {
         try {
-            $this->connect($host, $user, $pass, $port);
+            $this->connect(host: $host, user: $user, pass: $pass, port: $port);
             return $action($this->client);
         } catch (BadCredentialsException|ConnectException|QueryException $e) {
             throw ValidationException::withMessages([
@@ -103,15 +121,15 @@ class MikrotikAPI
         }
     }
 
-    /***
+    /**
+     * Obtiene la lista completa de perfiles PPPoE configurados en el router.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
-     * @throws QueryException
      */
     public function listPPPPoeProfiles(
         string $host,
@@ -126,7 +144,9 @@ class MikrotikAPI
         }, $port);
     }
 
-    /***
+    /**
+     * Ejecuta una consulta genérica a un endpoint de Mikrotik aplicando filtros opcionales (WHERE).
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
@@ -134,9 +154,7 @@ class MikrotikAPI
      * @param array $where
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
-     * @throws QueryException
      */
     public function executeQuery(
         string $host,
@@ -157,16 +175,16 @@ class MikrotikAPI
         }, $port);
     }
 
-    /***
+    /**
+     * Crea un nuevo usuario/secret de tipo PPP en el equipo Mikrotik.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param array $secretData
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
-     * @throws QueryException
      */
     public function createPPPSecret(
         string $host,
@@ -189,7 +207,9 @@ class MikrotikAPI
         }, $port);
     }
 
-    /***
+    /**
+     * Habilita o deshabilita un usuario/secret PPP en Mikrotik buscando primero por su nombre.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
@@ -197,7 +217,6 @@ class MikrotikAPI
      * @param bool $disable
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function togglePPPSecret(
@@ -228,7 +247,9 @@ class MikrotikAPI
         }, $port);
     }
 
-    /***
+    /**
+     * Actualiza la información de un usuario PPP especifíco según los datos provistos.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
@@ -236,7 +257,6 @@ class MikrotikAPI
      * @param array $newData
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function updatePPPSecret(
@@ -270,14 +290,77 @@ class MikrotikAPI
         }, $port);
     }
 
-    /***
+    /**
+     * Actualiza varios PPPoE Secrets en una única conexión RouterOS.
+     * Los que no se encuentran o fallen quedan registrados en el resultado bajo 'error', sin abortar el lote.
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param array $updates
+     * @param int $port
+     * @return array
+     * @throws ConfigException
+     */
+    public function updateMultiplePPPSecrets(
+        string $host,
+        string $user,
+        string $pass,
+        array  $updates,
+        int    $port = self::DEFAULT_PORT
+    ): array
+    {
+        return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($updates) {
+            $results = [];
+
+            foreach ($updates as $update) {
+                $secretName = $update['name'];
+
+                try {
+                    $queryFind = (new Query('/ppp/secret/print'))->where('name', $secretName);
+                    $found = $client->query($queryFind)->read();
+
+                    if (empty($found)) {
+                        Log::channel('cut-service')
+                            ->warning('PPPoE secret no encontrado:', ['secret' => $secretName]);
+                        $results[$secretName] = ['OK' => false, 'error' => "No se encontró el usuario {$secretName}."];
+                        continue;
+                    }
+
+                    $secretID = $found[0]['.id'];
+                    $queryUpdate = (new Query('/ppp/secret/set'))->equal('.id', $secretID);
+
+                    foreach ($update['data'] as $key => $value) {
+                        $queryUpdate->equal($key, $value);
+                    }
+
+                    $client->query($queryUpdate)->read();
+                    $results[$secretName] = ['OK' => true];
+
+                } catch (Throwable $e) {
+                    Log::channel('cut-service')->error('Error al actualizar a deuda a:', [
+                        'secret' => $secretName,
+                        'error' => $e->getMessage(),
+                        'exception' => get_class($e),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                    ]);
+                    $results[$secretName] = ['OK' => false, 'error' => $e->getMessage()];
+                }
+            }
+            return $results;
+        }, $port);
+    }
+
+    /**
+     * Elimina permanentemente un usuario PPP del equipo Mikrotik.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param string $secretName
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function deletePPPSecret(
@@ -304,17 +387,16 @@ class MikrotikAPI
         }, $port);
     }
 
-    /***
-     * Obtiene el PPP Secret por nombre
+    /**
+     * Obtiene los datos detallados de un usuario PPP específico mediante su nombre de usuario.
+     *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param string $secretName
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
-     * @throws QueryException
      */
     public function getPPPSecret(
         string $host,
@@ -328,14 +410,13 @@ class MikrotikAPI
     }
 
     /**
-     * Recursos del sistema: CPU, Memoria, Uptime, versión, etc.
+     * Obtiene información general de hardware y sistema del Mikrotik (CPU, Memoria RAM, Almacenamiento).
      *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function getSystemResources(string $host, string $user, string $pass, int $port = self::DEFAULT_PORT): array
@@ -346,7 +427,7 @@ class MikrotikAPI
     }
 
     /**
-     * Monitor de tráfico de una interfaz
+     * Monitorea de forma instantánea (una sola muestra) el tráfico de red o de una interfaz dada.
      *
      * @param string $host
      * @param string $user
@@ -354,7 +435,6 @@ class MikrotikAPI
      * @param string $interface
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function getInterfaceTraffic(
@@ -374,14 +454,13 @@ class MikrotikAPI
     }
 
     /**
-     * Listado de interfaces con sus contadores acumulados.
+     * Obtiene el listado de todas las interfaces del router y sus contadores acumulados de tráfico.
      *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function getInterfaces(string $host, string $user, string $pass, int $port = self::DEFAULT_PORT): array
@@ -392,14 +471,13 @@ class MikrotikAPI
     }
 
     /**
-     * Sesiones PPPoE activas.
+     * Obtiene el listado de todas las conexiones PPPoE/PPP que se encuentran activas en el momento.
      *
      * @param string $host
      * @param string $user
      * @param string $pass
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function getActivePPPConnections(
@@ -415,7 +493,8 @@ class MikrotikAPI
     }
 
     /**
-     * Busca una sesión PPPoE activa por usuario y trae los datos de la sesión, el perfil asignado y el tráfico actual.
+     * Busca los detalles unificados de un usuario PPPoE: su sesión activa, los datos de su secret
+     * y el consumo de tráfico dinámico actual.
      *
      * @param string $host
      * @param string $user
@@ -423,7 +502,6 @@ class MikrotikAPI
      * @param string $pppoeUser
      * @param int $port
      * @return array
-     * @throws ClientException
      * @throws ConfigException
      */
     public function getActiveConnectionDetails(

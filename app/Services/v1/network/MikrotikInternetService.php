@@ -6,39 +6,41 @@ use App\Libraries\MikrotikAPI;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
-class MikrotikInternetService
+readonly class MikrotikInternetService
 {
-    /***
+    /**
+     * Constructor del servicio.
+     *
      * @param MikrotikAPI $mikrotikAPI
      */
-    public function __construct(private MikrotikAPI $mikrotikAPI)
+    public function __construct(private readonly MikrotikAPI $mikrotikAPI)
     {
 
     }
 
-    /***
-     * Obtiene PPPoe User
+    /**
+     * Obtiene la información detallada de un usuario PPPoE específico.
+     *
      * @param array $server
      * @param string $username
      * @return array|null
-     * @throws \RouterOS\Exceptions\ClientException
      * @throws \RouterOS\Exceptions\ConfigException
-     * @throws \RouterOS\Exceptions\QueryException
      */
     public function getUser(array $server, string $username): ?array
     {
         $result = $this->mikrotikAPI->getPPPSecret(
-            $server['ip'],
-            $server['user'],
-            $server['secret'],
-            $username,
+            host: $server['ip'],
+            user: $server['user'],
+            pass: $server['secret'],
+            secretName: $username,
         );
 
         return $result[0] ?? null;
     }
 
-    /***
-     *  Create PPPoe Secrets
+    /**
+     * Crea un nuevo usuario PPPoE activo en el Mikrotik especificado.
+     *
      * @param array $server
      * @param array $profile
      * @param string $username
@@ -65,20 +67,21 @@ class MikrotikInternetService
 
         try {
             $this->mikrotikAPI->createPPPSecret(
-                $server['ip'],
-                $server['user'],
-                $server['secret'],
-                $data,
+                host: $server['ip'],
+                user: $server['user'],
+                pass: $server['secret'],
+                secretData: $data,
             );
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
-                'mikrotik' => "Error al crear el usuario PPPoe: {$e->getMessage()}",
+                'mikrotik' => "Error al crear el usuario PPPoE: {$e->getMessage()}",
             ]);
         }
     }
 
-    /***
-     * Update PPPoe Secrets
+    /**
+     * Actualiza los datos de un usuario PPPoE existente en el Mikrotik.
+     *
      * @param array $server
      * @param string $currentUsername
      * @param array $data
@@ -88,81 +91,107 @@ class MikrotikInternetService
     {
         try {
             $this->mikrotikAPI->updatePPPSecret(
-                $server['ip'],
-                $server['user'],
-                $server['secret'],
-                $currentUsername,
-                $data
+                host: $server['ip'],
+                user: $server['user'],
+                pass: $server['secret'],
+                currentName: $currentUsername,
+                newData: $data,
             );
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
-                'mikrotik' => "Error al actualizar el usuario PPPoe: {$e->getMessage()}",
+                'mikrotik' => "Error al actualizar el usuario PPPoE: {$e->getMessage()}",
             ]);
         }
     }
 
-    /***
-     * Enable/Disable PPPoe Secret
+    /**
+     * Actualiza varios usuarios PPPoE en un solo servidor usando una única conexión RouterOS.
+     *
+     * @param array $server
+     * @param array $updates
+     * @return array
+     */
+    public function updateMultipleUsers(array $server, array $updates): array
+    {
+        try {
+            return $this->mikrotikAPI->updateMultiplePPPSecrets(
+                host: $server['ip'],
+                user: $server['user'],
+                pass: $server['secret'],
+                updates: $updates,
+            );
+        } catch (Throwable $e) {
+            throw ValidationException::withMessages([
+                'mikrotik' => "Error al actualizar usuarios PPPoE en lote: {$e->getMessage()}",
+            ]);
+        }
+    }
+
+    /**
+     * Cambia el estado de activación (habilitado/deshabilitado) de un usuario PPPoE.
+     *
      * @param array $server
      * @param string $username
+     * @param bool $disable
      * @return void
      */
     public function toggleUser(array $server, string $username, bool $disable = true): void
     {
         try {
             $this->mikrotikAPI->togglePPPSecret(
-                $server['ip'],
-                $server['user'],
-                $server['secret'],
-                $username,
-                $disable
+                host: $server['ip'],
+                user: $server['user'],
+                pass: $server['secret'],
+                secretName: $username,
+                disable: $disable,
             );
-
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
-                'mikrotik' => "Error al activar/desactivar el usuario PPPoe: {$e->getMessage()}",
+                'mikrotik' => "Error al activar/desactivar el usuario PPPoE: {$e->getMessage()}",
             ]);
         }
     }
 
-    /***
+    /**
+     * Habilita el acceso a un usuario PPPoE en el Mikrotik.
+     *
      * @param array $server
      * @param string $username
      * @return void
-     * @throws \RouterOS\Exceptions\ClientException
      * @throws \RouterOS\Exceptions\ConfigException
      */
     public function enableUser(array $server, string $username): void
     {
         $this->mikrotikAPI->togglePPPSecret(
-            $server['ip'],
-            $server['user'],
-            $server['secret'],
-            $username,
-            false
+            host: $server['ip'],
+            user: $server['user'],
+            pass: $server['secret'],
+            secretName: $username,
+            disable: false,
         );
     }
 
-    /***
+    /**
+     * Deshabilita (suspende) el acceso a un usuario PPPoE en el Mikrotik.
+     *
      * @param array $server
      * @param string $username
      * @return void
-     * @throws \RouterOS\Exceptions\ClientException
      * @throws \RouterOS\Exceptions\ConfigException
      */
     public function disableUser(array $server, string $username): void
     {
         $this->mikrotikAPI->togglePPPSecret(
-            $server['ip'],
-            $server['user'],
-            $server['secret'],
-            $username,
-            true
+            host: $server['ip'],
+            user: $server['user'],
+            pass: $server['secret'],
+            secretName: $username,
         );
     }
 
-    /***
-     * Remove PPPoe Secret from Server
+    /**
+     * Elimina de forma definitiva un usuario PPPoE del Mikrotik.
+     *
      * @param array $server
      * @param string $username
      * @return void
@@ -171,19 +200,21 @@ class MikrotikInternetService
     {
         try {
             $this->mikrotikAPI->deletePPPSecret(
-                $server['ip'],
-                $server['user'],
-                $server['secret'],
-                $username,
+                host: $server['ip'],
+                user: $server['user'],
+                pass: $server['secret'],
+                secretName: $username,
             );
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
-                'mikrotik' => "Error al eliminar el usuario PPPoe: {$e->getMessage()}",
+                'mikrotik' => "Error al eliminar el usuario PPPoE: {$e->getMessage()}",
             ]);
         }
     }
 
-    /***
+    /**
+     * Obtiene la lista completa de perfiles PPPoE configurados en el Mikrotik.
+     *
      * @param array $server
      * @return array
      */
@@ -191,15 +222,14 @@ class MikrotikInternetService
     {
         try {
             return $this->mikrotikAPI->listPPPPoeProfiles(
-                $server['ip'],
-                $server['user'],
-                $server['secret'],
+                host: $server['ip'],
+                user: $server['user'],
+                pass: $server['secret'],
             );
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
-                'mikrotik' => "Error al listar los propietarios PPPoe.",
+                'mikrotik' => "Error al listar los propietarios PPPoE: {$e->getMessage()}",
             ]);
         }
     }
-
 }

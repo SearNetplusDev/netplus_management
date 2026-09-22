@@ -184,7 +184,13 @@ class InstallationStrategy extends BaseSupportStrategy
 
         ServiceInternetModel::query()->create($dto->toArray());
 
-        $this->mikrotikInternetService->createUser($server, $profile, $user, $password, $comment);
+        $this->mikrotikInternetService->createUser(
+            server: $server,
+            profile: $profile,
+            username: $user,
+            password: $password,
+            comment: $comment
+        );
     }
 
     /***
@@ -213,8 +219,7 @@ class InstallationStrategy extends BaseSupportStrategy
      * @param ServiceInternetModel $credentials
      * @return void
      */
-    private
-    function changeNode(array $oldServer, array $inputs, ServiceInternetModel $credentials): void
+    private function changeNode(array $oldServer, array $inputs, ServiceInternetModel $credentials): void
     {
         //  Eliminando credenciales de servidor anterior
         $this->mikrotikInternetService->deleteUser($oldServer, $credentials->user);

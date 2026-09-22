@@ -182,6 +182,11 @@ return [
             'path' => storage_path('logs/clients/expiring_contracts.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+        'cut-service' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/clients/pass_to_debt.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
     ],
 
 ];
