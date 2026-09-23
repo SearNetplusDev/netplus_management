@@ -4,6 +4,7 @@ namespace App\Jobs\monitoring;
 
 use App\Models\Infrastructure\Network\AuthServerModel;
 use App\Services\v1\monitoring\MikrotikConnectionSyncService;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -15,7 +16,7 @@ use Throwable;
 
 class SyncConnectionsJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
     public int $backoff = 60;
@@ -30,13 +31,17 @@ class SyncConnectionsJob implements ShouldQueue
     }
 
     /**
-     * Evita que se acumulen jobs si el anterior sigue corriendo.
+     * Evita que se acumulen jobs del mismo equipo si el anterior sigue corriendo, sin bloquear
+     * la sincronización concurrente de los demás equipos.
      *
      * @return array
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('mikrotik-sync-connections')->releaseAfter(30)];
+        return [
+            new WithoutOverlapping("mikrotik-sync-connections:{$this->authServerId}")
+                ->releaseAfter(30)
+        ];
     }
 
     /**
@@ -50,20 +55,25 @@ class SyncConnectionsJob implements ShouldQueue
      */
     public function handle(MikrotikConnectionSyncService $service): void
     {
+        if ($this->batch()?->cancelled()) {
+            return;
+        }
+
         $authServer = AuthServerModel::query()->findOrFail($this->authServerId);
         $synced = $service->sync(
             host: $authServer->ip,
             user: $authServer->user,
             pass: $authServer->secret,
-            port: (int)$authServer->port
+            port: (int)$authServer->port,
         );
+
         Log::channel('monitoring_sync')
-            ->info("[SUCCESS] Sincronización completada. Conexiones activas: " . count($synced));
+            ->info("[SUCCESS] [{$authServer->name}] Sincronización completada. Conexiones activas: " . count($synced));
     }
 
     public function failed(Throwable $e): void
     {
         Log::channel('monitoring_sync')
-            ->error("[FAILED] Fallo al sincronizar las conexiones activas: " . $e->getMessage());
+            ->error("[FAILED] [authServerId={$this->authServerId}] Fallo al sincronizar las conexiones activas: " . $e->getMessage());
     }
 }
