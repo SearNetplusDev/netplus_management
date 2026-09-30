@@ -16,6 +16,7 @@ Route::prefix('v1/dashboard')
             Route::get('active-services', [DashboardController::class, 'statsActiveServices']);
             Route::get('incomes', [DashboardController::class, 'statsMonthlyIncomes']);
             Route::get('pending-incomes', [DashboardController::class, 'statsMonthlyPendingIncomes']);
+            Route::get('daily-payments', [DashboardController::class, 'dailyPayments']);
         });
 
         Route::get('interfaces/traffic', [DashboardController::class, 'interfaceTraffic']);

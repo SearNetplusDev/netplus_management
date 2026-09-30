@@ -371,4 +371,41 @@ class DashboardController extends Controller
             ->orderByDesc('period_start')
             ->first();
     }
+
+    /**
+     * Suma de los pagos realizados por día, desde el inicio del mes en curso hasta el día de hoy.
+     *
+     * @return JsonResponse
+     */
+    public function dailyPayments(): JsonResponse
+    {
+        $startDate = Carbon::now()->startOfMonth();
+        $endDate = Carbon::now()->startOfDay();
+
+        $totals = PaymentModel::query()
+            ->where('status_id', CommonStatus::ACTIVE->value)
+            ->whereBetween('payment_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->selectRaw('DATE(payment_date) as day, SUM(amount) as total')
+            ->groupBy(DB::raw('DATE(payment_date)'))
+            ->pluck('total', 'day');
+
+        $categories = [];
+        $data = [];
+
+        foreach (CarbonPeriod::create($startDate, $endDate) as $date) {
+            $categories[] = $date->day;
+            $data[] = round((float)($totals[$date->toDateString()] ?? 0), 2);
+        }
+
+        return response()->json([
+            'categories' => $categories,
+            'series' => [
+                [
+                    'name' => 'Pagos recibidos',
+                    'data' => $data,
+                ],
+            ],
+            'total' => round(array_sum($data), 2),
+        ]);
+    }
 }
