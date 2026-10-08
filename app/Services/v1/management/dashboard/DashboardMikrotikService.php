@@ -39,9 +39,10 @@ class DashboardMikrotikService
         return Cache::remember($cacheKey, self::CACHE_TTL['resources'], function () use ($host, $user, $pass, $port) {
             $raw = $this->mkApi->getSystemResources($host, $user, $pass, $port);
 
-            if (empty($raw)) return [];
+            if (empty($raw['resources'])) return [];
 
-            $r = $raw[0];
+            $r = $raw['resources'][0];
+            $identity = $raw['identity'][0] ?? [];
             $totalMem = (int)$r['total-memory'];
             $freeMem = (int)$r['free-memory'];
             $usedMem = $totalMem - $freeMem;
@@ -61,6 +62,7 @@ class DashboardMikrotikService
                 ],
                 'storage' => $this->extractStorage($r),
                 'system' => [
+                    'name' => $identity['name'] ?? null,
                     'uptime' => $r['uptime'] ?? null,
                     'version' => $r['version'] ?? null,
                     'board_name' => $r['board-name'] ?? null,

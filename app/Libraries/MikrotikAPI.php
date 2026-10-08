@@ -419,12 +419,19 @@ class MikrotikAPI
      * @return array
      * @throws ConfigException
      */
-    public function getSystemResources(string $host, string $user, string $pass, int $port = self::DEFAULT_PORT): array
+    public function getSystemResources(
+        string $host, string $user, string $pass, int $port = self::DEFAULT_PORT): array
     {
         return $this->performActionAndClose($host, $user, $pass, function (Client $client) {
-            return $client->query(new Query('/system/resource/print'))->read();
+            $resources = $client->query(new Query('/system/resource/print'))->read();
+            $identity = $client->query(new Query('/system/identity/print'))->read();
+            return [
+                'resources' => $resources,
+                'identity' => $identity
+            ];
         }, $port);
     }
+
 
     /**
      * Monitorea de forma instantánea (una sola muestra) el tráfico de red o de una interfaz dada.

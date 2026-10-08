@@ -54,18 +54,35 @@ class DashboardController extends Controller
      */
     public function systemResources(DashboardMikrotikService $mikrotikService): JsonResponse
     {
-        $server = $this->authServer();
+//        $server = $this->authServer();
+//
+//        $data = $mikrotikService->getSystemResources(
+//            host: $server->ip,
+//            user: $server->user,
+//            pass: $server->secret,
+//            port: $server->port,
+//        );
+//
+//        return response()->json([
+//            'data' => new GeneralResource($data),
+//        ]);
 
-        $data = $mikrotikService->getSystemResources(
-            host: $server->ip,
-            user: $server->user,
-            pass: $server->secret,
-            port: $server->port,
-        );
+        $serverList = AuthServerModel::query()
+            ->where('status_id', CommonStatus::ACTIVE)
+            ->get();
+        $data = [];
+        foreach ($serverList as $server) {
+            $serverData = $mikrotikService->getSystemResources(
+                host: $server->ip,
+                user: $server->user,
+                pass: $server->secret,
+                port: $server->port,
+            );
 
-        return response()->json([
-            'data' => new GeneralResource($data),
-        ]);
+            $data[] = $serverData;
+        }
+
+        return response()->json(['data' => new GeneralResource($data)]);
     }
 
 
