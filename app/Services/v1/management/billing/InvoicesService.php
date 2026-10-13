@@ -16,7 +16,7 @@ use Carbon\Carbon;
 class InvoicesService
 {
     /***
-     * Retorna facturas de un cliente determinado en orden descendente
+     * Retorna facturas de un cliente determinado en orden descendente.
      * @param int $clientId
      * @return ClientModel
      */
@@ -234,6 +234,13 @@ class InvoicesService
         return Carbon::parse($invoice->period?->cutoff_date ?? $invoice->period?->due_date)->toDateString();
     }
 
+    /**
+     * Retorna las facturas pendientes de un cliente, indicando a qué grupo de pago pertenece
+     * cada una (servicio con facturación independiente o consolidada).
+     *
+     * @param int $clientId
+     * @return array
+     */
     public function clientPendingInvoices(int $clientId): array
     {
         $invoices = InvoiceModel::query()
@@ -247,6 +254,7 @@ class InvoicesService
             ])
             ->orderByRaw('CASE WHEN billing_status_id = ? THEN 0 ELSE 1 END', [BillingStatus::OVERDUE->value])
             ->orderBy('billing_period_id', 'ASC')
+            ->orderBy('id', 'ASC')
             ->get();
 
         return $invoices->map(function ($invoice) {
@@ -257,14 +265,17 @@ class InvoicesService
                 BillingStatus::ISSUED->value => BillingStatus::ISSUED->label(),
             };
             $total = number_format($invoice->balance_due, 2);
-            $independent = $invoice->items[0]->service?->separate_billing;
-
-            $address = (bool)$independent ? $invoice->items[0]->service?->address ?? '' : 'Servicios consolidados';
+            $service = $invoice->items->first()?->service;
+            $independent = (bool)$service?->separate_billing;
+            $address = $independent ? ($service->address ?? '') : 'Servicios consolidados';
+            $groupKey = $independent ? "service-{$service->id}" : 'consolidated';
 
             return [
                 'id' => $invoice->id,
                 'name' => "{$invoice->period?->name} ({$status}) - {$address} || $ {$total}",
                 'total' => $total,
+                'service_id' => $independent ? $service->id : null,
+                'group_key' => $groupKey,
             ];
         })->toArray();
     }

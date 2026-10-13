@@ -453,7 +453,7 @@ class MikrotikAPI
     ): array
     {
         return $this->performActionAndClose($host, $user, $pass, function (Client $client) use ($interface) {
-            $query = (new Query('/interface/monitor-traffic'))
+            $query = new Query('/interface/monitor-traffic')
                 ->equal('interface', $interface)
                 ->equal('once', '');
             return $client->query($query)->read();
