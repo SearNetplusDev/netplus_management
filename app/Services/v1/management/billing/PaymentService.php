@@ -9,44 +9,60 @@ use App\Models\Billing\DiscountModel;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Billing\PaymentModel;
 use App\Models\Services\ServiceModel;
+use App\Services\v1\management\billing\invoices\PaymentInvoiceValidator;
 use App\Services\v1\network\MikrotikInternetService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
-class PaymentService
+readonly class PaymentService
 {
-    public function __construct(private MikrotikInternetService $mikrotikInternetService)
+    public function __construct(
+        private readonly MikrotikInternetService $mikrotikInternetService,
+        private readonly PaymentInvoiceValidator $invoiceValidator,
+    )
     {
     }
 
     /***
-     *  Registra pago, activa navegación de ser necesario y actualiza estado financiero
+     *  Registra pago, activa navegación de ser necesario y actualiza estado financiero.
+     *
      * @param PaymentDTO $dto
      * @param array $invoiceIds
      * @param int|null $discountId
      * @return PaymentModel
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function createPayment(PaymentDTO $dto, array $invoiceIds, ?int $discountId = null): PaymentModel
     {
         return DB::transaction(function () use ($dto, $invoiceIds, $discountId) {
-            //  Facturas vencidas previas al pago
-            $overdueInvoicesBefore = InvoiceModel::query()
-                ->where([
-                    ['client_id', $dto->client_id],
-                    ['billing_status_id', BillingStatus::OVERDUE->value]
-                ])
-                ->pluck('id')
-                ->toArray();
-
             //  Calculando descuento sobre el monto de pago
             $discount = $discountId ? DiscountModel::query()->withoutGlobalScopes()->findOrFail($discountId) : null;
             $discountAmount = $discount ? $this->calculateDiscount($discount, $dto->amount) : 0;
 
             //  El monto efectivo a distribuir es el pago + descuento
             $totalAmountToDistribute = round($dto->amount + $discountAmount, 2);
+
+            /**
+             * Valida pertenencia, orden por servicio y monto; devuelve las facturas bloqueadas
+             * en orden canónico (el orden en que llegaron del cliente ya no importa).
+             */
+            $invoices = $this->invoiceValidator->validate(
+                clientId: $dto->client_id,
+                invoiceIds: $invoiceIds,
+                amountToDistribute: $totalAmountToDistribute,
+            );
+
+            //  Facturas vencidas previas al pago
+            $overdueInvoicesBefore = InvoiceModel::query()
+                ->where([
+                    ['client_id', $dto->client_id],
+                    ['billing_status_id', BillingStatus::OVERDUE->value],
+                ])
+                ->pluck('id')
+                ->toArray();
 
             //  Crea el pago con los datos del DTO + descuento
             $paymentData = array_merge($dto->toArray(), [
@@ -55,24 +71,10 @@ class PaymentService
             ]);
             $payment = PaymentModel::query()->create($paymentData);
 
-            $invoices = InvoiceModel::query()
-                ->whereIn('id', $invoiceIds)
-                ->lockForUpdate()
-                ->get()
-                ->keyBy('id');
-
             $invoicesUpdated = [];
             $remainingAmount = $totalAmountToDistribute;
 
-            foreach ($invoiceIds as $invoiceId) {
-                if (!isset($invoices[$invoiceId])) {
-                    throw ValidationException::withMessages([
-                        'invoices' => "La factura {$invoiceId} no existe.",
-                    ]);
-                }
-
-                $invoice = $invoices[$invoiceId];
-
+            foreach ($invoices as $invoice) {
                 //  Si la factura ya está pagada o no hay monto restante, continúa
                 if (round($invoice->balance_due, 2) <= 0 || $remainingAmount <= 0) continue;
 
@@ -95,17 +97,16 @@ class PaymentService
                     : ($invoice->paid_amount > 0
                         ? BillingStatus::PARTIALLY_PAID->value
                         : $invoice->billing_status_id);
-
                 $invoice->update([
                     'balance_due' => $newBalance,
                     'billing_status_id' => $newStatus,
                 ]);
 
-                $remainingAmount -= $amountToPay;
-                $invoicesUpdated[] = $invoiceId;
+                $remainingAmount = round($remainingAmount - $amountToPay, 2);
+                $invoicesUpdated[] = $invoice->id;
             }
 
-            //  Solo actualiza si se pagaron las facturas que estaban vencidas
+            //  Solo actualiza si se pagaron las facturas que están vencidas
             $paidOverdueInvoices = array_intersect($overdueInvoicesBefore, $invoicesUpdated);
 
             if (!empty($paidOverdueInvoices)) {
@@ -134,6 +135,7 @@ class PaymentService
     /***
      * Verifica y actualiza el acceso a internet por cada
      * servicio relacionado con las facturas pagadas
+     *
      * @param int $clientId
      * @return void
      */
@@ -251,7 +253,7 @@ class PaymentService
                 ->info("Servicio de internet activado para el servicio {$service->id}, cliente: {$service->client_id}", [
                     'pppoe_user' => $service->internet?->user ?? null,
                 ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::channel('reactivation')
                 ->error("Error al activar la navegación para el servicio {$service->id}: {$e->getMessage()}");
         }
@@ -293,7 +295,7 @@ class PaymentService
                 Log::channel('cuts')->info("Servicio {$service->id} deshabilitado por deuda");
             }
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::channel('cuts')
                 ->error("Error al desactivar la navegación para el servicio {$service->id}: " . $e->getMessage());
         }

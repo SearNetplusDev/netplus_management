@@ -9,6 +9,7 @@ use App\Enums\v1\General\BillingStatus;
 use App\Enums\v1\General\CommonStatus;
 use App\Models\Billing\InvoiceModel;
 use App\Models\Clients\ClientModel;
+use App\Services\v1\management\billing\invoices\InvoiceGrouping;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPDF;
 use Carbon\Carbon;
@@ -235,27 +236,16 @@ class InvoicesService
     }
 
     /**
-     * Retorna las facturas pendientes de un cliente, indicando a qué grupo de pago pertenece
-     * cada una (servicio con facturación independiente o consolidada).
+     * Retorna las facturas pagables de un cliente, indicando a qué grupo de pago pertenece cada una
+     * (servicio con facturación independiente o consolidado).
+     * Usa el mismo orden y agrupación que la validación del pago.
      *
      * @param int $clientId
      * @return array
      */
     public function clientPendingInvoices(int $clientId): array
     {
-        $invoices = InvoiceModel::query()
-            ->with(['period', 'items.service'])
-            ->where('client_id', $clientId)
-            ->whereIn('billing_status_id', [
-                BillingStatus::OVERDUE->value,
-                BillingStatus::PENDING->value,
-                BillingStatus::PARTIALLY_PAID->value,
-                BillingStatus::ISSUED->value
-            ])
-            ->orderByRaw('CASE WHEN billing_status_id = ? THEN 0 ELSE 1 END', [BillingStatus::OVERDUE->value])
-            ->orderBy('billing_period_id', 'ASC')
-            ->orderBy('id', 'ASC')
-            ->get();
+        $invoices = InvoiceGrouping::payableQuery($clientId)->get();
 
         return $invoices->map(function ($invoice) {
             $status = match ($invoice->billing_status_id) {
@@ -264,18 +254,17 @@ class InvoicesService
                 BillingStatus::PARTIALLY_PAID->value => BillingStatus::PARTIALLY_PAID->label(),
                 BillingStatus::ISSUED->value => BillingStatus::ISSUED->label(),
             };
-            $total = number_format($invoice->balance_due, 2);
+            $total = number_format($invoice->balance_due, 2, '.', '');
             $service = $invoice->items->first()?->service;
             $independent = (bool)$service?->separate_billing;
             $address = $independent ? ($service->address ?? '') : 'Servicios consolidados';
-            $groupKey = $independent ? "service-{$service->id}" : 'consolidated';
 
             return [
                 'id' => $invoice->id,
                 'name' => "{$invoice->period?->name} ({$status}) - {$address} || $ {$total}",
                 'total' => $total,
                 'service_id' => $independent ? $service->id : null,
-                'group_key' => $groupKey,
+                'group_key' => InvoiceGrouping::groupKey($invoice),
             ];
         })->toArray();
     }
