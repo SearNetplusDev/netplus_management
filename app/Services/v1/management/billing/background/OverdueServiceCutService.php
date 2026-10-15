@@ -15,49 +15,59 @@ class OverdueServiceCutService
 {
     /**
      * Procesa el corte de los servicios morosos.
-     * Agrupa los servicios a cortar por servidor de autenticación para abrir una única conexión Mikrotik
-     * por servidor en lugar de por servicio.
+     * Solo se cortan los servicios que aparecen en los ítems de las facturas vencidas (sin prórroga activa),
+     * de modo que un cliente con varios servicios no pierde los que están solventes.
+     * Agrupa los servicios a cortar por servidor de autenticación para abrir una única conexión Mikrotik por
+     * servidor en lugar de por servicio.
      *
      * @param bool $dryRun
      * @return void
      */
     public function cutOverdueClients(bool $dryRun = false): void
     {
-        Log::channel('cuts')->info('Iniciando corte de servicios morosos', [
-            'dryRun' => $dryRun,
-        ]);
+        Log::channel('cut-service')->info('Iniciando corte de servicios morosos', ['dryRun' => $dryRun]);
 
-        $servicesByNode = [];
+        $serviceByNode = [];
 
         InvoiceModel::query()
-            ->with('client.active_services.internet.profile')
+            ->with([
+                'items' => fn($q) => $q
+                    ->where('status_id', CommonStatus::ACTIVE->value)
+                    ->whereNotNull('service_id'),
+                'items.service' => fn($q) => $q->where('status_id', CommonStatus::ACTIVE->value),
+                'items.service.internet.profile',
+            ])
             ->where('billing_status_id', BillingStatus::OVERDUE->value)
             ->where('status_id', CommonStatus::ACTIVE->value)
             ->whereDoesntHave('extensions', function ($q) {
                 $q->where('status_id', CommonStatus::ACTIVE->value)
                     ->whereDate('extended_due_date', '>=', Carbon::now());
             })
-            ->chunkById(100, function ($invoices) use (&$servicesByNode) {
-                foreach ($invoices->groupBy('client_id') as $clientId => $clientInvoices) {
-                    $services = $clientInvoices->first()->client->active_services ?? collect();
+            ->chunkById(100, function ($invoices) use (&$serviceByNode) {
+                foreach ($invoices as $invoice) {
+                    foreach ($invoice->items as $item) {
+                        $service = $item->service;
 
-                    foreach ($services as $service) {
+                        //  Servicio inactivo/eliminado: no hay nada que cortar
+                        if (!$service) continue;
+
                         $credentials = $service->internet;
 
                         if (!$credentials) {
-                            Log::channel('cuts')->error("Credenciales no encontradas para el servicio {$service->id}", [
-                                'client_id' => $clientId,
-                            ]);
+                            Log::channel('cut-service')
+                                ->error("Credenciales no encontradas para el servicio {$service->id}", [
+                                    'client_id' => $invoice->client_id,
+                                    'invoice_id' => $invoice->id,
+                                ]);
                             continue;
                         }
 
                         /**
-                         * Indexando por service_id: si el mismo cliente cae en más de
-                         * un chunk (varias facturas vencidas), el servicio no se duplica.
+                         * Indexando por service_id: si el mismo servicio aparece en más de una factura
+                         * vencida (o en varios ítems), no se duplica
                          */
-
-                        $servicesByNode[$service->node_id][$service->id] = [
-                            'client_id' => $clientId,
+                        $serviceByNode[$service->node_id][$service->id] = [
+                            'client_id' => $invoice->client_id,
                             'user' => $credentials->user,
                             'debt_profile' => $credentials->profile?->debt_profile,
                         ];
@@ -65,23 +75,25 @@ class OverdueServiceCutService
                 }
             });
 
-        $totalServices = array_sum(array_map('count', $servicesByNode));
+        $totalServices = array_sum(array_map('count', $serviceByNode));
 
         if ($dryRun) {
-            Log::channel('cuts')->info("Dry-run: se cortarían los servicios", [
-                'total_services' => $totalServices,
-                'total_nodos' => count($servicesByNode),
-            ]);
+            Log::channel('cut-service')
+                ->info("Dry-run: se cortarían los servicios", [
+                    'total_services' => $totalServices,
+                    'total_nodos' => count($serviceByNode),
+                    'servicio_por_nodo' => array_map('array_keys', $serviceByNode),
+                ]);
             return;
         }
 
-        foreach ($servicesByNode as $nodeId => $services) {
+        foreach ($serviceByNode as $nodeId => $services) {
             $this->cutServicesOnNode(nodeId: (int)$nodeId, services: $services);
         }
 
-        Log::channel('cuts')->info("Finalizando corte de servicios morosos", [
-            'total_servicios' => $totalServices,
-            'total_nodos' => count($servicesByNode),
+        Log::channel('cut-service')->info("Finalizando corte de servicios morosos", [
+            'total_services' => $totalServices,
+            'total_nodos' => count($serviceByNode),
         ]);
     }
 
@@ -97,11 +109,12 @@ class OverdueServiceCutService
         try {
             $server = AuthServerModel::query()->findOrFail($nodeId)->toArray();
         } catch (Throwable $e) {
-            Log::channel('cuts')->error("No se pudo obtener el servidor Mikrotik para cortar servicios.", [
-                'node_id' => $nodeId,
-                'servicios' => array_keys($services),
-                'error' => $e->getMessage(),
-            ]);
+            Log::channel('cut-service')
+                ->error("No se pudo obtener el servidor Mikrotik para cortar servicios", [
+                    'node_id' => $nodeId,
+                    'servicios' => array_keys($services),
+                    'error' => $e->getMessage(),
+                ]);
             return;
         }
 
@@ -109,10 +122,20 @@ class OverdueServiceCutService
 
         foreach ($services as $serviceId => $data) {
             if (!$data['user']) {
-                Log::channel('cuts')->error("Usuario PPPoE vacío para servicio {$serviceId}, se omite", [
-                    'client_id' => $data['client_id'],
-                    'node_id' => $nodeId,
-                ]);
+                Log::channel('cut-service')
+                    ->error("Usuario PPPoE vacío para servicio {$serviceId}, se omite", [
+                        'client_id' => $data['client_id'],
+                        'node_id' => $nodeId,
+                    ]);
+                continue;
+            }
+
+            if (!$data['debt_profile']) {
+                Log::channel('cut-service')
+                    ->error("El perfil no tiene debt_profile configurado para servicio {$serviceId}, se omite", [
+                        'client_id' => $data['client_id'],
+                        'node_id' => $nodeId,
+                    ]);
                 continue;
             }
 
@@ -131,21 +154,22 @@ class OverdueServiceCutService
             $results = $mikrotikInternetService->updateMultipleUsers(server: $server, updates: $updates);
 
             foreach ($results as $username => $result) {
-                if (!($result['ok'] ?? false)) {
-                    Log::channel('cuts')->error("Error cortando servicio por morosidad", [
-                        'node_id' => $nodeId,
-                        'pppoe_user' => $username,
-                        'error' => $result['error'] ?? 'desconocido',
-                    ]);
+                if (!($result['OK'] ?? false)) {
+                    Log::channel('cut-service')
+                        ->error("Error conrtando servicio por morosidad", [
+                            'node_id' => $nodeId,
+                            'pppoe_user' => $username,
+                            'error' => $result['error'] ?? 'desconocido',
+                        ]);
                 }
             }
         } catch (Throwable $e) {
-            Log::channel('cuts')->error("Error al conectar con el nodo Mikrotik para el corte masivo", [
-                'node_id' => $nodeId,
-                'servicios' => array_keys($services),
-                'error' => $e->getMessage(),
-            ]);
+            Log::channel('cut-service')
+                ->error("Error al conectar con el nodo Mikrotik para el corte masivo", [
+                    'node_id' => $nodeId,
+                    'servicios' => array_keys($services),
+                    'error' => $e->getMessage(),
+                ]);
         }
     }
-
 }
