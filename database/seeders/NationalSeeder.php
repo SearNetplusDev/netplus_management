@@ -39,7 +39,8 @@ class NationalSeeder extends Seeder
                             'name' => $district['name'],
                             'state_id' => $state->id,
                             'municipality_id' => $mun->id,
-                            'status_id' => 1
+                            'status_id' => 1,
+                            'code' => $district['code']
                         ]);
                     }
                 }

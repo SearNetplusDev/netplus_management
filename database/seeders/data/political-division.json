@@ -10,16 +10,20 @@
                     "code": 13,
                     "districts": [
                         {
-                            "name": "Atiquizaya"
+                            "name": "Atiquizaya",
+                            "code": "03"
                         },
                         {
-                            "name": "El Refugio"
+                            "name": "El Refugio",
+                            "code": "05"
                         },
                         {
-                            "name": "San Lorenzo"
+                            "name": "San Lorenzo",
+                            "code": "09"
                         },
                         {
-                            "name": "Turín"
+                            "name": "Turín",
+                            "code": "12"
                         }
                     ]
                 },
@@ -28,16 +32,20 @@
                     "code": 14,
                     "districts": [
                         {
-                            "name": "Ahuachapán"
+                            "name": "Ahuachapán",
+                            "code": "01"
                         },
                         {
-                            "name": "Apaneca"
+                            "name": "Apaneca",
+                            "code": "02"
                         },
                         {
-                            "name": "Concepción de Ataco"
+                            "name": "Concepción de Ataco",
+                            "code": "04"
                         },
                         {
-                            "name": "Tacuba"
+                            "name": "Tacuba",
+                            "code": "11"
                         }
                     ]
                 },
@@ -46,16 +54,20 @@
                     "code": 15,
                     "districts": [
                         {
-                            "name": "Guaymango"
+                            "name": "Guaymango",
+                            "code": "06"
                         },
                         {
-                            "name": "Jujutla"
+                            "name": "Jujutla",
+                            "code": "07"
                         },
                         {
-                            "name": "San Francisco Menéndez"
+                            "name": "San Francisco Menéndez",
+                            "code": "08"
                         },
                         {
-                            "name": "San Pedro Puxtla"
+                            "name": "San Pedro Puxtla",
+                            "code": "10"
                         }
                     ]
                 }
@@ -71,16 +83,20 @@
                     "code": 14,
                     "districts": [
                         {
-                            "name": "Masahuat"
+                            "name": "Masahuat",
+                            "code": "06"
                         },
                         {
-                            "name": "Metapán"
+                            "name": "Metapán",
+                            "code": "07"
                         },
                         {
-                            "name": "Santa Rosa Guachipilín"
+                            "name": "Santa Rosa Guachipilín",
+                            "code": "11"
                         },
                         {
-                            "name": "Texistepeque"
+                            "name": "Texistepeque",
+                            "code": "13"
                         }
                     ]
                 },
@@ -89,7 +105,8 @@
                     "code": 15,
                     "districts": [
                         {
-                            "name": "Santa Ana"
+                            "name": "Santa Ana",
+                            "code": "10"
                         }
                     ]
                 },
@@ -98,10 +115,12 @@
                     "code": 16,
                     "districts": [
                         {
-                            "name": "Coatepeque"
+                            "name": "Coatepeque",
+                            "code": "02"
                         },
                         {
-                            "name": "El Congo"
+                            "name": "El Congo",
+                            "code": "04"
                         }
                     ]
                 },
@@ -110,22 +129,28 @@
                     "code": 17,
                     "districts": [
                         {
-                            "name": "Candelaria de la Frontera"
+                            "name": "Candelaria de la Frontera",
+                            "code": "01"
                         },
                         {
-                            "name": "Chalchuapa"
+                            "name": "Chalchuapa",
+                            "code": "03"
                         },
                         {
-                            "name": "El Porvenir"
+                            "name": "El Porvenir",
+                            "code": "05"
                         },
                         {
-                            "name": "San Antonio Pajonal"
+                            "name": "San Antonio Pajonal",
+                            "code": "08"
                         },
                         {
-                            "name": "San Sebastián Salitrillo"
+                            "name": "San Sebastián Salitrillo",
+                            "code": "09"
                         },
                         {
-                            "name": "Santiago de la Frontera"
+                            "name": "Santiago de la Frontera",
+                            "code": "12"
                         }
                     ]
                 }
@@ -141,16 +166,20 @@
                     "code": 17,
                     "districts": [
                         {
-                            "name": "Juayúa"
+                            "name": "Juayúa",
+                            "code": "07"
                         },
                         {
-                            "name": "Nahuizalco"
+                            "name": "Nahuizalco",
+                            "code": "08"
                         },
                         {
-                            "name": "Salcoatitán"
+                            "name": "Salcoatitán",
+                            "code": "10"
                         },
                         {
-                            "name": "Santa Catarina Masahuat"
+                            "name": "Santa Catarina Masahuat",
+                            "code": "13"
                         }
                     ]
                 },
@@ -159,19 +188,24 @@
                     "code": 18,
                     "districts": [
                         {
-                            "name": "Nahulingo"
+                            "name": "Nahulingo",
+                            "code": "09"
                         },
                         {
-                            "name": "San Antonio del Monte"
+                            "name": "San Antonio del Monte",
+                            "code": "11"
                         },
                         {
-                            "name": "Santo Domingo de Guzmán"
+                            "name": "Santo Domingo de Guzmán",
+                            "code": "14"
                         },
                         {
-                            "name": "Sonsonate"
+                            "name": "Sonsonate",
+                            "code": "15"
                         },
                         {
-                            "name": "Sonzacate"
+                            "name": "Sonzacate",
+                            "code": "16"
                         }
                     ]
                 },
@@ -180,22 +214,28 @@
                     "code": 19,
                     "districts": [
                         {
-                            "name": "Armenia"
+                            "name": "Armenia",
+                            "code": "02"
                         },
                         {
-                            "name": "Caluco"
+                            "name": "Caluco",
+                            "code": "03"
                         },
                         {
-                            "name": "Cuisnahuat"
+                            "name": "Cuisnahuat",
+                            "code": "04"
                         },
                         {
-                            "name": "Santa Isabel Ishuatán"
+                            "name": "Izalco",
+                            "code": "06"
                         },
                         {
-                            "name": "Izalco"
+                            "name": "San Julián",
+                            "code": "12"
                         },
                         {
-                            "name": "San Julián"
+                            "name": "Santa Isabel Ishuatán",
+                            "code": "05"
                         }
                     ]
                 },
@@ -204,7 +244,8 @@
                     "code": 20,
                     "districts": [
                         {
-                            "name": "Acajutla"
+                            "name": "Acajutla",
+                            "code": "01"
                         }
                     ]
                 }
@@ -220,13 +261,16 @@
                     "code": 34,
                     "districts": [
                         {
-                            "name": "Citalá"
+                            "name": "Citalá",
+                            "code": "04"
                         },
                         {
-                            "name": "La Palma"
+                            "name": "La Palma",
+                            "code": "12"
                         },
                         {
-                            "name": "San Ignacio"
+                            "name": "San Ignacio",
+                            "code": "25"
                         }
                     ]
                 },
@@ -235,34 +279,44 @@
                     "code": 35,
                     "districts": [
                         {
-                            "name": "Agua Caliente"
+                            "name": "Agua Caliente",
+                            "code": "01"
                         },
                         {
-                            "name": "Dulce Nombre de María"
+                            "name": "Dulce Nombre de María",
+                            "code": "08"
                         },
                         {
-                            "name": "El Paraíso"
+                            "name": "El Paraíso",
+                            "code": "10"
                         },
                         {
-                            "name": "La Reina"
+                            "name": "La Reina",
+                            "code": "13"
                         },
                         {
-                            "name": "Nueva Concepción"
+                            "name": "Nueva Concepción",
+                            "code": "16"
                         },
                         {
-                            "name": "San Fernando"
+                            "name": "San Fernando",
+                            "code": "22"
                         },
                         {
-                            "name": "San Francisco Morazán"
+                            "name": "San Francisco Morazán",
+                            "code": "24"
                         },
                         {
-                            "name": "San Rafael"
+                            "name": "San Rafael",
+                            "code": "31"
                         },
                         {
-                            "name": "Santa Rita"
+                            "name": "Santa Rita",
+                            "code": "32"
                         },
                         {
-                            "name": "Tejutla"
+                            "name": "Tejutla",
+                            "code": "33"
                         }
                     ]
                 },
@@ -271,64 +325,84 @@
                     "code": 36,
                     "districts": [
                         {
-                            "name": "Arcatao"
+                            "name": "Arcatao",
+                            "code": "02"
                         },
                         {
-                            "name": "Azacualpa"
+                            "name": "Azacualpa",
+                            "code": "03"
                         },
                         {
-                            "name": "Comalapa"
+                            "name": "Chalatenango",
+                            "code": "07"
                         },
                         {
-                            "name": "Concepción Quezaltepeque"
+                            "name": "Comalapa",
+                            "code": "05"
                         },
                         {
-                            "name": "Chalatenango"
+                            "name": "Concepción Quezaltepeque",
+                            "code": "06"
                         },
                         {
-                            "name": "El Carrizal"
+                            "name": "El Carrizal",
+                            "code": "09"
                         },
                         {
-                            "name": "La Laguna"
+                            "name": "La Laguna",
+                            "code": "11"
                         },
                         {
-                            "name": "Las Vueltas"
+                            "name": "Las Vueltas",
+                            "code": "14"
                         },
                         {
-                            "name": "Nombre de Jesús"
+                            "name": "Nombre de Jesús",
+                            "code": "15"
                         },
                         {
-                            "name": "Nueva Trinidad"
+                            "name": "Nueva Trinidad",
+                            "code": "17"
                         },
                         {
-                            "name": "Ojos de Agua"
+                            "name": "Ojos de Agua",
+                            "code": "18"
                         },
                         {
-                            "name": "Potonico"
+                            "name": "Potonico",
+                            "code": "19"
                         },
                         {
-                            "name": "San Antonio de la Cruz"
+                            "name": "San Antonio de la Cruz",
+                            "code": "20"
                         },
                         {
-                            "name": "San Antonio Los Ranchos"
+                            "name": "San Antonio Los Ranchos",
+                            "code": "21"
                         },
                         {
-                            "name": "San Francisco Lempa"
+                            "name": "San Francisco Lempa",
+                            "code": "23"
                         },
                         {
-                            "name": "San Isidro Labrador"
+                            "name": "San Isidro Labrador",
+                            "code": "26"
                         },
                         {
-                            "name": "San José Cancasque (Cancasque)"
+                            "name": "San José Cancasque (Cancasque)",
+                            "code": "27"
                         },
                         {
-                            "name": "San José Las Flores / Las Flores"
+                            "name": "San José Las Flores / Las Flores",
+                            "code": "28"
                         },
                         {
-                            "name": "San Luis del Carmen"
+                            "name": "San Luis del Carmen",
+                            "code": "29"
                         },
                         {
-                            "name": "San Miguel de Mercedes"
+                            "name": "San Miguel de Mercedes",
+                            "code": "30"
                         }
                     ]
                 }
@@ -344,13 +418,16 @@
                     "code": 23,
                     "districts": [
                         {
-                            "name": "Quezaltepeque"
+                            "name": "Quezaltepeque",
+                            "code": "12"
                         },
                         {
-                            "name": "San Matías"
+                            "name": "San Matías",
+                            "code": "16"
                         },
                         {
-                            "name": "San Pablo Tacachico"
+                            "name": "San Pablo Tacachico",
+                            "code": "17"
                         }
                     ]
                 },
@@ -359,10 +436,12 @@
                     "code": 24,
                     "districts": [
                         {
-                            "name": "Ciudad Arce"
+                            "name": "Ciudad Arce",
+                            "code": "02"
                         },
                         {
-                            "name": "San Juan Opico"
+                            "name": "San Juan Opico",
+                            "code": "15"
                         }
                     ]
                 },
@@ -371,19 +450,24 @@
                     "code": 25,
                     "districts": [
                         {
-                            "name": "Colón"
+                            "name": "Colón",
+                            "code": "03"
                         },
                         {
-                            "name": "Jayaque"
+                            "name": "Jayaque",
+                            "code": "07"
                         },
                         {
-                            "name": "Sacacoyo"
+                            "name": "Sacacoyo",
+                            "code": "13"
                         },
                         {
-                            "name": "Talnique"
+                            "name": "Talnique",
+                            "code": "19"
                         },
                         {
-                            "name": "Tepecoyo"
+                            "name": "Tepecoyo",
+                            "code": "21"
                         }
                     ]
                 },
@@ -392,19 +476,24 @@
                     "code": 26,
                     "districts": [
                         {
-                            "name": "Antiguo Cuscatlán"
+                            "name": "Antiguo Cuscatlán",
+                            "code": "01"
                         },
                         {
-                            "name": "Huizúcar"
+                            "name": "Huizúcar",
+                            "code": "06"
                         },
                         {
-                            "name": "Nuevo Cuscatlán"
+                            "name": "Nuevo Cuscatlán",
+                            "code": "10"
                         },
                         {
-                            "name": "San José Villanueva"
+                            "name": "San José Villanueva",
+                            "code": "14"
                         },
                         {
-                            "name": "Zaragoza"
+                            "name": "Zaragoza",
+                            "code": "22"
                         }
                     ]
                 },
@@ -413,19 +502,24 @@
                     "code": 27,
                     "districts": [
                         {
-                            "name": "Chiltiupán"
+                            "name": "Chiltiupán",
+                            "code": "05"
                         },
                         {
-                            "name": "Jicalapa"
+                            "name": "Jicalapa",
+                            "code": "08"
                         },
                         {
-                            "name": "La Libertad"
+                            "name": "La Libertad",
+                            "code": "09"
                         },
                         {
-                            "name": "Tamanique"
+                            "name": "Tamanique",
+                            "code": "18"
                         },
                         {
-                            "name": "Teotepeque"
+                            "name": "Teotepeque",
+                            "code": "20"
                         }
                     ]
                 },
@@ -434,10 +528,12 @@
                     "code": 28,
                     "districts": [
                         {
-                            "name": "Comasagua"
+                            "name": "Comasagua",
+                            "code": "04"
                         },
                         {
-                            "name": "Santa Tecla"
+                            "name": "Santa Tecla",
+                            "code": "11"
                         }
                     ]
                 }
@@ -453,13 +549,16 @@
                     "code": 20,
                     "districts": [
                         {
-                            "name": "Aguilares"
+                            "name": "Aguilares",
+                            "code": "01"
                         },
                         {
-                            "name": "El Paisnal"
+                            "name": "El Paisnal",
+                            "code": "05"
                         },
                         {
-                            "name": "Guazapa"
+                            "name": "Guazapa",
+                            "code": "06"
                         }
                     ]
                 },
@@ -468,10 +567,12 @@
                     "code": 21,
                     "districts": [
                         {
-                            "name": "Apopa"
+                            "name": "Apopa",
+                            "code": "02"
                         },
                         {
-                            "name": "Nejapa"
+                            "name": "Nejapa",
+                            "code": "09"
                         }
                     ]
                 },
@@ -480,16 +581,20 @@
                     "code": 22,
                     "districts": [
                         {
-                            "name": "Ilopango"
+                            "name": "Ilopango",
+                            "code": "07"
                         },
                         {
-                            "name": "San Martín"
+                            "name": "San Martín",
+                            "code": "13"
                         },
                         {
-                            "name": "Soyapango"
+                            "name": "Soyapango",
+                            "code": "17"
                         },
                         {
-                            "name": "Tonacatepeque"
+                            "name": "Tonacatepeque",
+                            "code": "18"
                         }
                     ]
                 },
@@ -498,19 +603,24 @@
                     "code": 23,
                     "districts": [
                         {
-                            "name": "Ayutuxtepeque"
+                            "name": "Ayutuxtepeque",
+                            "code": "03"
                         },
                         {
-                            "name": "Cuscatancingo"
+                            "name": "Ciudad Delgado",
+                            "code": "19"
                         },
                         {
-                            "name": "Mejicanos"
+                            "name": "Cuscatancingo",
+                            "code": "04"
                         },
                         {
-                            "name": "San Salvador"
+                            "name": "Mejicanos",
+                            "code": "08"
                         },
                         {
-                            "name": "Ciudad Delgado"
+                            "name": "San Salvador",
+                            "code": "14"
                         }
                     ]
                 },
@@ -519,19 +629,24 @@
                     "code": 24,
                     "districts": [
                         {
-                            "name": "Panchimalco"
+                            "name": "Panchimalco",
+                            "code": "10"
                         },
                         {
-                            "name": "Rosario de Mora"
+                            "name": "Rosario de Mora",
+                            "code": "11"
                         },
                         {
-                            "name": "San Marcos"
+                            "name": "San Marcos",
+                            "code": "12"
                         },
                         {
-                            "name": "Santiago Texacuangos"
+                            "name": "Santiago Texacuangos",
+                            "code": "15"
                         },
                         {
-                            "name": "Santo Tomás"
+                            "name": "Santo Tomás",
+                            "code": "16"
                         }
                     ]
                 }
@@ -547,19 +662,24 @@
                     "code": 17,
                     "districts": [
                         {
-                            "name": "Oratorio de Concepción"
+                            "name": "Oratorio de Concepción",
+                            "code": "06"
                         },
                         {
-                            "name": "San Bartolomé Perulapía"
+                            "name": "San Bartolomé Perulapía",
+                            "code": "07"
                         },
                         {
-                            "name": "San José Guayabal"
+                            "name": "San José Guayabal",
+                            "code": "09"
                         },
                         {
-                            "name": "San Pedro Perulapán"
+                            "name": "San Pedro Perulapán",
+                            "code": "10"
                         },
                         {
-                            "name": "Suchitoto"
+                            "name": "Suchitoto",
+                            "code": "15"
                         }
                     ]
                 },
@@ -568,37 +688,48 @@
                     "code": 18,
                     "districts": [
                         {
-                            "name": "Candelaria"
+                            "name": "Candelaria",
+                            "code": "01"
                         },
                         {
-                            "name": "Cojutepeque"
+                            "name": "Cojutepeque",
+                            "code": "02"
                         },
                         {
-                            "name": "El Carmen"
+                            "name": "El Carmen",
+                            "code": "03"
                         },
                         {
-                            "name": "El Rosario"
+                            "name": "El Rosario",
+                            "code": "04"
                         },
                         {
-                            "name": "Monte San Juan"
+                            "name": "Monte San Juan",
+                            "code": "05"
                         },
                         {
-                            "name": "San Cristóbal"
+                            "name": "San Cristóbal",
+                            "code": "08"
                         },
                         {
-                            "name": "San Rafael Cedros"
+                            "name": "San Rafael Cedros",
+                            "code": "11"
                         },
                         {
-                            "name": "San Ramón"
+                            "name": "San Ramón",
+                            "code": "12"
                         },
                         {
-                            "name": "Santa Cruz Analquito"
+                            "name": "Santa Cruz Analquito",
+                            "code": "13"
                         },
                         {
-                            "name": "Santa Cruz Michapa"
+                            "name": "Santa Cruz Michapa",
+                            "code": "14"
                         },
                         {
-                            "name": "Tenancingo"
+                            "name": "Tenancingo",
+                            "code": "16"
                         }
                     ]
                 }
@@ -614,25 +745,32 @@
                     "code": 23,
                     "districts": [
                         {
-                            "name": "Cuyultitán"
+                            "name": "Cuyultitán",
+                            "code": "01"
                         },
                         {
-                            "name": "Olocuilta"
+                            "name": "Olocuilta",
+                            "code": "05"
                         },
                         {
-                            "name": "San Francisco Chinameca"
+                            "name": "San Francisco Chinameca",
+                            "code": "09"
                         },
                         {
-                            "name": "San Juan Talpa"
+                            "name": "San Juan Talpa",
+                            "code": "11"
                         },
                         {
-                            "name": "San Luis Talpa"
+                            "name": "San Luis Talpa",
+                            "code": "13"
                         },
                         {
-                            "name": "San Pedro Masahuat"
+                            "name": "San Pedro Masahuat",
+                            "code": "15"
                         },
                         {
-                            "name": "Tapalhuaca"
+                            "name": "Tapalhuaca",
+                            "code": "20"
                         }
                     ]
                 },
@@ -641,40 +779,52 @@
                     "code": 24,
                     "districts": [
                         {
-                            "name": "El Rosario"
+                            "name": "El Rosario",
+                            "code": "02"
                         },
                         {
-                            "name": "Jerusalén"
+                            "name": "Jerusalén",
+                            "code": "03"
                         },
                         {
-                            "name": "Mercedes La Ceiba"
+                            "name": "Mercedes La Ceiba",
+                            "code": "04"
                         },
                         {
-                            "name": "Paraíso de Osorio"
+                            "name": "Paraíso de Osorio",
+                            "code": "06"
                         },
                         {
-                            "name": "San Antonio Masahuat"
+                            "name": "San Antonio Masahuat",
+                            "code": "07"
                         },
                         {
-                            "name": "San Emigdio"
+                            "name": "San Emigdio",
+                            "code": "08"
                         },
                         {
-                            "name": "San Juan Tepezontes"
+                            "name": "San Juan Tepezontes",
+                            "code": "12"
                         },
                         {
-                            "name": "San Miguel Tepezontes"
+                            "name": "San Luis La Herradura",
+                            "code": "22"
                         },
                         {
-                            "name": "San Pedro Nonualco"
+                            "name": "San Miguel Tepezontes",
+                            "code": "14"
                         },
                         {
-                            "name": "Santa María Ostuma"
+                            "name": "San Pedro Nonualco",
+                            "code": "16"
                         },
                         {
-                            "name": "Santiago Nonualco"
+                            "name": "Santa María Ostuma",
+                            "code": "18"
                         },
                         {
-                            "name": "San Luis La Herradura"
+                            "name": "Santiago Nonualco",
+                            "code": "19"
                         }
                     ]
                 },
@@ -683,13 +833,16 @@
                     "code": 25,
                     "districts": [
                         {
-                            "name": "San Juan Nonualco"
+                            "name": "San Juan Nonualco",
+                            "code": "10"
                         },
                         {
-                            "name": "San Rafael Obrajuelo"
+                            "name": "San Rafael Obrajuelo",
+                            "code": "17"
                         },
                         {
-                            "name": "Zacatecoluca"
+                            "name": "Zacatecoluca",
+                            "code": "21"
                         }
                     ]
                 }
@@ -705,16 +858,20 @@
                     "code": 10,
                     "districts": [
                         {
-                            "name": "Cinquera"
+                            "name": "Cinquera",
+                            "code": "01"
                         },
                         {
-                            "name": "Ilobasco"
+                            "name": "Ilobasco",
+                            "code": "03"
                         },
                         {
-                            "name": "Jutiapa"
+                            "name": "Jutiapa",
+                            "code": "04"
                         },
                         {
-                            "name": "Tejutepeque"
+                            "name": "Tejutepeque",
+                            "code": "07"
                         }
                     ]
                 },
@@ -723,19 +880,24 @@
                     "code": 11,
                     "districts": [
                         {
-                            "name": "Guacotecti"
+                            "name": "Dolores",
+                            "code": "09"
                         },
                         {
-                            "name": "San Isidro"
+                            "name": "Guacotecti",
+                            "code": "02"
                         },
                         {
-                            "name": "Sensuntepeque"
+                            "name": "San Isidro",
+                            "code": "05"
                         },
                         {
-                            "name": "Victoria"
+                            "name": "Sensuntepeque",
+                            "code": "06"
                         },
                         {
-                            "name": "Dolores"
+                            "name": "Victoria",
+                            "code": "08"
                         }
                     ]
                 }
@@ -751,25 +913,32 @@
                     "code": 14,
                     "districts": [
                         {
-                            "name": "Apastepeque"
+                            "name": "Apastepeque",
+                            "code": "01"
                         },
                         {
-                            "name": "Santa Clara"
+                            "name": "San Esteban Catarina",
+                            "code": "06"
                         },
                         {
-                            "name": "Santo Domingo"
+                            "name": "San Ildefonso",
+                            "code": "07"
                         },
                         {
-                            "name": "San Esteban Catarina"
+                            "name": "San Lorenzo",
+                            "code": "08"
                         },
                         {
-                            "name": "San Ildefonso"
+                            "name": "San Sebastián",
+                            "code": "09"
                         },
                         {
-                            "name": "San Lorenzo"
+                            "name": "Santa Clara",
+                            "code": "04"
                         },
                         {
-                            "name": "San Sebastián"
+                            "name": "Santo Domingo",
+                            "code": "05"
                         }
                     ]
                 },
@@ -778,22 +947,28 @@
                     "code": 15,
                     "districts": [
                         {
-                            "name": "Guadalupe"
+                            "name": "Guadalupe",
+                            "code": "02"
                         },
                         {
-                            "name": "San Cayetano Istepeque"
+                            "name": "San Cayetano Istepeque",
+                            "code": "03"
                         },
                         {
-                            "name": "San Vicente"
+                            "name": "San Vicente",
+                            "code": "10"
                         },
                         {
-                            "name": "Tecoluca"
+                            "name": "Tecoluca",
+                            "code": "11"
                         },
                         {
-                            "name": "Tepetitán"
+                            "name": "Tepetitán",
+                            "code": "12"
                         },
                         {
-                            "name": "Verapaz"
+                            "name": "Verapaz",
+                            "code": "13"
                         }
                     ]
                 }
@@ -809,31 +984,40 @@
                     "code": 24,
                     "districts": [
                         {
-                            "name": "Alegría"
+                            "name": "Alegría",
+                            "code": "01"
                         },
                         {
-                            "name": "Berlín"
+                            "name": "Berlín",
+                            "code": "02"
                         },
                         {
-                            "name": "El Triunfo"
+                            "name": "El Triunfo",
+                            "code": "05"
                         },
                         {
-                            "name": "Estanzuelas"
+                            "name": "Estanzuelas",
+                            "code": "07"
                         },
                         {
-                            "name": "Jucuapa"
+                            "name": "Jucuapa",
+                            "code": "09"
                         },
                         {
-                            "name": "Mercedes Umaña"
+                            "name": "Mercedes Umaña",
+                            "code": "11"
                         },
                         {
-                            "name": "Nueva Granada"
+                            "name": "Nueva Granada",
+                            "code": "12"
                         },
                         {
-                            "name": "San Buenaventura"
+                            "name": "San Buenaventura",
+                            "code": "16"
                         },
                         {
-                            "name": "Santiago de María"
+                            "name": "Santiago de María",
+                            "code": "21"
                         }
                     ]
                 },
@@ -842,34 +1026,44 @@
                     "code": 25,
                     "districts": [
                         {
-                            "name": "California"
+                            "name": "California",
+                            "code": "03"
                         },
                         {
-                            "name": "Concepción Batres"
+                            "name": "Concepción Batres",
+                            "code": "04"
                         },
                         {
-                            "name": "Ereguayquín"
+                            "name": "Ereguayquín",
+                            "code": "06"
                         },
                         {
-                            "name": "Jucuarán"
+                            "name": "Jucuarán",
+                            "code": "10"
                         },
                         {
-                            "name": "Ozatlán"
+                            "name": "Ozatlán",
+                            "code": "13"
                         },
                         {
-                            "name": "San Dionisio"
+                            "name": "San Dionisio",
+                            "code": "17"
                         },
                         {
-                            "name": "Santa Elena"
+                            "name": "Santa Elena",
+                            "code": "18"
                         },
                         {
-                            "name": "Santa María"
+                            "name": "Santa María",
+                            "code": "20"
                         },
                         {
-                            "name": "Tecapán"
+                            "name": "Tecapán",
+                            "code": "22"
                         },
                         {
-                            "name": "Usulután"
+                            "name": "Usulután",
+                            "code": "23"
                         }
                     ]
                 },
@@ -878,16 +1072,20 @@
                     "code": 26,
                     "districts": [
                         {
-                            "name": "Jiquilisco"
+                            "name": "Jiquilisco",
+                            "code": "08"
                         },
                         {
-                            "name": "Puerto El Triunfo"
+                            "name": "Puerto El Triunfo",
+                            "code": "14"
                         },
                         {
-                            "name": "San Agustín"
+                            "name": "San Agustín",
+                            "code": "15"
                         },
                         {
-                            "name": "San Francisco Javier"
+                            "name": "San Francisco Javier",
+                            "code": "19"
                         }
                     ]
                 }
@@ -903,28 +1101,36 @@
                     "code": 21,
                     "districts": [
                         {
-                            "name": "Carolina"
+                            "name": "Carolina",
+                            "code": "01"
                         },
                         {
-                            "name": "Ciudad Barrios"
+                            "name": "Chapeltique",
+                            "code": "04"
                         },
                         {
-                            "name": "Chapeltique"
+                            "name": "Ciudad Barrios",
+                            "code": "02"
                         },
                         {
-                            "name": "Nuevo Edén de San Juan"
+                            "name": "Nuevo Edén de San Juan",
+                            "code": "11"
                         },
                         {
-                            "name": "San Antonio del Mosco"
+                            "name": "San Antonio del Mosco",
+                            "code": "13"
                         },
                         {
-                            "name": "San Gerardo"
+                            "name": "San Gerardo",
+                            "code": "14"
                         },
                         {
-                            "name": "San Luis de la Reina"
+                            "name": "San Luis de la Reina",
+                            "code": "16"
                         },
                         {
-                            "name": "Sesori"
+                            "name": "Sesori",
+                            "code": "19"
                         }
                     ]
                 },
@@ -933,22 +1139,28 @@
                     "code": 22,
                     "districts": [
                         {
-                            "name": "Comacarán"
+                            "name": "Chirilagua",
+                            "code": "06"
                         },
                         {
-                            "name": "Chirilagua"
+                            "name": "Comacarán",
+                            "code": "03"
                         },
                         {
-                            "name": "Moncagua"
+                            "name": "Moncagua",
+                            "code": "09"
                         },
                         {
-                            "name": "Quelepa"
+                            "name": "Quelepa",
+                            "code": "12"
                         },
                         {
-                            "name": "San Miguel"
+                            "name": "San Miguel",
+                            "code": "17"
                         },
                         {
-                            "name": "Uluazapa"
+                            "name": "Uluazapa",
+                            "code": "20"
                         }
                     ]
                 },
@@ -957,22 +1169,28 @@
                     "code": 23,
                     "districts": [
                         {
-                            "name": "Chinameca"
+                            "name": "Chinameca",
+                            "code": "05"
                         },
                         {
-                            "name": "El Tránsito"
+                            "name": "El Tránsito",
+                            "code": "07"
                         },
                         {
-                            "name": "Lolotique"
+                            "name": "Lolotique",
+                            "code": "08"
                         },
                         {
-                            "name": "Nueva Guadalupe"
+                            "name": "Nueva Guadalupe",
+                            "code": "10"
                         },
                         {
-                            "name": "San Jorge"
+                            "name": "San Jorge",
+                            "code": "15"
                         },
                         {
-                            "name": "San Rafael Oriente"
+                            "name": "San Rafael Oriente",
+                            "code": "18"
                         }
                     ]
                 }
@@ -988,37 +1206,48 @@
                     "code": 27,
                     "districts": [
                         {
-                            "name": "Arambala"
+                            "name": "Arambala",
+                            "code": "01"
                         },
                         {
-                            "name": "Cacaopera"
+                            "name": "Cacaopera",
+                            "code": "02"
                         },
                         {
-                            "name": "Corinto"
+                            "name": "Corinto",
+                            "code": "03"
                         },
                         {
-                            "name": "El Rosario"
+                            "name": "El Rosario",
+                            "code": "07"
                         },
                         {
-                            "name": "Joateca"
+                            "name": "Joateca",
+                            "code": "10"
                         },
                         {
-                            "name": "Jocoaitique"
+                            "name": "Jocoaitique",
+                            "code": "11"
                         },
                         {
-                            "name": "Meanguera"
+                            "name": "Meanguera",
+                            "code": "14"
                         },
                         {
-                            "name": "Perquín"
+                            "name": "Perquín",
+                            "code": "16"
                         },
                         {
-                            "name": "San Fernando"
+                            "name": "San Fernando",
+                            "code": "18"
                         },
                         {
-                            "name": "San Isidro"
+                            "name": "San Isidro",
+                            "code": "20"
                         },
                         {
-                            "name": "Torola"
+                            "name": "Torola",
+                            "code": "24"
                         }
                     ]
                 },
@@ -1027,49 +1256,64 @@
                     "code": 28,
                     "districts": [
                         {
-                            "name": "Chilanga"
+                            "name": "Chilanga",
+                            "code": "04"
                         },
                         {
-                            "name": "Delicias de Concepción"
+                            "name": "Delicias de Concepción",
+                            "code": "05"
                         },
                         {
-                            "name": "El Divisadero"
+                            "name": "El Divisadero",
+                            "code": "06"
                         },
                         {
-                            "name": "Gualococti"
+                            "name": "Gualococti",
+                            "code": "08"
                         },
                         {
-                            "name": "Guatajiagua"
+                            "name": "Guatajiagua",
+                            "code": "09"
                         },
                         {
-                            "name": "Jocoro"
+                            "name": "Jocoro",
+                            "code": "12"
                         },
                         {
-                            "name": "Lolotiquillo"
+                            "name": "Lolotiquillo",
+                            "code": "13"
                         },
                         {
-                            "name": "Osicala"
+                            "name": "Osicala",
+                            "code": "15"
                         },
                         {
-                            "name": "San Carlos"
+                            "name": "San Carlos",
+                            "code": "17"
                         },
                         {
-                            "name": "San Francisco Gotera"
+                            "name": "San Francisco Gotera",
+                            "code": "19"
                         },
                         {
-                            "name": "San Simón"
+                            "name": "San Simón",
+                            "code": "21"
                         },
                         {
-                            "name": "Sensembra"
+                            "name": "Sensembra",
+                            "code": "22"
                         },
                         {
-                            "name": "Sociedad"
+                            "name": "Sociedad",
+                            "code": "23"
                         },
                         {
-                            "name": "Yamabal"
+                            "name": "Yamabal",
+                            "code": "25"
                         },
                         {
-                            "name": "Yoloaiquín"
+                            "name": "Yoloaiquín",
+                            "code": "26"
                         }
                     ]
                 }
@@ -1085,34 +1329,44 @@
                     "code": 19,
                     "districts": [
                         {
-                            "name": "Anamorós"
+                            "name": "Anamorós",
+                            "code": "01"
                         },
                         {
-                            "name": "Bolívar"
+                            "name": "Bolívar",
+                            "code": "02"
                         },
                         {
-                            "name": "Concepción de Oriente"
+                            "name": "Concepción de Oriente",
+                            "code": "03"
                         },
                         {
-                            "name": "El Sauce"
+                            "name": "El Sauce",
+                            "code": "06"
                         },
                         {
-                            "name": "Lilisque"
+                            "name": "Lislique",
+                            "code": "09"
                         },
                         {
-                            "name": "Nueva Esparta"
+                            "name": "Nueva Esparta",
+                            "code": "11"
                         },
                         {
-                            "name": "Pasaquina"
+                            "name": "Pasaquina",
+                            "code": "12"
                         },
                         {
-                            "name": "Polorós"
+                            "name": "Polorós",
+                            "code": "13"
                         },
                         {
-                            "name": "San José"
+                            "name": "San José",
+                            "code": "15"
                         },
                         {
-                            "name": "Santa Rosa de Lima"
+                            "name": "Santa Rosa de Lima",
+                            "code": "16"
                         }
                     ]
                 },
@@ -1121,28 +1375,36 @@
                     "code": 20,
                     "districts": [
                         {
-                            "name": "Conchagua"
+                            "name": "Conchagua",
+                            "code": "04"
                         },
                         {
-                            "name": "El Carmen"
+                            "name": "El Carmen",
+                            "code": "05"
                         },
                         {
-                            "name": "Intipucá"
+                            "name": "Intipucá",
+                            "code": "07"
                         },
                         {
-                            "name": "La Unión"
+                            "name": "La Unión",
+                            "code": "08"
                         },
                         {
-                            "name": "Meanguera del Golfo"
+                            "name": "Meanguera del Golfo",
+                            "code": "10"
                         },
                         {
-                            "name": "San Alejo"
+                            "name": "San Alejo",
+                            "code": "14"
                         },
                         {
-                            "name": "Yayantique"
+                            "name": "Yayantique",
+                            "code": "17"
                         },
                         {
-                            "name": "Yucuaiquín"
+                            "name": "Yucuaiquín",
+                            "code": "18"
                         }
                     ]
                 }
