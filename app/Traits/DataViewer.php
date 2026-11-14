@@ -3,6 +3,9 @@
 namespace App\Traits;
 
 use App\Libraries\CustomQueryBuilder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\JoinClause;
 
 trait DataViewer
 {
@@ -29,7 +32,45 @@ trait DataViewer
             'f.*.query_1' => 'required',
             'f.*.query_2' => 'required_if:f.*.operator,between,not_between'
         ])->validate();
-        return (new CustomQueryBuilder)->apply($query, $data);
+
+        $query = (new CustomQueryBuilder)->apply($query, $data);
+        return $this->applyOrder($query, $data);
+    }
+
+    protected function applyOrder($query, array $data)
+    {
+        if (empty($data['order_column'])) return $query;
+
+        $column = $data['order_column'];
+        $direction = $data['order_direction'] ?? 'asc';
+
+        //  Descarta cualquier orderBy previo
+        $query->reorder();
+
+        // Columna propia de la tabla
+        if (!str_contains($column, '.')) {
+            return $query->orderBy($this->getTable() . '.' . $column, $direction);
+        }
+
+        [$relationName, $relatedColumn] = explode('.', $column, 2);
+
+        if (!method_exists($this, $relationName)) return $query;
+
+        $relation = $this->$relationName();
+
+        if (!$relation instanceof BelongsTo) return $query;
+
+        $related = $relation->getRelated();
+
+        $subQuery = $related->newQuery()
+            ->select($related->getTable() . '.' . $relatedColumn)
+            ->whereColumn(
+                $related->getTable() . '.' . $relation->getOwnerKeyName(),
+                $this->getTable() . '.' . $relation->getForeignKeyName()
+            )
+            ->limit(1);
+
+        return $query->orderBy($subQuery, $direction);
     }
 
     protected function columnList(array $columns): string

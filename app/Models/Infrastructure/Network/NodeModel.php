@@ -94,11 +94,13 @@ class NodeModel extends Model
         'prefix',
         'nc',
         'status_id',
+        'auth_server.name'
     ];
     protected array $orderable = [
         'id',
         'name',
         'status_id',
+        'auth_server.name',
     ];
     protected $appends = ['status'];
 

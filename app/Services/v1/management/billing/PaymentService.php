@@ -14,7 +14,6 @@ use App\Services\v1\network\MikrotikInternetService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 readonly class PaymentService
@@ -78,6 +77,9 @@ readonly class PaymentService
                 //  Si la factura ya está pagada o no hay monto restante, continúa
                 if (round($invoice->balance_due, 2) <= 0 || $remainingAmount <= 0) continue;
 
+                //  Estado previo, para no perder el estado "vencido" en pagos parciales
+                $wasOverdue = $invoice->billing_status_id == BillingStatus::OVERDUE->value;
+
                 //  Calcula cuanto se puede pagar de esa factura
                 $maxPayable = round($invoice->balance_due, 2);
                 $amountToPay = round(min($remainingAmount, $maxPayable), 2);
@@ -92,11 +94,14 @@ readonly class PaymentService
                 $newBalance = round(max($invoice->total_amount - $invoice->paid_amount, 0), 2);
 
                 //  Estado de la factura
-                $newStatus = $newBalance <= 0
-                    ? BillingStatus::PAID->value
-                    : ($invoice->paid_amount > 0
-                        ? BillingStatus::PARTIALLY_PAID->value
-                        : $invoice->billing_status_id);
+                if ($newBalance <= 0) {
+                    $newStatus = BillingStatus::PAID->value;
+                } elseif ($wasOverdue) {
+                    $newStatus = BillingStatus::OVERDUE->value;
+                } else {
+                    $newStatus = BillingStatus::PARTIALLY_PAID->value;
+                }
+
                 $invoice->update([
                     'balance_due' => $newBalance,
                     'billing_status_id' => $newStatus,
@@ -110,9 +115,13 @@ readonly class PaymentService
             $paidOverdueInvoices = array_intersect($overdueInvoicesBefore, $invoicesUpdated);
 
             if (!empty($paidOverdueInvoices)) {
-                $this->updateInternetAccessForPaidServices($payment->client_id);
+                /*
+                 * Se ejecuta hasta que la transacción haya confirmado, para no tocar el Mikrotik
+                 * dentro de la transacción ni si esta se revierte.
+                 */
+                $clientId = $payment->client_id;
+                DB::afterCommit(fn() => $this->updateInternetAccessForPaidServices($clientId));
             }
-
             return $payment->load(['invoices', 'discount']);
         });
     }
@@ -143,7 +152,7 @@ readonly class PaymentService
     {
         //  Obteniendo servicios activos del cliente
         $services = ServiceModel::query()
-            ->with(['internet', 'node.auth_server'])
+            ->with(['internet.profile', 'node.auth_server'])
             ->where([
                 ['client_id', $clientId],
                 ['status_id', CommonStatus::ACTIVE->value],
@@ -151,37 +160,34 @@ readonly class PaymentService
             ->get();
 
         foreach ($services as $service) {
-            //  Verificar si el servicio tiene facturas asociadas
-            $serviceInvoices = $this->getInvoicesForService($service->id, $clientId);
+            $serviceInvoices = $this->getInvoicesForService(serviceId: $service->id, clientId: $clientId);
 
-            if ($serviceInvoices->isEmpty()) {
-                //  Si el servicio no tiene facturas, activarlo
-                $this->activateServiceInternet($service);
+            //  Diagnóstico: estado de cada factura evaluada para este servicio
+            Log::channel('reactivation')
+                ->info("Evaluando servicio {$service->id}", [
+                    'client_id' => $clientId,
+                    'invoices' => $serviceInvoices->map(
+                        fn($i) => ['id' => $i->id, 'status' => $i->billing_status_id, 'balance' => $i->balance_due]
+                    )
+                        ->values()
+                        ->all(),
+                ]);
+
+            //  Si el servicio aún tiene facturas vencidas, se mantiene en deuda
+            $hasOverdueInvoices = $serviceInvoices->contains(
+                fn($invoice) => $invoice->billing_status_id == BillingStatus::OVERDUE->value
+            );
+
+            if ($hasOverdueInvoices) {
+                Log::channel('reactivation')
+                    ->info("Servicio {$service->id} sigue con facturas vencidas, no se reactiva", [
+                        'client_id' => $clientId,
+                    ]);
                 continue;
             }
 
-            //  Verificar si hay facturas vencidas para el servicio
-            $hasOverdueInvoices = $serviceInvoices->contains(function ($invoice) {
-                return $invoice->billing_status_id === BillingStatus::OVERDUE->value;
-            });
-
-            //  Si no hay facturas vencidas para este servicio
-            if (!$hasOverdueInvoices) {
-
-                //  Verificar si hay facturas pendientes para este servicio
-                $hasPendingInvoices = $serviceInvoices->contains(function ($invoice) {
-                    return in_array($invoice->billing_status_id, [
-                        BillingStatus::ISSUED->value,
-                        BillingStatus::PENDING->value,
-                        BillingStatus::PARTIALLY_PAID->value,
-                    ]);
-                });
-
-                //  Si hay facturas pendientes o si todas están pagadas, activar el servicio
-                if ($hasPendingInvoices || $this->areAllInvoicesPaid($serviceInvoices)) {
-                    $this->activateServiceInternet($service);
-                }
-            }
+            //  Sin vencidas (con facturas pendientes, todas pagadas o sin facturas): se reactiva
+            $this->activateServiceInternet($service);
         }
     }
 
@@ -207,18 +213,6 @@ readonly class PaymentService
     }
 
     /***
-     * Verifica si todas las facturas del servicio están pagadas
-     * @param Collection $invoices
-     * @return bool
-     */
-    private function areAllInvoicesPaid(Collection $invoices): bool
-    {
-        return $invoices->every(function ($invoice) {
-            return $invoice->billing_status_id === BillingStatus::PAID->value;
-        });
-    }
-
-    /***
      * Activa la navegación de un servicio en Mikrotik
      * @param ServiceModel $service
      * @return void
@@ -227,10 +221,18 @@ readonly class PaymentService
     {
         try {
             //  Verificar que el servicio tenga internet configurado
-            if (!$service->internet || !$service->internet->profile) return;
+            if (!$service->internet || !$service->internet->profile) {
+                Log::channel('reactivation')
+                    ->warning("Servicio {$service->id} sin internet/perfil configurado, no se reactiva");
+                return;
+            }
 
             //  Verificar que tenga un nodo y servidor de autenticación
-            if (!$service->node || !$service->node->auth_server) return;
+            if (!$service->node || !$service->node->auth_server) {
+                Log::channel('reactivation')
+                    ->warning("Servicio {$service->id} sin nodo/servidor de autenticación, no se reactiva");
+                return;
+            }
 
             $authServer = $service->node->auth_server;
             $normalProfile = $service->internet?->profile?->mk_profile;
@@ -251,7 +253,8 @@ readonly class PaymentService
 
             Log::channel('reactivation')
                 ->info("Servicio de internet activado para el servicio {$service->id}, cliente: {$service->client_id}", [
-                    'pppoe_user' => $service->internet?->user ?? null,
+                    'pppoe_user' => $username,
+                    'profile' => $normalProfile,
                 ]);
         } catch (Throwable $e) {
             Log::channel('reactivation')
