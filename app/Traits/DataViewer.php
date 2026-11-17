@@ -4,8 +4,6 @@ namespace App\Traits;
 
 use App\Libraries\CustomQueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\JoinClause;
 
 trait DataViewer
 {

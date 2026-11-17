@@ -45,7 +45,8 @@ class InternetController extends Controller
      */
     public function mikrotikProfilesList(): JsonResponse
     {
-        $server = AuthServerModel::query()->find(1);
+        $main = config('mikrotik.main_server');
+        $server = AuthServerModel::query()->find($main);
         $routerOS = new MikrotikAPI();
         $profiles = $routerOS->executeQuery(
             $server->ip,
