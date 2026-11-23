@@ -2,24 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Imports\ClientsImport;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Services\v1\imports\ImportClientsService;
 use Illuminate\Database\Seeder;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ClientSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * @return void
+     * @throws \Throwable
      */
     public function run(): void
     {
-        $path = storage_path('app/imports/clients.xlsx');
-        $client = Excel::toCollection(new ClientsImport, $path)[0];
-
-        foreach ($client as $row) {
-            $name = strtolower($row['name']);
-            dd(ucwords($name));
-        }
+        $service = app(ImportClientsService::class);
+        $service->importClients();
     }
 }

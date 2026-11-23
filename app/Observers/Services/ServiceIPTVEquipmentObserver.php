@@ -23,7 +23,7 @@ class ServiceIPTVEquipmentObserver extends Conversion
                         'service_iptv_equipment_id' => $serviceIptvEquipmentModel->id,
                         'service_id' => $serviceIptvEquipmentModel->service_id,
                         'equipment_id' => $serviceIptvEquipmentModel->equipment_id,
-                        'user_id' => Auth::user()->id,
+                        'user_id' => Auth::user()->id ?? 6,
                         'action' => 'create',
                         'before' => null,
                         'after' => $this->convert($serviceIptvEquipmentModel->getAttributes())
