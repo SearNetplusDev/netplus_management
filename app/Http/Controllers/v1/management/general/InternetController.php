@@ -76,9 +76,14 @@ class InternetController extends Controller
                 ['status_id', CommonStatus::ACTIVE->value],
                 ['iptv', $iptv]
             ])
-            ->select(['id', 'name'])
+            ->select(['id', 'name', 'price'])
             ->orderBy('id', 'ASC')
             ->get()
-            ->makeHidden('status');
+            ->map(function ($plan) {
+                return [
+                    'id' => $plan->id,
+                    'name' => "{$plan->name}  ($" . number_format($plan->price, 2) . ")",
+                ];
+            });
     }
 }
