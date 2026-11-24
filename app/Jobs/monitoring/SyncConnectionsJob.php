@@ -40,7 +40,8 @@ class SyncConnectionsJob implements ShouldQueue
     {
         return [
             new WithoutOverlapping("mikrotik-sync-connections:{$this->authServerId}")
-                ->releaseAfter(30)
+                ->dontRelease()
+                ->releaseAfter(360),
         ];
     }
 

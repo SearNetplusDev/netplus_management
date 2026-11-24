@@ -28,11 +28,11 @@ Schedule::command('billing:cut-overdue-invoices')
     ->withoutOverlapping()
     ->onOneServer();
 
-Schedule::command('mikrotik:sync-connections')
-    ->everyMinute()
-    ->timezone('America/El_Salvador')
-    ->withoutOverlapping()
-    ->onOneServer();
+//Schedule::command('mikrotik:sync-connections')
+//    ->everyMinute()
+//    ->timezone('America/El_Salvador')
+//    ->withoutOverlapping()
+//    ->onOneServer();
 
 Schedule::command('background:notify-expiring-contracts')
     ->dailyAt('08:10')
