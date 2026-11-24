@@ -14,6 +14,7 @@ use App\Models\Services\ServiceInternetModel;
 use App\Models\Services\ServiceModel;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\network\MikrotikInternetService;
+use App\Traits\Operation\GenerateServiceUser;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +22,8 @@ use Throwable;
 
 class InstallationStrategy extends BaseSupportStrategy
 {
+    use GenerateServiceUser;
+
     /***
      * @param MikrotikInternetService $mikrotikInternetService
      */
@@ -89,6 +92,7 @@ class InstallationStrategy extends BaseSupportStrategy
             ])
             ->oldest()
             ->first();
+
         if ($service) {
             $oldNode = $this->getNode($service->node_id);
             $oldServer = $oldNode->auth_server->toArray();
@@ -319,18 +323,6 @@ class InstallationStrategy extends BaseSupportStrategy
     public function getProfile(int $profileId): InternetModel
     {
         return InternetModel::query()->findOrFail($profileId);
-    }
-
-    /***
-     * @param string $prefix
-     * @param int $nodeId
-     * @return string
-     */
-    private function generateUser(string $prefix, int $nodeId): string
-    {
-        $prefix = 'NetPlus' . $prefix;
-        $count = ServiceModel::query()->where('node_id', $nodeId)->withTrashed()->count();
-        return sprintf("%s%05d", $prefix, $count);
     }
 
     /***

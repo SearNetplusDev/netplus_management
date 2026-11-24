@@ -12,6 +12,7 @@ use App\Models\Services\ServiceModel;
 use App\Models\Services\ServicePlanChangeModel;
 use App\Models\Supports\SupportModel;
 use App\Services\v1\network\MikrotikInternetService;
+use App\Traits\Operation\GenerateServiceUser;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +20,8 @@ use Throwable;
 
 class RenovationStrategy extends BaseSupportStrategy
 {
+    use GenerateServiceUser;
+
     /***
      * @param MikrotikInternetService $mikrotikInternetService
      */
@@ -191,18 +194,6 @@ class RenovationStrategy extends BaseSupportStrategy
     private function getCredentials(int $serviceId): ServiceInternetModel
     {
         return ServiceInternetModel::query()->where('service_id', $serviceId)->first();
-    }
-
-    /***
-     * @param string $prefix
-     * @param int $nodeId
-     * @return string
-     */
-    private function generateUser(string $prefix, int $nodeId): string
-    {
-        $prefix = 'NetPlus' . $prefix;
-        $count = ServiceModel::query()->where('node_id', $nodeId)->withTrashed()->count();
-        return sprintf("%s%05d", $prefix, $count);
     }
 
     /***
