@@ -59,7 +59,7 @@ class SupportService
             //  Calculando tiempo de resolución
             if ($support->creation_date) {
                 $dueDate = Carbon::parse($support->due_date);
-                $closedAt = Carbon::parse($support->close_date);
+                $closedAt = Carbon::parse($support->closed_at);
                 $support->resolution_time = $closedAt->diffInMicroseconds($dueDate);
 
                 //  Verificando SLA
@@ -88,7 +88,7 @@ class SupportService
             ->get();
 
         return [
-            'ticket' => $query->first()->support?->ticket_number,
+            'ticket' => $query->first()?->support?->ticket_number,
             'collection' => $query,
         ];
     }

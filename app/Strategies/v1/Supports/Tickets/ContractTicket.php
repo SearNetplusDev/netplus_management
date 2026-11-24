@@ -39,6 +39,6 @@ class ContractTicket implements SupportTicketInterface
             'data' => $data,
         ])->setPaper('A4', 'portrait');
 
-        return $pdf->stream();
+        return $pdf->output();
     }
 }

@@ -32,6 +32,6 @@ class GenericTicket implements SupportTicketInterface
             ],
         ])->setPaper('A4', 'portrait');
 
-        return $pdf->stream();
+        return $pdf->output();
     }
 }
