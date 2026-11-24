@@ -74,41 +74,29 @@ class SupportsController extends Controller
 
     public function print(int $id, SupportService $service): Response
     {
-        register_shutdown_function(function () {
-            $e = error_get_last();
-            if ($e) {
-                file_put_contents('/tmp/print_fatal.log', date('c') . ' ' . json_encode($e) . PHP_EOL, FILE_APPEND);
-            }
-        });
+        $support = SupportModel::query()
+            ->with([
+                'branch.state:id,name',
+                'branch.municipality:id,name',
+                'branch.district:id,name',
+                'client.dui',
+                'client.nit',
+                'client.passport',
+                'client.residence',
+                'client.mobile',
+                'contract',
+                'state',
+                'municipality',
+                'district',
+                'details',
+                'type',
+            ])
+            ->findOrFail($id);
+        $pdfBinary = $service->printTicket($support);
 
-        try {
-            $support = SupportModel::query()
-                ->with([
-                    'branch.state:id,name',
-                    'branch.municipality:id,name',
-                    'branch.district:id,name',
-                    'client.dui',
-                    'client.nit',
-                    'client.passport',
-                    'client.residence',
-                    'client.mobile',
-                    'contract',
-                    'state',
-                    'municipality',
-                    'district',
-                    'details',
-                    'type',
-                ])
-                ->findOrFail($id);
-            $pdfBinary = $service->printTicket($support);
-
-            return response($pdfBinary, 200)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="ticket.pdf"');
-        } catch (\Throwable $e) {
-            file_put_contents('/tmp/print_error.log', date('c') . ' ' . $e . PHP_EOL, FILE_APPEND);
-            throw $e;
-        }
+        return response($pdfBinary, 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="ticket.pdf"');
     }
 
     public function logs(Request $request, SupportService $service): JsonResponse
