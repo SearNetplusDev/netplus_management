@@ -16,10 +16,16 @@ class InternetController extends Controller
     {
         return response()->json([
             'response' => InternetModel::query()
-                ->select(['id', 'name'])
+                ->select(['id', 'name', 'price'])
                 ->where('status_id', CommonStatus::ACTIVE->value)
                 ->orderBy('name', 'ASC')
                 ->get()
+                ->map(function ($plan) {
+                    return [
+                        'id' => $plan->id,
+                        'name' => "{$plan->name}  ($" . number_format($plan->price, 2) . ")",
+                    ];
+                })
         ]);
     }
 
