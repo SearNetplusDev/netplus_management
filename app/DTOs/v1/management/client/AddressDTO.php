@@ -36,7 +36,7 @@ class AddressDTO extends Data
         return new self(
             client_id: $data['client_id'] ?? 0,
             neighborhood: $data['neighborhood'] ?? '',
-            address: $data['address'] ?? '',
+            address: mb_strtolower(trim($data['address'] ?? ''), "UTF-8"),
             state_id: $data['state_id'] ?? 0,
             municipality_id: $data['municipality_id'] ?? 0,
             district_id: $data['district_id'] ?? 0,
