@@ -12,6 +12,11 @@ use Spatie\LaravelData\Attributes\Validation\Required;
 
 class SupportDTO extends Data
 {
+    public readonly ?string $description;
+    public readonly string $address;
+    public readonly ?string $solution;
+    public readonly ?string $comments;
+
     public function __construct(
         #[Required, IntegerType]
         public readonly int     $type_id,
@@ -35,7 +40,7 @@ class SupportDTO extends Data
         public readonly ?Carbon $due_date,
 
         #[Nullable, StringType]
-        public readonly ?string $description,
+        ?string                 $description,
 
         #[Nullable, IntegerType]
         public readonly ?int    $technician_id,
@@ -50,16 +55,16 @@ class SupportDTO extends Data
         public readonly int     $district_id,
 
         #[Required, StringType]
-        public readonly string  $address,
+        string                  $address,
 
         #[Nullable, Date]
         public readonly ?Carbon $closed_at,
 
         #[Nullable, StringType]
-        public readonly ?string $solution,
+        ?string                 $solution,
 
         #[Nullable, StringType]
-        public readonly ?string $comments,
+        ?string                 $comments,
 
         #[Required, IntegerType]
         public readonly int     $user_id,
@@ -95,6 +100,9 @@ class SupportDTO extends Data
         public readonly ?Carbon $contract_end_date,
     )
     {
-
+        $this->description = $description !== null ? mb_strtolower(trim($description), 'UTF-8') : null;
+        $this->address = mb_strtolower(trim($address), 'UTF-8');
+        $this->solution = $solution !== null ? mb_strtolower(trim($solution), 'UTF-8') : null;
+        $this->comments = $comments !== null ? mb_strtolower(trim($comments), 'UTF-8') : null;
     }
 }
