@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\v1\management\supports\SurveyController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\v1\management\supports\PriceController;
 use App\Http\Controllers\v1\management\supports\StatusController;
-use App\Http\Controllers\v1\management\supports\TypesController;
 use App\Http\Controllers\v1\management\supports\SupportsController;
+use App\Http\Controllers\v1\management\supports\SurveyController;
+use App\Http\Controllers\v1\management\supports\TypesController;
 
 Route::prefix('v1/supports')
     ->middleware(['auth:sanctum'])
@@ -38,5 +39,13 @@ Route::prefix('v1/supports')
             Route::post('data', [StatusController::class, 'data']);
             Route::post('edit', [StatusController::class, 'read']);
             Route::put('{id}', [StatusController::class, 'update']);
+        });
+
+        //  Prices
+        Route::group(['prefix' => 'prices'], function () {
+            Route::post('/', [PriceController::class, 'store']);
+            Route::post('data', [PriceController::class, 'data']);
+            Route::post('edit', [PriceController::class, 'read']);
+            Route::put('{id}', [PriceController::class, 'update']);
         });
     });

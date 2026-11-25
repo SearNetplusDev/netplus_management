@@ -80,4 +80,15 @@ enum SupportType: int
             self::IPTV_INSTALLATION->value,
         ];
     }
+
+    public function requiresPrice(): bool
+    {
+        return match ($this) {
+            self::INTERNET_INSTALLATION,
+            self::IPTV_INSTALLATION,
+            self::INTERNET_RENEWAL,
+            self::IPTV_RENEWAL => true,
+            default => false,
+        };
+    }
 }

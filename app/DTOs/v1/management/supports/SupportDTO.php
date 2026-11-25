@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
+use Spatie\LaravelData\Attributes\Validation\Numeric;
 use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Required;
@@ -98,6 +99,15 @@ class SupportDTO extends Data
 
         #[Nullable, Date]
         public readonly ?Carbon $contract_end_date,
+
+        /**
+         * Datos para precios
+         */
+        #[Nullable, IntegerType]
+        public readonly ?int    $price_id = null,
+
+        #[Nullable, Numeric]
+        public readonly ?float  $price = null,
     )
     {
         $this->description = $description !== null ? mb_strtolower(trim($description), 'UTF-8') : null;

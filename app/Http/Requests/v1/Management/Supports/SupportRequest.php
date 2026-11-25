@@ -7,6 +7,7 @@ use App\Enums\v1\Supports\SupportStatus;
 use App\Enums\v1\Supports\SupportType;
 use App\Models\Infrastructure\Network\EquipmentModel;
 use App\Models\Services\ServiceModel;
+use App\Models\Supports\PriceModel;
 use App\Models\Supports\SupportModel;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
@@ -56,6 +57,16 @@ class SupportRequest extends FormRequest
             'final_date' => ['nullable', 'date'],
             'node' => ['nullable', 'integer', 'exists:infrastructure_nodes,id'],
             'equipment' => ['nullable', 'integer', 'exists:infrastructure_equipment,id'],
+
+            //  Precio: debe pertenecer al tipo de soporte elegido y estar activo
+            'price' => [
+                'nullable',
+                'integer',
+                Rule::exists('supports_prices', 'id')
+                    ->where('type_id', $this->input('type'))
+                    ->where('status_id', true)
+                    ->whereNull('deleted_at'),
+            ],
         ];
     }
 
@@ -270,6 +281,10 @@ class SupportRequest extends FormRequest
             'equipment.required' => 'Equipo es un campo obligatorio.',
             'equipment.integer' => 'Formato inválido.',
             'equipment.exists' => 'El equipo seleccionado no existe.',
+
+            'price.required' => 'Precio es un campo obligatorio.',
+            'price.integer' => 'Formato inválido',
+            'price.exists' => 'El precio seleccionado no existe, está inactivo o no corresponde al tipo de soporte.',
         ];
     }
 
@@ -301,6 +316,8 @@ class SupportRequest extends FormRequest
             equipment_id: $this->input('equipment') ?? null,
             contract_date: Carbon::parse($this->input('initial_date')) ?? null,
             contract_end_date: Carbon::parse($this->input('final_date')) ?? null,
+            price_id: $this->resolvePriceId(),
+            price: $this->resolvePriceAmount(),
         );
     }
 
@@ -313,5 +330,32 @@ class SupportRequest extends FormRequest
     public function getSupportStatus(): ?SupportStatus
     {
         return SupportStatus::tryFrom((int)$this->input('status'));
+    }
+
+    /**
+     * Solo se guarda el precio si el tipo de soporte lo usa,
+     * así se evita guardar un price_id en un soporte que no cobra.
+     *
+     * @return int|null
+     */
+    private function resolvePriceId(): ?int
+    {
+        if (!$this->getSupportType()?->requiresPrice() || !$this->filled('price')) {
+            return null;
+        }
+        return (int)$this->input('price');
+    }
+
+    /**
+     * Copia del monto vigente del catálogo al momento de crear el soporte.
+     *
+     * @return float|null
+     */
+    private function resolvePriceAmount(): ?float
+    {
+        $priceId = $this->resolvePriceId();
+        if ($priceId === null) return null;
+        $amount = PriceModel::query()->whereKey($priceId)->value('price');
+        return $amount !== null ? (float)$amount : null;
     }
 }

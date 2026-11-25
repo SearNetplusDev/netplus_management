@@ -3,6 +3,7 @@
 namespace App\Models\Supports;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\DataViewer;
 use App\Traits\HasStatusTrait;
@@ -17,6 +18,8 @@ use App\Traits\HasStatusTrait;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property numeric $price
  * @property-read array $status
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Supports\PriceModel> $prices
+ * @property-read int|null $prices_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TypeModel advancedFilter()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TypeModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TypeModel newQuery()
@@ -46,5 +49,10 @@ class TypeModel extends Model
     protected array $allowedFilters = ['id', 'name', 'status_id'];
     protected array $orderable = ['id', 'name', 'status_id'];
     protected $appends = ['status'];
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(PriceModel::class, 'type_id', 'id');
+    }
 
 }

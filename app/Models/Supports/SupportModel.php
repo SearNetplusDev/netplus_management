@@ -13,6 +13,7 @@ use App\Models\Services\ServiceModel;
 use App\Models\User;
 use App\Observers\Supports\SupportObserver;
 use App\Traits\DataViewer;
+use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,12 +47,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $price_id
+ * @property numeric|null $price
  * @property-read BranchModel|null $branch
  * @property-read ClientModel|null $client
  * @property-read ContractModel|null $contract
  * @property-read \App\Models\Supports\SupportDetailModel|null $details
  * @property-read DistrictModel|null $district
  * @property-read MunicipalityModel|null $municipality
+ * @property-read \App\Models\Supports\PriceModel|null $priceOption
  * @property-read ServiceModel|null $service
  * @property-read StateModel|null $state
  * @property-read \App\Models\Supports\StatusModel|null $status
@@ -79,6 +83,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel whereDueDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel whereMunicipalityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel wherePriceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel whereResolutionTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel whereServiceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SupportModel whereSolution($value)
@@ -122,6 +128,8 @@ class SupportModel extends Model
         'status_id',
         'breached_sla',
         'resolution_time',
+        'price_id',
+        'price',
     ];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected array $allowedFilters = [
@@ -167,6 +175,11 @@ class SupportModel extends Model
     public function type(): BelongsTo
     {
         return $this->belongsTo(TypeModel::class, 'type_id', 'id');
+    }
+
+    public function priceOption(): BelongsTo
+    {
+        return $this->belongsTo(PriceModel::class, 'price_id', 'id');
     }
 
     public function client(): BelongsTo
