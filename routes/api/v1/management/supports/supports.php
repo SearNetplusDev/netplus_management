@@ -47,5 +47,6 @@ Route::prefix('v1/supports')
             Route::post('data', [PriceController::class, 'data']);
             Route::post('edit', [PriceController::class, 'read']);
             Route::put('{id}', [PriceController::class, 'update']);
+            Route::get('catalog', [PriceController::class, 'catalog']);
         });
     });

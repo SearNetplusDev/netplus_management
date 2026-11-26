@@ -33,6 +33,8 @@ class BaseSupport
             'status_id' => (int)$data['status_id'],
             'breached_sla' => false,
             'resolution_time' => null,
+            'price_id' => (int)$data['price_id'] ?? null,
+            'price' => $data['price'] ?? null,
         ];
 
         return SupportModel::query()->create($data);
@@ -55,6 +57,13 @@ class BaseSupport
             'comments' => $data['comments'],
             'status_id' => (int)$data['status_id'],
         ];
+
+        $newPriceId = $data['price_id'] ?? null;
+
+        if ($newPriceId !== $model->price_id) {
+            $payload['price_id'] = $newPriceId;
+            $payload['price'] = $data['price'] ?? null;
+        }
 
         $model->update($payload);
         return $model->refresh();

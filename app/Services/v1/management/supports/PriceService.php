@@ -3,7 +3,9 @@
 namespace App\Services\v1\management\supports;
 
 use App\DTOs\v1\management\supports\PriceDTO;
+use App\Enums\v1\General\CommonStatus;
 use App\Models\Supports\PriceModel;
+use Illuminate\Support\Collection;
 
 class PriceService
 {
@@ -40,5 +42,24 @@ class PriceService
     {
         $priceModel->update($priceDTO->toArray());
         return $priceModel;
+    }
+
+    /**
+     * Retorna el catálogo de precios activos en formato ['id', 'name']
+     *
+     * @return Collection
+     */
+    public function priceList(): Collection
+    {
+        return PriceModel::query()
+            ->select(['id', 'name', 'price'])
+            ->where('status_id', CommonStatus::ACTIVE->value)
+            ->get()
+            ->map(function ($q) {
+                return [
+                    'id' => $q->id,
+                    'name' => $q->name . ' ($' . $q->price . ')',
+                ];
+            });
     }
 }

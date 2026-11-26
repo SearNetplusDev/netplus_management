@@ -32,7 +32,9 @@ class ContractTicket implements SupportTicketInterface
             'office_address' => $branchAddress,
             'plan' => $support->details?->profile?->name,
             'price' => number_format($support->details?->profile?->price, 2),
-            'installation_price' => $support->type?->price,
+            'installation_price' => $support->price,
+            'reference_name' => ucwords($support->client->reference?->name) ?? 'N/A',
+            'reference_phone' => $support->client->reference?->mobile ?? 'N/A',
         ];
 
         $pdf = Pdf::loadView('v1.management.pdf.clients.residential_contract', [

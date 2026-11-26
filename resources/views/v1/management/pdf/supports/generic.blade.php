@@ -325,8 +325,8 @@
     </div>
 
     <div class="footer">
-        NETPLUS - Soporte Técnico | Ticket: {{ $data['ticket'] }} | Contacto: +503 7626 6022 |
-        netpluscompanywork@gmail.com | Atención 24/7 | Confidencial: No redistribuir.
+        NETPLUS - Soporte Técnico | Ticket: {{ $data['ticket'] }} | Contacto: +503 7626 6022 | +503 7492 7711 |
+        netpluscompanywork@gmail.com | Confidencial: No redistribuir.
         &copy; {{ $data['year'] }}
     </div>
 </div>

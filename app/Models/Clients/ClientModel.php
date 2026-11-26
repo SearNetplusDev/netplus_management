@@ -244,6 +244,13 @@ class ClientModel extends Model
             ->latest();
     }
 
+    public function reference(): HasOne
+    {
+        return $this->hasOne(ReferenceModel::class, 'client_id', 'id')
+            ->where('status_id', true)
+            ->latest();
+    }
+
     public function corporate_info(): HasOne
     {
         return $this->hasOne(FinancialInformationModel::class, 'client_id', 'id')

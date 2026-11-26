@@ -84,6 +84,7 @@ class SupportsController extends Controller
                 'client.passport',
                 'client.residence',
                 'client.mobile',
+                'client.reference',
                 'contract',
                 'state',
                 'municipality',

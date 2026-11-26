@@ -16,7 +16,7 @@
         body {
             font-family: 'Arial', sans-serif;
             font-size: 12px;
-            line-height: 1.15em;
+            line-height: 1em;
             color: #333;
             background: #fff;
             margin: 1.5cm 1.9cm;
@@ -386,7 +386,24 @@
                         ${{ $data['installation_price'] }}
                     </td>
                 </tr>
+
+                <tr>
+                    <td class="label">Nombre referencia:</td>
+                    <td>{{ $data['reference_name'] }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Contacto referencia</td>
+                    <td>{{ $data['reference_phone'] }}</td>
+                </tr>
             </table>
+        </div>
+
+        <div style="font-weight: bold; line-height: 1.1em;">
+            NOTA IMPORTANTE: el pago deberá realizarse mediante depósito o transferencia bancaria, del 28 al 30
+            de cada mes, en cualquier agencia o punto autorizado de las siguientes instituciones financieras, a nombre
+            de NETPLUS, S.A. de C.V.: Banco Agrícola, cuenta corriente N.º 5000231387; o
+            Banco DAVIVIENDA, cuenta corriente N.º 039510028198. Se agradece realizar el pago
+            dentro del plazo establecido para garantizar la continuidad del servicio.
         </div>
 
         <div class="date-place">
@@ -399,7 +416,7 @@
             <div style="width: 50%; margin: 0 auto; text-align: center">
                 <div class="signature-box">
                     <div
-                            class="signature-name">{{ $data['name'] ?? 'NOMBRE DEL CLIENTE' }}</div>
+                        class="signature-name">{{ $data['name'] ?? 'NOMBRE DEL CLIENTE' }}</div>
                     <div class="signature-title">FIRMA DEL CLIENTE</div>
                     <div class="signature-title">
                         {{$data['document_type']}}: {{ $data['document_number'] ?? '' }}</div>

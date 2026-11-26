@@ -79,4 +79,19 @@ class PriceController extends Controller
             'data' => new GeneralResource($data),
         ]);
     }
+
+    /**
+     * Retorna el catálogo de precios de soporte disponibles.
+     *
+     * @param PriceService $priceService
+     * @return JsonResponse
+     */
+    public function catalog(PriceService $priceService): JsonResponse
+    {
+        $query = $priceService->priceList();
+
+        return response()->json([
+            'response' => new GeneralResource($query),
+        ]);
+    }
 }
