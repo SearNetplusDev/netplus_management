@@ -8,12 +8,13 @@ use Illuminate\Http\JsonResponse;
 
 class DataViewerService
 {
-    /***
+    /**
      * @param Request $request
      * @param Builder $query
      * @param array $filterColumns
      * @param string|null $defaultOrderColumn
      * @param string|null $defaultOrderDirection
+     * @param array|null $priorityOrder
      * @return JsonResponse
      */
     public function handle(
@@ -21,7 +22,8 @@ class DataViewerService
         Builder $query,
         array   $filterColumns = [],
         ?string $defaultOrderColumn = 'status_id',
-        ?string $defaultOrderDirection = 'desc'
+        ?string $defaultOrderDirection = 'desc',
+        ?array  $priorityOrder = null
     ): JsonResponse
     {
         if ($request->has('e')) {
@@ -42,7 +44,7 @@ class DataViewerService
         $orderDirection = $request->input('order_direction', $defaultOrderDirection);
         $orderDirection = in_array(strtolower($orderDirection), ['asc', 'desc']) ? strtolower($orderDirection) : 'desc';
         $query->orderBy($orderColumn, $orderDirection);
-        $result = $query->advancedFilter();
+        $result = $query->advancedFilter($priorityOrder);
 
         return response()->json(['collection' => $result]);
     }

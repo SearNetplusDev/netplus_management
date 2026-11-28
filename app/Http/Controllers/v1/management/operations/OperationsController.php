@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\management\operations;
 
+use App\Enums\v1\Supports\SupportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\Management\Operations\OperationRequest;
 use App\Http\Resources\v1\management\supports\SupportResource;
@@ -56,7 +57,10 @@ class OperationsController extends Controller
             'district' => fn($q, $data) => $q->whereIn('district_id', $data),
             'user' => fn($q, $data) => $q->whereIn('user_id', $data),
             'technician' => fn($q, $data) => $q->whereIn('technician_id', $data),
-        ], 'id', 'desc');
+        ], 'id', 'desc', [
+            'column' => 'status_id',
+            'values' => SupportStatus::getActiveStatuses(),
+        ]);
     }
 
     /***

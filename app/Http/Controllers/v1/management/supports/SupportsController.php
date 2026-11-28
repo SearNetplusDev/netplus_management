@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\management\supports;
 
+use App\Enums\v1\Supports\SupportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\Management\Supports\SupportRequest;
 use App\Http\Requests\v1\Management\Supports\UpdateSupportRequest;
@@ -42,7 +43,10 @@ class SupportsController extends Controller
             'district' => fn($q, $data) => $q->whereIn('district_id', $data),
             'user' => fn($q, $data) => $q->whereIn('user_id', $data),
             'technician' => fn($q, $data) => $q->whereIn('technician_id', $data),
-        ], 'id', 'desc');
+        ], 'id', 'desc', [
+            'column' => 'status_id',
+            'values' => SupportStatus::getActiveStatuses(),
+        ]);
     }
 
     public function store(SupportRequest $request, SupportService $service): JsonResponse

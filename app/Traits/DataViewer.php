@@ -7,17 +7,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait DataViewer
 {
-    public function scopeAdvancedFilter($query)
+    /**
+     * @param $query
+     * @param array|null $priorityOrder
+     * @return mixed
+     */
+    public function scopeAdvancedFilter($query, ?array $priorityOrder = null)
     {
         $request = request();
-        $processedQuery = $this->process($query, $request->all());
+        $processedQuery = $this->process($query, $request->all(), $priorityOrder);
 
         return $request->boolean('no_limit')
             ? $processedQuery->get()
             : $processedQuery->paginate($request->input('limit', 10));
     }
 
-    public function process($query, $data)
+    public function process($query, $data, ?array $priorityOrder = null)
     {
         validator($data, [
             'order_column' => 'sometimes|required|in:' . $this->columnList($this->orderable),
@@ -32,7 +37,9 @@ trait DataViewer
         ])->validate();
 
         $query = (new CustomQueryBuilder)->apply($query, $data);
-        return $this->applyOrder($query, $data);
+        $query = $this->applyOrder($query, $data);
+
+        return $this->applyPriorityOrder($query, $priorityOrder);
     }
 
     protected function applyOrder($query, array $data)
@@ -69,6 +76,31 @@ trait DataViewer
             ->limit(1);
 
         return $query->orderBy($subQuery, $direction);
+    }
+
+    /**
+     * Antepone un ORDER BY por grupos: los registros cuyo valor de columna
+     * esté en 'values' van primero (0), el resto después de (1).
+     * Los órdenes existentes se conservan como criterio secundario.
+     *
+     * @param $query
+     * @param array|null $priorityOrder
+     * @return void
+     */
+    protected function applyPriorityOrder($query, ?array $priorityOrder)
+    {
+        if (empty($priorityOrder['column']) || empty($priorityOrder['values'])) return $query;
+
+        $baseQuery = $query->getQuery();
+        $column = $baseQuery->getGrammar()->wrap($this->getTable() . '.' . $priorityOrder['column']);
+        $values = implode(',', array_map('intval', $priorityOrder['values']));
+        $priority = [
+            'type' => 'Raw',
+            'sql' => "CASE WHEN {$column} IN ({$values}) THEN 0 ELSE 1 END",
+        ];
+        $baseQuery->orders = array_merge([$priority], $baseQuery->orders ?? []);
+
+        return $query;
     }
 
     protected function columnList(array $columns): string
